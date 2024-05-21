@@ -93,7 +93,7 @@ export function SignUpForm() {
   const checkExistingUser = async (email, contact) => {
     // Make a request to the backend to check if the user already exists
     const response = await Axios.post(
-      "http://localhost:5000/api/routes/checkExistingUser",
+      "http://localhost:5050/api/routes/checkExistingUser",
       {
         email,
         contact,
@@ -104,7 +104,7 @@ export function SignUpForm() {
 
   const addUser = async () => {
     // Send a request to your backend to save the user data
-    await Axios.post("http://localhost:5000/api/routes/signUp", {
+    await Axios.post("http://localhost:5050/api/routes/signUp", {
       firstName,
       lastName,
       userName,
@@ -129,7 +129,7 @@ export function SignUpForm() {
   }, [isButtonClicked]); // Run this effect whenever isButtonClicked changes
 
   const handleButtonClick = () => {
-    setIsButtonClicked(true);
+    setIsButtonClicked(false);
   };
 
   return (

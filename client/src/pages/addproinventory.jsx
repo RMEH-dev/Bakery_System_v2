@@ -49,7 +49,7 @@ function AddProInventory() {
   useEffect(() => {
     if (id) {
       axios
-        .get(`http://localhost:5000/api/routes/getProStock/${id}`)
+        .get(`http://localhost:5050/api/routes/getProStock/${id}`)
         .then((response) => {
           const data = response.data;
           setFormData({
@@ -107,10 +107,10 @@ function AddProInventory() {
 
     const request = id
       ? axios.put(
-          `http://localhost:5000/api/routes/updateProStock/${id}`,
+          `http://localhost:5050/api/routes/updateProStock/${id}`,
           dataToSend
         )
-      : axios.post("http://localhost:5000/api/routes/addProStock", dataToSend);
+      : axios.post("http://localhost:5050/api/routes/addProStock", dataToSend);
 
     request
       .then((response) => {

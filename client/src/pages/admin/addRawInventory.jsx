@@ -52,7 +52,7 @@ function AddRawInventory() {
   useEffect(() => {
     if (id) {
       axios
-        .get(`http://localhost:5000/api/routes/getEditRawStock/${id}`)
+        .get(`http://localhost:5050/api/routes/getEditRawStock/${id}`)
         .then((response) => {
           const data = response.data;
 
@@ -76,7 +76,7 @@ function AddRawInventory() {
   useEffect(() => {
     if (selectedProStock) {
       axios
-        .get(`http://localhost:5000/api/routes/getProStockIDs`, {
+        .get(`http://localhost:5050/api/routes/getProStockIDs`, {
           params: { proStockName: selectedProStock },
         })
         .then((response) => {
@@ -129,10 +129,10 @@ function AddRawInventory() {
 
     const request = id
       ? axios.put(
-          `http://localhost:5000/api/routes/updateRawStock/${id}`,
+          `http://localhost:5050/api/routes/updateRawStock/${id}`,
           dataToSend
         )
-      : axios.post("http://localhost:5000/api/routes/addRawStock", dataToSend);
+      : axios.post("http://localhost:5050/api/routes/addRawStock", dataToSend);
 
     request
       .then((response) => {

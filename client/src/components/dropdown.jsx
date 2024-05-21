@@ -9,7 +9,7 @@ function Dropdown({ endpoint, selectedOption, setSelectedOption, label, disabled
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/routes/${endpoint}`)
+      .get(`http://localhost:5050/api/routes/${endpoint}`)
       .then((response) => {
         setItems(response.data);
       })

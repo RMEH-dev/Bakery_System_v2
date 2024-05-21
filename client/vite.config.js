@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000, // Set your desired port number here
+    port: 3030, // Set your desired port number here
     hmr: {
       overlay: false
     }

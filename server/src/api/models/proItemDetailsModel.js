@@ -1,8 +1,8 @@
 const db = require("../../config/databaseConnection");
 
-const insertProItemDetails = (values, callback) => {
-  const sqlInsertProItemDetails1 = 'INSERT INTO proitemdetails (proStockID, proBatchNo, category, subCategory, pricePerItem) VALUES (?, ?, ?, ?, ?)';
-  db.query(sqlInsertProItemDetails1, values, callback);
+const insertProStockBatch= (values, callback) => {
+  const sqlInsertProStockBatch = 'INSERT INTO prostockbatch (proStockBatchID, quantity, manuDate, expDate) VALUES (?, ?, ?, ?)';
+  db.query(sqlInsertProStockBatch, values, callback);
 };
 
-module.exports = { insertProItemDetails };
+module.exports = { insertProStockBatch };

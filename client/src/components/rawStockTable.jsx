@@ -249,7 +249,7 @@ export default function RawStockTable() {
   useEffect(() => {
     // Fetch data from the backend when the component mounts
     axios
-      .get("http://localhost:5000/api/routes/rawStock") // Assuming your backend endpoint is /api/stocks
+      .get("http://localhost:5050/api/routes/rawStock") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         setRows(response.data); // Update the state with fetched data
       })

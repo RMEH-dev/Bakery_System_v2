@@ -17,7 +17,7 @@ export function ProductGallery() {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/routes/getProductsByCategory",
+          "http://localhost:5050/api/routes/getProductsByCategory",
           {
             params: {
               page: currentPage,

@@ -1,15 +1,47 @@
 const jwt = require('jsonwebtoken');
-const jwtConfig = require('../../config/jwt');
+const jwtConfig = require("../../config/jwt");
 
-const authenticationToken = (req, res, next) => {
-    const token =req.headers['authorization'];
-    if(!token) return res.sendStatus(401);
+// Middleware to check if user is admin
+const isAdmin = (req, res, next) => {
+  const token = req.headers.authorization.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
 
-    jwt.verify(token, jwtConfig.secret, (err, user) => {
-        if (err) return res,sendStatus(403);
-        req.user=user;
-        next();
-    });
+  jwt.verify(token, jwtConfig, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Failed to authenticate token' });
+    }
+
+    if (decoded.userType !== 'Admin') {
+      return res.status(403).json({ message: 'Only admin can perform this action' });
+    }
+
+    req.user = decoded; // Add the decoded token to the request object
+    next();
+  });
 };
 
-module.exports = authenticationToken;
+// Middleware to check if user is admin
+const isStaff = (req, res, next) => {
+    const token = req.headers.authorization.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+  
+    jwt.verify(token, jwtConfig, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Failed to authenticate token' });
+      }
+  
+      if (decoded.userType !== 'Staff') {
+        return res.status(403).json({ message: 'Only staff can perform this action' });
+      }
+  
+      req.user = decoded; // Add the decoded token to the request object
+      next();
+    });
+  };
+
+
+module.exports = { isAdmin, isStaff};

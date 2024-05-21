@@ -36,7 +36,7 @@ function AddRawStockUsage() {
   useEffect(() => {
     if (id) {
       axios
-        .get(`http://localhost:5000/api/routes/editRawStockUsage/${id}`)
+        .get(`http://localhost:5050/api/routes/editRawStockUsage/${id}`)
         .then((response) => {
           const data = response.data;
           setFormData({
@@ -56,7 +56,7 @@ function AddRawStockUsage() {
   useEffect(() => {
     if (selectedRawStockName) {
       axios
-        .get(`http://localhost:5000/api/routes/getRawStockIDUsage`, {
+        .get(`http://localhost:5050/api/routes/getRawStockIDUsage`, {
           params: { rawStockName: selectedRawStockName },
         })
         .then((response) => {
@@ -71,7 +71,7 @@ function AddRawStockUsage() {
   useEffect(() => {
     if (selectedProStockName) {
       axios
-        .get(`http://localhost:5000/api/routes/getProStockIDUsage`, {
+        .get(`http://localhost:5050/api/routes/getProStockIDUsage`, {
           params: { proStockName: selectedProStockName },
         })
         .then((response) => {
@@ -114,11 +114,11 @@ function AddRawStockUsage() {
     };
     const request = id
       ? axios.put(
-          `http://localhost:5000/api/routes/updateRawStockUsage/${id}`,
+          `http://localhost:5050/api/routes/updateRawStockUsage/${id}`,
           dataToSend2
         )
       : axios.post(
-          "http://localhost:5000/api/routes/addRawStockUsage",
+          "http://localhost:5050/api/routes/addRawStockUsage",
           dataToSend
         );
 

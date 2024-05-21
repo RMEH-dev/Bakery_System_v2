@@ -1,14 +1,14 @@
 const {
-  getProStockDetails,
+  getProStockBatch,
   insertProStock,
   getProStockNames,
   getProStockIDs,
   getProStock,
-  updateProStock,
+  updateProStock
 } = require("../models/proStockModel");
 const generateProStockID = require("../helpers/generateProStockID");
 const generateProBatchNo = require("../helpers/generateProBatchNo");
-const { insertProItemDetails } = require("../models/proItemDetailsModel");
+const { insertProStockBatch } = require("../models/proItemDetailsModel");
 const db = require("../../config/databaseConnection");
 
 // exports.postCheckExistingProStock = (req, res) => {
@@ -23,7 +23,7 @@ const db = require("../../config/databaseConnection");
 // };
 
 exports.getProStockInfo = (req, res) => {
-  getProStockDetails([], (error, results) => {
+  getProStockBatch([], (error, results) => {
     if (error) {
       console.error(
         "Error fetching ProStock details from the database:",
@@ -84,7 +84,7 @@ exports.addProStock = (req, res) => {
           pricePerItem,
         ];
 
-        insertProItemDetails(valuesProItemDetails, (err) => {
+        insertProStockBatch(valuesProItemDetails, (err) => {
           if (err) {
             console.error(
               "Error inserting data into MySQL (proitemdetails):",

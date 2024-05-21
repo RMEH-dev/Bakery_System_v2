@@ -1,8 +1,11 @@
+const db = require("../../config/databaseConnection");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
   getUserByEmail,
+  getNextUserId,
   createUser,
+  createUserRole,
   findUserByEmailOrContact,
 } = require("../models/authModel");
 const jwtConfig = require("../../config/jwt");
@@ -24,15 +27,7 @@ exports.checkExistingUser = (req, res) => {
 
 // Register a new user with the specified email
 exports.signUp = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    userName,
-    email,
-    contact,
-    password,
-    confirmPassword,
-  } = req.body;
+  const { firstName, lastName, userName, email, contact, password } = req.body;
 
   try {
     findUserByEmailOrContact(email, contact, async (err, results) => {
@@ -44,37 +39,56 @@ exports.signUp = async (req, res) => {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      // If user does not exist, hash passwords and create a new user
+      // If user does not exist, hash password and create a new user
       try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const hashedConfirmPassword = await bcrypt.hash(confirmPassword, 10);
 
-        const userType = "Customer"; //setting default user type as Customer
         const userID = generateUserID(); // Generate a unique userID
 
-        const user = {
-          userType,
-          userID,
-          firstName,
-          lastName,
-          userName,
-          email,
-          contact,
-          password: hashedPassword,
-          confirmPassword: hashedConfirmPassword,
-        };
+      // Generate a new userID
+      // db.query('CALL GetNextUserId(@nextUserID); SELECT @nextUserID AS nextID;', (err, rows) => {
+      //   if (err) {
+      //     console.error("Error generating userID:", err);
+      //     return res.status(500).json({ message: "Internal server error" });
+      //   }
 
-        createUser(user, (err, results) => {
-          if (err) {
-            console.error("Error creating user:", err);
-            return res.status(500).json({ message: "Internal server error" });
-          }
-          // Create JWT token
-          const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-            expiresIn: jwtConfig.expiresIn,
+        // const userID = rows[1][0].nextID; // Extract the next user ID from the stored procedure result
+
+          const user = {
+              userID,
+              firstName,
+              lastName,
+              userName,
+              email,
+              contact,
+              password: hashedPassword,
+          };
+
+          createUser(user, (err, results) => {
+            if (err) {
+              console.error("Error creating user:", err);
+              return res.status(500).json({ message: "Internal server error" });
+            }
+
+            const userTypeID = 3; // Assuming 'customer' is the default user type
+            const branchID = null; // No branch assigned initially
+
+            createUserRole(userID, userTypeID, branchID, (err, results) => {
+              if (err) {
+                console.error("Error assigning user role:", err);
+                return res
+                  .status(500)
+                  .json({ message: "Internal server error" });
+              }
+
+              const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+                expiresIn: jwtConfig.expiresIn,
+              });
+              res
+                .status(201)
+                .json({ message: "User created successfully", token });
+            });
           });
-          res.status(201).json({ message: "User created successfully", token });
-        });
       } catch (error) {
         console.error("Error hashing password:", error);
         return res.status(500).json({ message: "Internal server error" });
@@ -106,7 +120,6 @@ exports.login = (req, res) => {
           id: user.userID,
           email: user.email,
           userType: user.userType,
-          password: user.password,
         },
         jwtConfig.secret,
         {
