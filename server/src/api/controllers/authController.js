@@ -42,7 +42,6 @@ exports.signUp = async (req, res) => {
       // If user does not exist, hash password and create a new user
       try {
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const userID = generateUserID(); // Generate a unique userID
 
       // Generate a new userID
@@ -70,7 +69,7 @@ exports.signUp = async (req, res) => {
               return res.status(500).json({ message: "Internal server error" });
             }
 
-            const userTypeID = 3; // Assuming 'customer' is the default user type
+            const userTypeID = 3; // Assuming 'Customer' is the default user type
             const branchID = null; // No branch assigned initially
 
             createUserRole(userID, userTypeID, branchID, (err, results) => {
@@ -120,6 +119,7 @@ exports.login = (req, res) => {
           id: user.userID,
           email: user.email,
           userType: user.userType,
+          branchID: user.branchID, 
         },
         jwtConfig.secret,
         {

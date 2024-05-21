@@ -1,7 +1,7 @@
 //Routing to the Controller methods
 const express = require('express');
 const router = express.Router();
-const {isAdmin} = require('../middlewares/authMiddleware');
+const { isAdmin } = require('../middlewares/authMiddleware');
 const rawStockController = require('../controllers/rawStockController');
 const rawStockInput = require('../validations/rawStockInput');
 

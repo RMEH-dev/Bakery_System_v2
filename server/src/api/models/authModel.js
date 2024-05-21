@@ -44,7 +44,7 @@ const findUserByEmailOrContact = (email, contact, callback) => {
 
 const getUserByEmail = (email, callback) => {
   const sql = `
-    SELECT u.userID, u.email, u.password, ur.userTypeID, ut.userType
+    SELECT u.userID, u.email, u.password, ur.userTypeID, ut.userType, ur.branchID
     FROM user u 
     JOIN userroles ur ON u.userID = ur.userID 
     JOIN usertypes ut ON ur.userTypeID = ut.userTypeID

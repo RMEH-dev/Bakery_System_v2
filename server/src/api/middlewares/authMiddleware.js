@@ -1,8 +1,14 @@
 const jwt = require('jsonwebtoken');
 const jwtConfig = require("../../config/jwt");
+const db = require('../../config/databaseConnection');
 
 // Middleware to check if user is admin
-const isAdmin = (req, res, next) => {
+const checkUserRole = (roles) => (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
   const token = req.headers.authorization.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
@@ -13,35 +19,22 @@ const isAdmin = (req, res, next) => {
       return res.status(401).json({ message: 'Failed to authenticate token' });
     }
 
-    if (decoded.userType !== 'Admin') {
-      return res.status(403).json({ message: 'Only admin can perform this action' });
+    const { userType, branchID} = decoded;
+
+    if (!roles.includes(userType)) {
+      return res.status(403).json({ message: 'Insufficient Privileges' });
     }
 
-    req.user = decoded; // Add the decoded token to the request object
+    req.user = decoded;
+
+    // Ensure the user is associated with the branch
+    if (req.body.branchID && req.body.branchID !== branchID) {
+      return res.status(403).json({ message: 'User not associated with this branch' });
+    }
     next();
   });
 };
 
-// Middleware to check if user is admin
-const isStaff = (req, res, next) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ message: 'No token provided' });
-    }
-  
-    jwt.verify(token, jwtConfig, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: 'Failed to authenticate token' });
-      }
-  
-      if (decoded.userType !== 'Staff') {
-        return res.status(403).json({ message: 'Only staff can perform this action' });
-      }
-  
-      req.user = decoded; // Add the decoded token to the request object
-      next();
-    });
-  };
 
 
-module.exports = { isAdmin, isStaff};
+module.exports = { isAdmin: checkUserRole(['Admin']), isStaff: checkUserRole(['Staff']),};
