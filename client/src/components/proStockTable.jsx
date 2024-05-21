@@ -26,6 +26,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axios";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -63,7 +64,7 @@ const headCells = [
     label: "Pro Stock Name",
   },
   {
-    id: "proBatchNo",
+    id: "proStockBatchID",
     numeric: false,
     disablePadding: false,
     label: "Batch No.",
@@ -82,13 +83,13 @@ const headCells = [
     label: "PP Item (Rs.)",
   },
   {
-    id: "proManuDate",
+    id: "manuDate",
     numeric: false,
     disablePadding: false,
     label: "Manu Date",
   },
   {
-    id: "proExpDate",
+    id: "expDate",
     numeric: false,
     disablePadding: false,
     label: "Exp Date",
@@ -112,7 +113,7 @@ const headCells = [
     label: "Available Till",
   },
   {
-    id: "proStockQuantity",
+    id: "quantity",
     numeric: true,
     disablePadding: false,
     label: "Quantity",
@@ -266,8 +267,8 @@ export default function ProStockTable() {
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
-    axios
-      .get("http://localhost:5050/api/routes/proStock") // Assuming your backend endpoint is /api/stocks
+    axiosInstance
+      .get("/proStock/") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         setRows(response.data); // Update the state with fetched data
       })
@@ -417,7 +418,7 @@ export default function ProStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proBatchNo}
+                        {row.proStockBatchID}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -437,12 +438,12 @@ export default function ProStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proManuDate}
+                        {row.manuDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proExpDate}
+                        {row.expDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -475,7 +476,7 @@ export default function ProStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proStockQuantity}
+                        {row.quantity}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -483,12 +484,12 @@ export default function ProStockTable() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                            row.proStockQuantity > 5 ? "green" : "red",
+                            row.quantity > 5 ? "green" : "red",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {row.proStockQuantity > 5 ? "Available" : "Low Stock"}
+                          {row.quantity > 5 ? "Available" : "Low Stock"}
                         </Typography>
                       </Button>
                     </TableCell>

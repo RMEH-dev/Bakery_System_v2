@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CustomerProfile from '../../pages/customer/profile';
 import {
   Card,
@@ -8,8 +8,20 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
+import LogoutButton from '../primary/logoutbtn';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function LogOut() {
+
+  const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        toast.success('Logged out successfully');
+        navigate('/login', { replace: true });
+    };
+
   return (
     <CustomerProfile>
      
@@ -30,29 +42,29 @@ function LogOut() {
                 Are you sure you want to log out?  
               </Typography>
               <Link to="/">
-              <Typography className="text-black px-4 rounded-xl bg-c2 w-[200px] font-medium font-[Montserrat]">
+              <Typography className="text-c2 px-4 rounded-xl bg-deep-orange-800 hover:bg-c5 hover:text-c1 h-10 items-center mt-2 pt-2 w-[200px] font-bold font-[Montserrat]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105">
                 Confirm & Log Out  
               </Typography>
               </Link>
               </div>
-              <div className="grid flex grid-cols-3 gap-2">
+              <div className="flex grid-cols-3 gap-10">
               <Link to="/profileUser/AccountDetails">
               <Button
-                className="mt-5 w-[250px] hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]"
+                className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >
                 Account Details
               </Button>
               </Link>
               <Link to="/profileUser/MyOrders">
               <Button
-                className="mt-5 w-[250px] hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]"
+                className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >
                 Orders
               </Button>
               </Link>
               <Link to="/profileUser/Addresses">
               <Button
-                className="mt-5 w-[250px] hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]"
+                className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >
                 Addresses
               </Button>

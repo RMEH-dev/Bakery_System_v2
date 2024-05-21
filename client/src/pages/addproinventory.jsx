@@ -17,27 +17,19 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrencyInput from "react-currency-input-field";
-import axios from "axios"; // Import Axios
+import axiosInstance from "../utils/axios"
+import axios from "axios";
 import Dropdown from "../components/dropdown";
+import DropdownWithAdd from "../components/dropdownwithadd";
 
-const categoryMap = {
-  "Breads & Buns": ["Bread", "Bun"],
-  Pastries: ["Puff Pastry", "Croissant"],
-  "Cakes & Cupcakes": ["Cake", "Gateau", "Cupcake"],
-  "Sweets & Desserts": ["Sweet", "Dessert"],
-  Platters: ["Savory Platter", "Sweet Platter"],
-  Beverages: ["Cold Beverage", "Hot Beverage"],
-};
 
 function AddProInventory() {
   const { id } = useParams();
-  const [selectedOption1, setSelectedOption1] = useState(null);
-  const [isDropdownOpen1, setIsDropdownOpen1] = useState(false);
-  const [selectedOption2, setSelectedOption2] = useState(null);
-  const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+  const [selectedProStockName, setSelectedProStockName] = useState("");
+  const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
+  const [selectedProStockSubCategory, setSelectedProStockSubCategory] = useState("");
 
   const [formData, setFormData] = useState({
-    proStockName: "",
     manufactureDate: "",
     expirationDate: "",
     quantity: "",
@@ -48,23 +40,24 @@ function AddProInventory() {
 
   useEffect(() => {
     if (id) {
-      axios
-        .get(`http://localhost:5050/api/routes/getProStock/${id}`)
+      axiosInstance
+        .get(`/getProStock/${id}`)
         .then((response) => {
           const data = response.data;
           setFormData({
-            proStockName: data.proStockName,
-            manufactureDate: data.proManuDate,
-            expirationDate: data.proExpDate,
+            manufactureDate: data.manuDate,
+            expirationDate: data.expDate,
             category: data.category,
             subCategory: data.subCategory,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
             pricePerItem: data.pricePerItem,
-            quantity: data.proStockQuantity,
+            quantity: data.quantity,
           });
-          setSelectedOption1(data.category);
-          setSelectedOption2(data.subCategory);
+          
+
+          setSelectedProStockCategory(data.category);
+          setSelectedProStockSubCategory(data.subCategory);
         })
         .catch((error) => {
           console.error("Error fetching pro stock data:", error);
@@ -79,20 +72,11 @@ function AddProInventory() {
     });
   };
 
-  const handleSelect1 = (option) => {
-    setSelectedOption1(option);
-    setIsDropdownOpen1(false);
-  };
-
-  const handleSelect2 = (option) => {
-    setSelectedOption2(option);
-    setIsDropdownOpen2(false);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData || !selectedOption1 || !selectedOption2) {
+    if (!formData || !selectedProStockName || !selectedProStockCategory || !selectedProStockSubCategory) {
       toast.error("Please fill out all the fields.");
       return;
     }
@@ -106,11 +90,11 @@ function AddProInventory() {
     console.log("Data to send:", dataToSend);
 
     const request = id
-      ? axios.put(
-          `http://localhost:5050/api/routes/updateProStock/${id}`,
+      ?  axiosInstance.put(
+          `/updateProStock/${id}`,
           dataToSend
         )
-      : axios.post("http://localhost:5050/api/routes/addProStock", dataToSend);
+      :  axiosInstance.post("/addProStock", dataToSend);
 
     request
       .then((response) => {
@@ -172,18 +156,12 @@ function AddProInventory() {
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Expiration Date
                       </Typography>
-                      <Input
-                        type="text"
-                        size="md"
-                        placeholder="Raw Stock Name"
-                        name="proStockName"
-                        value={formData.proStockName}
-                        onChange={handleChange}
-                        className="w-[350px] 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c1 rounded-[30px]"
-                        labelProps={{
-                          className: "before:content-none after:content-none",
-                        }}
-                        required
+                      <DropdownWithAdd
+                        endpoint="getProStockNames"
+                        selectedOption={selectedProStockName}
+                        setSelectedOption={setSelectedProStockName}
+                        label="Pro Stock Name"
+                        disabled={!!id}
                       />
                       <Input
                         type="date"
@@ -214,7 +192,7 @@ function AddProInventory() {
                     </div>
                     <div className="grid grid-cols-3 gap-10">
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
-                        Produced Stock Category
+                        Category
                       </Typography>
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Sub Category
@@ -222,60 +200,20 @@ function AddProInventory() {
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Available From
                       </Typography>
-                      <Typography
-                        className="cursor-pointer pl-2 mt-1 items-center w-[200px] bg-deep-orange-800 py-2 justify-center rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                        onClick={() => setIsDropdownOpen1(!isDropdownOpen1)}
-                      >
-                        {selectedOption1 ? selectedOption1 : "Select Category"}
-                        {isDropdownOpen1 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {Object.keys(categoryMap).map((category) => (
-                              <li
-                                key={category}
-                                onClick={() => handleSelect1(category)}
-                                className={
-                                  selectedOption1 === category
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {category}
-                                {selectedOption1 === category && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </Typography>
-                      <Typography
-                        className="cursor-pointer pl-6 pt- mt-1 justify-center w-[250px] bg-deep-orange-800 py-2 rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                        onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
-                      >
-                        {selectedOption2
-                          ? selectedOption2
-                          : "Select Sub Category"}
-                        {isDropdownOpen2 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {categoryMap[selectedOption1].map((subCategory) => (
-                              <li
-                                key={subCategory}
-                                onClick={() => handleSelect2(subCategory)}
-                                className={
-                                  selectedOption2 === subCategory
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {subCategory}
-                                {selectedOption2 === subCategory && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </Typography>
+                      <DropdownWithAdd
+                        endpoint="getProStockCategory"
+                        selectedOption={selectedProStockCategory}
+                        setSelectedOption={setSelectedProStockCategory}
+                        label="Category"
+                        disabled={!!id}
+                      />
+                      <DropdownWithAdd
+                        endpoint="getProStockSubCategory"
+                        selectedOption={selectedProStockSubCategory}
+                        setSelectedOption={setSelectedProStockSubCategory}
+                        label="Sub Category"
+                        disabled={!!id}
+                      />
                       <Input
                         type="time"
                         size="md"

@@ -1,7 +1,7 @@
 const db = require("../../config/databaseConnection");
 
 const generateProStockID = (callback) => {
-  const sqlGetHighestID = "SELECT proStockID FROM producedstock ORDER BY proStockID DESC LIMIT 1";
+  const sqlGetHighestID = "SELECT proStockID FROM prostock ORDER BY proStockID DESC LIMIT 1";
 
   db.query(sqlGetHighestID, (err, result) => {
     if (err) {

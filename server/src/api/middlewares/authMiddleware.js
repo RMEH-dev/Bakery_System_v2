@@ -4,12 +4,12 @@ const db = require('../../config/databaseConnection');
 
 // Middleware to check if user is admin
 const checkUserRole = (roles) => (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers['authorization'];
   if (!authHeader) {
     return res.status(401).json({ message: 'No token provided' });
   }
 
-  const token = req.headers.authorization.split(' ')[1];
+  const token = authHeader && authHeader.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
@@ -37,4 +37,4 @@ const checkUserRole = (roles) => (req, res, next) => {
 
 
 
-module.exports = { isAdmin: checkUserRole(['Admin']), isStaff: checkUserRole(['Staff']),};
+module.exports = { isAdmin: checkUserRole('Admin'), isStaff: checkUserRole('Staff'),};

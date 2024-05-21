@@ -166,7 +166,6 @@ function AddRawStockUsage() {
                     <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
                         Produced Stock Name
                       </Typography>
-                      
                       <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
                         Produced Stock ID
                       </Typography>

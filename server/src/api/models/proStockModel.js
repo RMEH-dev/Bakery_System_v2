@@ -7,7 +7,7 @@ const insertProStock = (values, callback) => {
 };
 
 const getProStockBatch = (values, callback) => {
-  const sqlGetProStockBatch = `SELECT p.proStockName,  i.quantity, DATE_FORMAT(i.manuDate, '%Y-%m-%d') AS manuDate, DATE_FORMAT(i.expDate, '%Y-%m-%d') AS expDate, p.availableFrom, p.availableTill, i.proStockBatchID, p.category, p.subCategory, p.pricePerItem FROM prostock p JOIN prostockbatch i ON p.proStockID = i.proStockID`;
+  const sqlGetProStockBatch = `SELECT p.proStockName, i.quantity, DATE_FORMAT(i.manuDate, '%Y-%m-%d') AS manuDate, DATE_FORMAT(i.expDate, '%Y-%m-%d') AS expDate, p.availableFrom, p.availableTill, i.proStockBatchID, p.category, p.subCategory, p.pricePerItem FROM prostock p JOIN prostockbatch i ON p.proStockID = i.proStockID`;
   db.query(sqlGetProStockBatch, values, callback);
 };
 
@@ -19,6 +19,27 @@ const getProStockBatch = (values, callback) => {
 const getProStockNames = (callback) => {
   const sqlGetProStockNames = "SELECT proStockName FROM prostock";
   db.query(sqlGetProStockNames, (error, results) => {
+    if (error) {
+      return callback(error, null);
+    }
+    callback(null, results);
+  });
+};
+
+const getProStockCategory = (callback) => {
+  const sqlGetProStockCategory = "SELECT DISTINCT category FROM prostock";
+  db.query(sqlGetProStockCategory, (error, results) => {
+    if (error) {
+      return callback(error, null);
+    }
+    callback(null, results);
+  });
+};
+
+
+const getProStockSubCategory = (callback) => {
+  const sqlGetProStockSubCategory = "SELECT DISTINCT subCategory FROM prostock";
+  db.query(sqlGetProStockSubCategory, (error, results) => {
     if (error) {
       return callback(error, null);
     }
@@ -67,7 +88,10 @@ module.exports = {
   getProStockBatch,
   insertProStock,
   getProStockNames,
+  getProStockCategory,
+  getProStockSubCategory,
   getProStockIDs,
   getProStock,
-  updateProStock
+  updateProStock,
+
 };

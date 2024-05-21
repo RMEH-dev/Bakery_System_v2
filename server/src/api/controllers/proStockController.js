@@ -2,6 +2,8 @@ const {
   getProStockBatch,
   insertProStock,
   getProStockNames,
+  getProStockCategory,
+  getProStockSubCategory,
   getProStockIDs,
   getProStock,
   updateProStock
@@ -107,6 +109,24 @@ exports.addProStock = (req, res) => {
 //to get the product related names
 exports.getProStockNames = (req, res) => {
   getProStockNames((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
+
+exports.getProStockCategory= (req, res) => {
+  getProStockCategory((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
+
+exports.getProStockSubCategory= (req, res) => {
+  getProStockSubCategory((error, results) => {
     if (error) {
       return res.status(500).json({ error: "Database query error" });
     }
