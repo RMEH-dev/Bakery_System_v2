@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axios"
-import { ChevronDownIcon, CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, CheckIcon, PlusIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 function DropdownWithAdd({ endpoint, selectedOption, setSelectedOption, label, disabled }) {
   const [items, setItems] = useState([]);
@@ -22,6 +22,10 @@ function DropdownWithAdd({ endpoint, selectedOption, setSelectedOption, label, d
   const handleSelect = (item) => {
     setSelectedOption(item);
     setIsDropdownOpen(false);
+  };
+
+  const handleUnselect = () => {
+    setSelectedOption("");
   };
 
   const handleAddNewItem = () => {
@@ -46,7 +50,18 @@ function DropdownWithAdd({ endpoint, selectedOption, setSelectedOption, label, d
         onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
       >
         {selectedOption || `${label}`}
-        <ChevronDownIcon className="ml-40 -mt-6 w-5 h-5" />
+        <div className="flex items-center">
+          {selectedOption && (
+            <XCircleIcon 
+              className="w-5 h-5 text-white mr-2 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation(); 
+                handleUnselect();
+              }} 
+            />
+          )}
+          <ChevronDownIcon className="w-5 h-5" />
+        </div>
       </div>
       {isDropdownOpen && !disabled && (
         <div className="mt-5 mr-5 absolute z-10 w-[250px] font-[Montserrat] bg-c5 rounded-2xl shadow-lg">

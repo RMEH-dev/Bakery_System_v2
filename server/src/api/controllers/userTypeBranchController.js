@@ -1,4 +1,5 @@
 const db = require('../../config/databaseConnection');
+const {getUserRoleAndBranch} = require('../models/userRoleModel');
 
 exports.updateUserRoleAndBranch = (req, res) => {
     const { userID, userTypeID, branchID } = req.body;
@@ -20,3 +21,20 @@ exports.updateUserRoleAndBranch = (req, res) => {
         res.status(200).json({ message: "User role and branch updated successfully" });
     })
 }
+
+const getUserRoleAndBranch = (req, res) => {
+    const { userID } = req.user;
+  
+    getUserRoleAndBranch(userID, (error, results) => {
+      if (error) {
+        console.error('Error fetching user role and branch:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'User role and branch not found' });
+      }
+  
+      res.json(results);
+    });
+  };

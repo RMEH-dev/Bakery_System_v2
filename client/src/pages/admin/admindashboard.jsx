@@ -9,10 +9,13 @@ import {
   ArrowRightIcon,
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import BranchSelector from "../../components/branchSelector";
 
 function AdminDashboard({ children }) {
   const [selectedOption2, setSelectedOption2] = useState(null);
   const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+  const [branches, setBranches] = useState([]);
+  const [selectedBranch, setSelectedBranch] = useState("");
 
   const handleSelect2 = (option) => {
     setSelectedOption2(option);
@@ -28,70 +31,21 @@ function AdminDashboard({ children }) {
           </h1>
         </Link>
         <div className="ml-20 flex flex-cols-3 justify-end right-0">
-        <Link to="/adminDashboard">
-          <Button className="w-[200px] justify-end h-[20px] hover:transition-transform duration-500 ease-in-out hover:scale-105 text-c1 hover:bg-deep-orange-900 hover:text-white bg-white rounded-xl text-md font-[Montserrat]">
-            View Reports
-          </Button>
-        </Link>
-        <div className="bg-white h-12 w-3 ml-5 mr-5  rounded-2xl z-10">
+          <Link to="/adminDashboard">
+            <Button className="w-[200px] justify-end h-[20px] hover:transition-transform duration-500 ease-in-out hover:scale-105 text-c1 hover:bg-deep-orange-900 hover:text-white bg-white rounded-xl text-md font-[Montserrat]">
+              View Reports
+            </Button>
+          </Link>
+          <div className="bg-white h-12 w-3 ml-5 mr-5  rounded-2xl z-10"></div>
+          <Link to="/inventoryLogs">
+            <Button className="w-[200px] h-[20px] text-c1 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 hover:text-white bg-white rounded-xl text-md font-[Montserrat]">
+              View Logs
+            </Button>
+          </Link>
         </div>
-        <Link to="/inventoryLogs">
-          <Button className="w-[200px] h-[20px] text-c1 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 hover:text-white bg-white rounded-xl text-md font-[Montserrat]">
-            View Logs
-          </Button>
-        </Link>
-        </div>
-        <div className="mr-4">
-          <Typography
-            className="cursor-pointer text-center w-[200px] h-[200px] pt-2 pb-2 justify-items-center bg-c5 rounded-2xl text-black font-bold text-lg font-[Montserrat]"
-            onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
-          >
-            Outlet
-            <ChevronDownIcon className="ml-36 -mt-6 w-5 h-5" />
-            {isDropdownOpen2 && (
-              <ul className="mt-5  absolute z-10 cursor-pointer rounded-2xl text-c3 w-[200px] h-[100px] text-lg font-bold font-[Montserrat] bg-white">
-                <li
-                  onClick={() => handleSelect2("Ganemulla")}
-                  className={
-                    selectedOption2 === "Ganemulla"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Ganemulla
-                  {selectedOption2 === "Ganemulla" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-                <li
-                  onClick={() => handleSelect2("Kandana")}
-                  className={
-                    selectedOption2 === "Kandana"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Kandana
-                  {selectedOption2 === "Kandana" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-                <li
-                  onClick={() => handleSelect2("Bopitiya")}
-                  className={
-                    selectedOption2 === "Bopitiya"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Bopitiya
-                  {selectedOption2 === "Bopitiya" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-              </ul>
-            )}
-          </Typography>
+        
+        <div className="ml-20 mt-5 flex justify-right">
+        <BranchSelector />
         </div>
       </div>
       <div>

@@ -25,6 +25,7 @@ import DropdownWithAdd from "../components/dropdownwithadd";
 
 function AddProInventory() {
   const { id } = useParams();
+  const [selectedOption1, setSelectedOption1] = useState(null);
   const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
   const [selectedProStockSubCategory, setSelectedProStockSubCategory] = useState("");
@@ -54,8 +55,7 @@ function AddProInventory() {
             pricePerItem: data.pricePerItem,
             quantity: data.quantity,
           });
-          
-
+          setSelectedProStockName(data.proStockName); 
           setSelectedProStockCategory(data.category);
           setSelectedProStockSubCategory(data.subCategory);
         })
@@ -83,8 +83,9 @@ function AddProInventory() {
 
     const dataToSend = {
       ...formData,
-      category: selectedOption1,
-      subCategory: selectedOption2,
+      proStockName: selectedProStockName,
+      category: selectedProStockCategory,
+      subCategory: selectedProStockSubCategory,
     };
 
     console.log("Data to send:", dataToSend);
@@ -110,7 +111,6 @@ function AddProInventory() {
             : "Produced Stock added successfully"
         );
         setFormData({
-          proStockName: "",
           manufactureDate: "",
           expirationDate: "",
           quantity: "",
@@ -118,8 +118,9 @@ function AddProInventory() {
           availableFrom: "",
           availableTill: "",
         });
-        setSelectedOption1(null);
-        setSelectedOption2(null);
+        setSelectedProStockName(null); 
+        setSelectedProStockCategory(null);
+        setSelectedProStockSubCategory(null);
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);
