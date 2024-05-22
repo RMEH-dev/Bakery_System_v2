@@ -25,10 +25,14 @@ import DropdownWithAdd from "../components/dropdownwithadd";
 
 function AddProInventory() {
   const { id } = useParams();
-  const [selectedOption1, setSelectedOption1] = useState(null);
+  // const [selectedOption1, setSelectedOption1] = useState(null);
   const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
   const [selectedProStockSubCategory, setSelectedProStockSubCategory] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [userBranch, setUserBranch] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
+
 
   const [formData, setFormData] = useState({
     manufactureDate: "",
@@ -37,9 +41,24 @@ function AddProInventory() {
     pricePerItem: "",
     availableFrom: "",
     availableTill: "",
+    branchID: "",
   });
 
   useEffect(() => {
+
+     // Fetch user role and branch
+     axiosInstance.get("/getCurrentUser")
+     .then(response => {
+       const user = response.data;
+       setUserRole(user.userType);
+       setUserBranch(user.branchID);
+       setSelectedBranch(user.branchID);
+     })
+     .catch(error => {
+       console.error("Error fetching user data:", error);
+     });
+
+
     if (id) {
       axiosInstance
         .get(`/getProStock/${id}`)
@@ -48,16 +67,16 @@ function AddProInventory() {
           setFormData({
             manufactureDate: data.manuDate,
             expirationDate: data.expDate,
-            category: data.category,
-            subCategory: data.subCategory,
+            quantity: data.quantity,
+            pricePerItem: data.pricePerItem,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
-            pricePerItem: data.pricePerItem,
-            quantity: data.quantity,
+            branchID: data.branchID,
           });
           setSelectedProStockName(data.proStockName); 
           setSelectedProStockCategory(data.category);
           setSelectedProStockSubCategory(data.subCategory);
+          setSelectedBranch(data.branchID);
         })
         .catch((error) => {
           console.error("Error fetching pro stock data:", error);
@@ -85,7 +104,8 @@ function AddProInventory() {
       ...formData,
       proStockName: selectedProStockName,
       category: selectedProStockCategory,
-      subCategory: selectedProStockSubCategory,
+      subCategory: selectedProStockSubCategory,  
+      branchID: userRole === 'Admin' ? selectedBranch : userBranch,
     };
 
     console.log("Data to send:", dataToSend);
@@ -117,10 +137,12 @@ function AddProInventory() {
           pricePerItem: "",
           availableFrom: "",
           availableTill: "",
+          branchID: "",
         });
         setSelectedProStockName(null); 
         setSelectedProStockCategory(null);
         setSelectedProStockSubCategory(null);
+        setSelectedBranch("")
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);
@@ -130,7 +152,7 @@ function AddProInventory() {
   return (
     <AdminDashboard>
       <div className="bg-c1 pb-20 h-[50px] 2xl:h-[150px]">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c1 pt-10 h-[100px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-150 ml-5 mb-5 mr-5 bg-c2 pt-10 h-[100px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[100px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
@@ -162,7 +184,7 @@ function AddProInventory() {
                         selectedOption={selectedProStockName}
                         setSelectedOption={setSelectedProStockName}
                         label="Pro Stock Name"
-                        disabled={!!id}
+                        // disabled={!!id}
                       />
                       <Input
                         type="date"
@@ -206,14 +228,14 @@ function AddProInventory() {
                         selectedOption={selectedProStockCategory}
                         setSelectedOption={setSelectedProStockCategory}
                         label="Category"
-                        disabled={!!id}
+                        // disabled={!!id}
                       />
                       <DropdownWithAdd
                         endpoint="getProStockSubCategory"
                         selectedOption={selectedProStockSubCategory}
                         setSelectedOption={setSelectedProStockSubCategory}
                         label="Sub Category"
-                        disabled={!!id}
+                        // disabled={!!id}
                       />
                       <Input
                         type="time"
@@ -283,8 +305,16 @@ function AddProInventory() {
                       required
                     />
                   </div>
+                  {userRole === "Admin" && (
+                    <div className="mb-4">
+                      <BranchSelector
+                        selectedBranch={selectedBranch}
+                        setSelectedBranch={setSelectedBranch}
+                        userType={userRole}
+                      />
+                    </div>
+                  )}
                 </form>
-
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addProInventory">
                     <Button

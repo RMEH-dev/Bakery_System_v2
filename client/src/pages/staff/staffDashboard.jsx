@@ -8,6 +8,7 @@ import {
   CheckIcon,
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import BranchSelector from "../../components/branchSelector";
 
 function StaffDashboard({ children }) {
   const [selectedOption2, setSelectedOption2] = useState(null);
@@ -32,56 +33,7 @@ function StaffDashboard({ children }) {
           </Button>
         </Link>
         <div className="mr-4">
-          <Typography
-            className="cursor-pointer text-center w-[200px] h-[200px] pt-2 pb-2 justify-items-center bg-c5 rounded-2xl text-black font-bold text-lg font-[Montserrat]"
-            onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
-          >
-            Outlet
-            <ChevronDownIcon className="ml-36 -mt-6 w-5 h-5" />
-            {isDropdownOpen2 && (
-              <ul className="mt-5  absolute z-10 cursor-pointer rounded-2xl text-c3 w-[200px] h-[100px] text-lg font-bold font-[Montserrat] bg-white">
-                <li
-                  onClick={() => handleSelect2("Ganemulla")}
-                  className={
-                    selectedOption2 === "Ganemulla"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Ganemulla
-                  {selectedOption2 === "Ganemulla" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-                <li
-                  onClick={() => handleSelect2("Kandana")}
-                  className={
-                    selectedOption2 === "Kandana"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Kandana
-                  {selectedOption2 === "Kandana" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-                <li
-                  onClick={() => handleSelect2("Bopitiya")}
-                  className={
-                    selectedOption2 === "Bopitiya"
-                      ? "bg-c3 text-c2 flex rounded-2xl justify-between items-center p-4"
-                      : "flex justify-between items-center p-4"
-                  }
-                >
-                  Bopitiya
-                  {selectedOption2 === "Bopitiya" && (
-                    <CheckIcon className="w-5 h-5 text-green-500" />
-                  )}
-                </li>
-              </ul>
-            )}
-          </Typography>
+          <BranchSelector/>
         </div>
       </div>
       <div>

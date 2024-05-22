@@ -31,6 +31,11 @@ const checkUserRole = (roles) => (req, res, next) => {
     if (req.body.branchID && req.body.branchID !== branchID) {
       return res.status(403).json({ message: 'User not associated with this branch' });
     }
+
+    // Add userID and branchID to the request body
+    req.body.userID = userID;
+    req.body.branchID = branchID;
+
     next();
   });
 };

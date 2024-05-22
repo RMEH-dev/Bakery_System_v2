@@ -69,6 +69,12 @@ const headCells = [
     disablePadding: false,
     label: "Batch No.",
   },
+  {
+    id: "branchName",
+    numeric: false,
+    disablePadding: false,
+    label: "Branch Name",
+  },
   { id: "category", numeric: false, disablePadding: false, label: "Category" },
   {
     id: "subCategory",
@@ -325,15 +331,15 @@ export default function ProStockTable() {
   };
 
   const handleDelete = () => {
-    const newRows = rows.filter((row) => !selected.includes(row.proStockName));
+    const newRows = rows.filter((row) => !selected.includes(row.proStockBatchID));
     setRows(newRows);
     setSelected([]);
   };
 
   const handleEdit = () => {
-    const selectedRow = rows.find((row) => selected.includes(row.proStockName));
+    const selectedRow = rows.find((row) => selected.includes(row.proStockBatchID));
     if (selectedRow) {
-      navigate(`/editProInventory/${selectedRow.proBatchNo}`);
+      navigate(`/editProInventory/${selectedRow.proStockBatchID}`);
     }
   };
 
@@ -383,17 +389,17 @@ export default function ProStockTable() {
             />
             <TableBody className="bg-white text-c1 text-xl font-semibold font-[Montserrat]">
               {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.proStockName);
+                const isItemSelected = isSelected(row.proStockBatchID);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.proStockName)}
+                    onClick={(event) => handleClick(event, row.proStockBatchID)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.proStockName}
+                    key={row.proStockBatchID}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
@@ -419,6 +425,11 @@ export default function ProStockTable() {
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
                         {row.proStockBatchID}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="regular">
+                        {row.branchName}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">

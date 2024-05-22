@@ -131,3 +131,18 @@ exports.login = (req, res) => {
     });
   });
 };
+
+
+exports.getCurrentUser =(req, res) => {
+  const { userID } = req.params;
+  getCurrentUser(userID, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Produced Stock Not Found" });
+    }
+    res.json(results[0]);
+  });
+  // res.json(rawStock);
+};

@@ -188,15 +188,15 @@ exports.updateProStock = (req, res) => {
   }
   
   const updateData = [
-    quantity,
     proStockName,
+    pricePerItem,
     manufactureDate,
     expirationDate,
-    availableFrom,
-    availableTill,
+    quantity,
     category,
     subCategory,
-    pricePerItem,
+    availableFrom,
+    availableTill,
     id,
   ];
 

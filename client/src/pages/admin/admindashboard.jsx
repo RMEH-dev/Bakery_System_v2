@@ -12,15 +12,7 @@ import {
 import BranchSelector from "../../components/branchSelector";
 
 function AdminDashboard({ children }) {
-  const [selectedOption2, setSelectedOption2] = useState(null);
-  const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
-  const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState("");
-
-  const handleSelect2 = (option) => {
-    setSelectedOption2(option);
-    setIsDropdownOpen2(false);
-  };
 
   return (
     <PageLayout className="">
@@ -43,9 +35,13 @@ function AdminDashboard({ children }) {
             </Button>
           </Link>
         </div>
-        
+        <BranchSelector
+        endpoint="branches"
+        selectedOption={selectedBranch}
+        setSelectedOption={setSelectedBranch}
+        label="Select Branch"
+        />
         <div className="ml-20 mt-5 flex justify-right">
-        <BranchSelector />
         </div>
       </div>
       <div>
