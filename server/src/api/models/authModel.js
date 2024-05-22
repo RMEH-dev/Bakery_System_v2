@@ -77,5 +77,4 @@ module.exports = {
   findUserByEmailOrContact,
   createUser,
   createUserRole,
-
 };

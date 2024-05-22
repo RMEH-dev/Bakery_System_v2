@@ -8,9 +8,9 @@ const {
   getProStock,
   updateProStock
 } = require("../models/proStockModel");
+const { insertProStockBatch } = require("../models/proitemDetailsModel");
 const generateProStockID = require("../helpers/generateProStockID");
 const generateProBatchNo = require("../helpers/generateProBatchNo");
-const { insertProStockBatch } = require("../models/proItemDetailsModel");
 const db = require("../../config/databaseConnection");
 
 // exports.postCheckExistingProStock = (req, res) => {
@@ -48,6 +48,7 @@ exports.addProStock = (req, res) => {
     subCategory,
     availableFrom,
     availableTill,
+    branchID,
   } = req.body;
 
   generateProStockID((err, newProStockID) => {
@@ -59,11 +60,12 @@ exports.addProStock = (req, res) => {
     const valuesProStock = [
       newProStockID,
       proStockName,
-      quantity,
-      manufactureDate,
-      expirationDate,
+      category,
+      subCategory,
       availableFrom,
       availableTill,
+      pricePerItem,
+      branchID,
     ];
 
     insertProStock(valuesProStock, (err) => {
@@ -72,24 +74,25 @@ exports.addProStock = (req, res) => {
         return res.status(500).json({ error: "Database error" });
       }
 
-      generateProBatchNo(newProStockID, (err, newProBatchNo) => {
+      generateProBatchNo(newProStockID, (err, newProStockBatchID) => {
         if (err) {
           console.error("Error generating new proBatchNo:", err);
           return res.status(500).json({ error: "Database error" });
         }
 
         const valuesProItemDetails = [
+          newProStockBatchID,
           newProStockID,
-          newProBatchNo,
-          category,
-          subCategory,
-          pricePerItem,
-        ];
+          quantity,
+          manufactureDate,
+          expirationDate,
+          branchID,
+        ];   
 
         insertProStockBatch(valuesProItemDetails, (err) => {
           if (err) {
             console.error(
-              "Error inserting data into MySQL (proitemdetails):",
+              "Error inserting data into MySQL (prostockbatch):",
               err
             );
             return res.status(500).json({ error: "Database error" });
@@ -98,7 +101,7 @@ exports.addProStock = (req, res) => {
           res.status(200).json({
             message: "Produced stock added successfully",
             proStockID: newProStockID,
-            proBatchNo: newProBatchNo,
+            proStockBatchID: newProStockBatchID,
           });
         });
       });
@@ -171,6 +174,7 @@ exports.updateProStock = (req, res) => {
     subCategory,
     availableFrom,
     availableTill,
+    branchID,
   } = req.body;
 
   if (
@@ -182,7 +186,7 @@ exports.updateProStock = (req, res) => {
     !category ||
     !subCategory ||
     !availableFrom ||
-    !availableTill
+    !availableTill || !branchID
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -197,6 +201,7 @@ exports.updateProStock = (req, res) => {
     subCategory,
     availableFrom,
     availableTill,
+    branchID,
     id,
   ];
 

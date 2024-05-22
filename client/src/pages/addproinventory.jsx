@@ -21,6 +21,14 @@ import axiosInstance from "../utils/axios"
 import axios from "axios";
 import Dropdown from "../components/dropdown";
 import DropdownWithAdd from "../components/dropdownwithadd";
+import BranchSelector from "../components/branchSelector";
+import { jwtDecode } from "jwt-decode";
+
+const getDecodedToken = () => {
+  const token = localStorage.getItem('token'); // Or however you store your JWT
+  return jwtDecode(token);
+};
+
 
 
 function AddProInventory() {
@@ -30,7 +38,7 @@ function AddProInventory() {
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
   const [selectedProStockSubCategory, setSelectedProStockSubCategory] = useState("");
   const [userRole, setUserRole] = useState("");
-  const [userBranch, setUserBranch] = useState("");
+  const [userBranch, setUserBranch] = useState();
   const [selectedBranch, setSelectedBranch] = useState("");
 
 
@@ -45,19 +53,9 @@ function AddProInventory() {
   });
 
   useEffect(() => {
-
-     // Fetch user role and branch
-     axiosInstance.get("/getCurrentUser")
-     .then(response => {
-       const user = response.data;
-       setUserRole(user.userType);
-       setUserBranch(user.branchID);
-       setSelectedBranch(user.branchID);
-     })
-     .catch(error => {
-       console.error("Error fetching user data:", error);
-     });
-
+    const user = getDecodedToken(); // Decode JWT to get user data
+    setUserRole(user.userType);
+    setUserBranch(user.branchID);
 
     if (id) {
       axiosInstance
@@ -105,7 +103,7 @@ function AddProInventory() {
       proStockName: selectedProStockName,
       category: selectedProStockCategory,
       subCategory: selectedProStockSubCategory,  
-      branchID: userRole === 'Admin' ? selectedBranch : userBranch,
+      branchID: userBranch
     };
 
     console.log("Data to send:", dataToSend);
@@ -305,7 +303,7 @@ function AddProInventory() {
                       required
                     />
                   </div>
-                  {userRole === "Admin" && (
+                  {/* {userRole === "Admin" && (
                     <div className="mb-4">
                       <BranchSelector
                         selectedBranch={selectedBranch}
@@ -313,7 +311,7 @@ function AddProInventory() {
                         userType={userRole}
                       />
                     </div>
-                  )}
+                  )} */}
                 </form>
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addProInventory">

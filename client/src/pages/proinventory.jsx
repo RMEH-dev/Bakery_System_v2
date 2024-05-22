@@ -15,11 +15,12 @@ import {
 } from "@heroicons/react/24/outline";
 import ProStockTable from "../components/proStockTable";
 
+
 function ProInventory() {
   return (
     <AdminDashboard>
       <div className="bg-c3 pb-5">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c3 pt-10 h-[850px] 2xl:h-[1000px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-10 ml-5 mb-5 mr-5 bg-c3 pt-10 h-[850px] 2xl:h-[1000px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[900px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}

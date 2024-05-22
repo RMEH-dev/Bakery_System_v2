@@ -19,24 +19,22 @@ const checkUserRole = (roles) => (req, res, next) => {
       return res.status(401).json({ message: 'Failed to authenticate token' });
     }
 
-    const { userType, branchID} = decoded;
+    const { userType, branchID, userID} = decoded;
 
     if (!roles.includes(userType)) {
       return res.status(403).json({ message: 'Insufficient Privileges' });
     }
 
-    req.user = decoded;
+
+    req.user = { userType, branchID, userID };
 
     // Ensure the user is associated with the branch
     if (req.body.branchID && req.body.branchID !== branchID) {
       return res.status(403).json({ message: 'User not associated with this branch' });
     }
 
-    // Add userID and branchID to the request body
-    req.body.userID = userID;
-    req.body.branchID = branchID;
-
     next();
+
   });
 };
 

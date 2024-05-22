@@ -2,7 +2,7 @@ const db = require("../../config/databaseConnection");
 
 const insertProStock = (values, callback) => {
   const sqlInsertProStock =
-    "INSERT INTO prostock (proStockID, proStockName, category, subCategory, availableFrom, availableTill, pricePerItem) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    "INSERT INTO prostock (proStockID, proStockName, category, subCategory, availableFrom, availableTill, pricePerItem, branchID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
   db.query(sqlInsertProStock, values, callback);
 };
 
