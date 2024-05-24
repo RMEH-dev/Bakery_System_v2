@@ -462,14 +462,14 @@ export default function ProStockTable() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                            new Date(row.proExpDate) < new Date()
+                            new Date(row.expDate) < new Date()
                               ? "red"
                               : "green",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {new Date(row.proExpDate) < new Date()
+                          {new Date(row.expDate) < new Date()
                             ? "Expired"
                             : "Consumable"}
                         </Typography>

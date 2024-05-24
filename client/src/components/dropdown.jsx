@@ -43,16 +43,16 @@ function Dropdown({ endpoint, selectedOption, setSelectedOption, label, disabled
             placeholder={`Search ${label}`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 rounded-t-2xl text-lg font-[Montserrat] bg-white border-b-2 border-gray-300"
+            className="w-full  p-2 rounded-t-2xl text-lg font-[Montserrat] bg-white border-b-2 border-gray-300"
           />
-          <ul className="max-h-64 overflow-y-auto">
+          <ul className="max-h-64 cursor-pointer overflow-y-auto">
             {filteredItems.map((item, index) => (
               <li
                 key={index}
                 onClick={() => handleSelect(Object.values(item)[0])}
                 className={
                   selectedOption === Object.values(item)[0]
-                    ? "bg-deep-orange-800 text-white font-[Montserrat] flex rounded-2xl justify-between items-center p-2"
+                    ? "bg-deep-orange-800 text-white font-[Montserrat]   flex rounded-2xl justify-between items-center p-2"
                     : "flex justify-between items-center p-4"
                 }
               >

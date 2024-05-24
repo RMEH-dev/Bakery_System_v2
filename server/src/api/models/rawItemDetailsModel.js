@@ -1,8 +1,17 @@
 const db = require("../../config/databaseConnection");
 
-const insertRawItemDetails = (values, callback) => {
-  const sqlInsertRawItemDetails = 'INSERT INTO rawitemdetails (rawStockID, category, packageAmount, supplier) VALUES (?, ?, ?, ?)';
-  db.query(sqlInsertRawItemDetails, values, callback);
+const insertRawStockBatchAsync = (values) => {
+  const sqlInsertRawStockBatch = `
+    INSERT INTO rawstockbatch (rawStockBatchID, rawStockID, quantity, branchID)
+    VALUES (?, ?, ?, ?)`;
+  return new Promise((resolve, reject) => {
+    db.query(sqlInsertRawStockBatch, values, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(result);
+    });
+  });
 };
 
-module.exports = { insertRawItemDetails };
+module.exports = { insertRawStockBatchAsync };

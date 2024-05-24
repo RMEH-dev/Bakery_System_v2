@@ -1,13 +1,21 @@
-const generateRawStockID = require("../helpers/generateRawStockID");
+const generateRawStockIDAsync = require("../helpers/generateRawStockID");
 const {
-  insertRawStock,
+  insertRawStockAsync,
+  getOrCreateSupplierID,
   getEditRawStock,
+  getRawStockNames,
+  getRawStockCategory,
+  getSupplier,
+  insertSupplierAsync,
+  getSupplierIDAsync,
+  getUnits,
   updateRawStock,
 } = require("../models/rawStockModel");
 const { rawStock } = require("../models/rawStockModel");
-const { insertRawItemDetails } = require("../models/rawItemDetailsModel");
+const { insertRawStockBatchAsync } = require("../models/rawItemDetailsModel");
 const db = require("../../config/databaseConnection");
 const { insertRawStockUsageTable } = require("../models/rawStockModel");
+const generateRawStockBatchIDAsync = require("../helpers/generateRawStockBatchID");
 
 // Define a route to fetch raw stock data
 exports.rawStock = (req, res) => {
@@ -19,67 +27,117 @@ exports.rawStock = (req, res) => {
   });
 };
 
-// Route to handle adding raw inventory
+//to get the raw stock related names
+exports.getRawStockNames = (req, res) => {
+  getRawStockNames((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
 
-exports.addRawStock = (req, res) => {
+exports.getSupplier = (req, res) => {
+  getSupplier((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
+
+exports.getUnits = (req, res) => {
+  getUnits((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
+
+exports.getRawStockCategory = (req, res) => {
+  getRawStockCategory((error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+  });
+};
+exports.addRawStock = async (req, res) => {
   const {
-    rawStockName,
-    manufactureDate,
-    expirationDate,
+    branchID,
     category,
-    packageAmount,
-    proStockName,
+    expirationDate,
+    manufactureDate,
     proStockID,
     quantity,
-    supplier,
+    rawStockName,
+    supplierName,
+    units,
   } = req.body;
 
-  generateRawStockID((err, newRawStockID) => {
-    if (err) {
-      console.error("Error generating new rawStockID:", err);
-      return res.status(500).json({ error: "Database error" });
+  try {
+    // Generate new rawStockID
+    const newRawStockID = await generateRawStockIDAsync();
+
+    // Check if supplier exists, if not , insert it 
+    let supplierID;
+    const existingSupplier = await getSupplierIDAsync(supplierName);
+
+
+    if (existingSupplier.length === 0) {
+      const supplierValues = [supplierName];
+      const supplierResult = await insertSupplierAsync(supplierValues);
+      supplierID = supplierResult.insertId;
+    } else {
+      supplierID = existingSupplier[0].supplierID;
     }
 
+    // // Insert or get supplierID
+    // const supplierID = await getOrCreateSupplierID(supplierName, newRawStockBatchID);
+
+    // Insert data into rawstock table
     const valuesRawStock = [
       newRawStockID,
       rawStockName,
-      quantity,
+      category,
       proStockID,
+      units,
       manufactureDate,
       expirationDate,
+      branchID,
+      supplierID,
     ];
+    await insertRawStockAsync(valuesRawStock);
 
-    insertRawStock(valuesRawStock, (err, result) => {
-      if (err) {
-        console.error("Error inserting data into MySQL (rawstock):", err);
-        return res.status(500).json({ error: "Database error" });
-      }
+    // Generate new rawStockBatchID
+    const newRawStockBatchID = await generateRawStockBatchIDAsync(
+      newRawStockID
+    );
 
-      const valuesRawItemDetails = [
-        newRawStockID,
-        category,
-        packageAmount,
-        supplier,
-      ];
+    // Insert data into rawstockbatch table
+    const valuesRawStockBatch = [
+      newRawStockBatchID,
+      newRawStockID,
+      quantity,
+      branchID,
+    ];
+    await insertRawStockBatchAsync(valuesRawStockBatch);
 
-      insertRawItemDetails(valuesRawItemDetails, (err, result) => {
-        if (err) {
-          console.error(
-            "Error inserting data into MySQL (rawitemdetails):",
-            err
-          );
-          return res.status(500).json({ error: "Database error" });
-        }
 
-        res
-          .status(200)
-          .json({
-            message: "Raw stock added successfully",
-            rawStockID: newRawStockID,
-          });
-      });
+
+    // Update supplierID in rawstock table
+
+
+    res.status(200).json({
+      message: "Produced stock added successfully",
+      rawStockID: newRawStockID,
+      rawStockBatchID: newRawStockBatchID,
     });
-  });
+  } catch (error) {
+    console.error("Error adding raw stock:", error);
+    res.status(500).json({ error: "Database error" });
+  }
 };
 
 //fetching the raw stock using rawStockID
@@ -141,11 +199,9 @@ exports.updateRawStock = (req, res) => {
     ],
     (error, results) => {
       if (error) {
-        return res
-          .status(500)
-          .json({
-            error: "An error occurred while updating the raw stock data.",
-          });
+        return res.status(500).json({
+          error: "An error occurred while updating the raw stock data.",
+        });
       }
       res.json({ message: "Raw stock data updated successfully." });
     }

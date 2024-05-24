@@ -25,6 +25,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
+import axiosInstance from "../utils/axios";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
 function descendingComparator(a, b, orderBy) {
@@ -63,46 +64,46 @@ const headCells = [
     label: "Raw Stock Name",
   },
   {
-    id: "rawStockID",
+    id: "rawStockBatchID",
     numeric: false,
     disablePadding: false,
     label: "StockID",
   },
   { id: "category", numeric: false, disablePadding: false, label: "Category" },
-  { id: "proStockID", numeric: false, disablePadding: false, label: "ProStockID"},
+  { id: "proStockBatchID", numeric: false, disablePadding: false, label: "ProStockID"},
   { id: "proStockName", numeric: false, disablePadding: false, label: "Pro Stock Name"},
   {
-    id: "packageAmount",
+    id: "supplierName",
     numeric: false,
     disablePadding: false,
-    label: "Supplier",
+    label: "Supplier Name",
   },
-  { id: "supplier", numeric: false, disablePadding: false, label: "Manufacture Date" },
+  { id: "manuDate", numeric: false, disablePadding: false, label: "Manufacture Date" },
   {
-    id: "rawManuDate",
+    id: "expDate",
     numeric: false,
     disablePadding: false,
     label: "Expiration Date",
   },
   {
-    id: "rawExpDate",
+    id: "expAlerts",
     numeric: false,
     disablePadding: false,
     label: "Exp Alert",
   },
   {
-    id: "expAlert",
+    id: "quantity",
     numeric: false,
     disablePadding: false,
     label: "Quantity",
   },
   {
-    id: "rawStockQuantity",
+    id: "units",
     numeric: true,
     disablePadding: false,
     label: "Unit",
   },
-  { id: "alerts", numeric: false, disablePadding: false, label: "Alerts" },
+  { id: "thresholdAlerts", numeric: false, disablePadding: false, label: "threshold Alerts" },
 ];
 
 function EnhancedTableHead(props) {
@@ -248,8 +249,8 @@ export default function RawStockTable() {
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
-    axios
-      .get("http://localhost:5050/api/routes/rawStock") // Assuming your backend endpoint is /api/stocks
+    axiosInstance
+      .get("/rawStock/") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         setRows(response.data); // Update the state with fetched data
       })
@@ -399,7 +400,7 @@ export default function RawStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.rawStockID}
+                        {row.rawStockBatchID}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -409,7 +410,7 @@ export default function RawStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.proStockID}
+                        {row.proStockBatchID}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -419,19 +420,19 @@ export default function RawStockTable() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.supplier}
+                        {row.supplierName}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       {" "}
                       <Typography variant="body2" fontWeight="bold">
-                        {row.rawManuDate}
+                        {row.manuDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       {" "}
                       <Typography variant="body2" fontWeight="bold">
-                        {row.rawExpDate}
+                        {row.expDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -439,23 +440,23 @@ export default function RawStockTable() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                           new Date(row.rawExpDate) < new Date() ? "red" : "green",
+                           new Date(row.expDate) < new Date() ? "red" : "green",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {new Date(row.rawExpDate) < new Date() ? "Expired" : "Consumable"}
+                          {new Date(row.expDate) < new Date() ? "Expired" : "Consumable"}
                         </Typography>
                       </Button>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.rawStockQuantity}
+                        {row.quantity}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.packageAmount}
+                        {row.units}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -463,12 +464,12 @@ export default function RawStockTable() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                            row.rawStockQuantity > 5 ? "green" : "red",
+                            row.quantity > 5 ? "green" : "red",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {row.rawStockQuantity > 5 ? "Available" : "Low Stock"}
+                          {row.quantity > 5 ? "Available" : "Low Stock"}
                         </Typography>
                       </Button>
                     </TableCell>

@@ -17,7 +17,7 @@ const getProStockBatch = (values, callback) => {
 // };
 
 const getProStockNames = (callback) => {
-  const sqlGetProStockNames = "SELECT proStockName FROM prostock";
+  const sqlGetProStockNames = "SELECT DISTINCT  proStockName FROM prostock";
   db.query(sqlGetProStockNames, (error, results) => {
     if (error) {
       return callback(error, null);
@@ -64,26 +64,77 @@ const getProStock = (id, callback) => {
   db.query(sqlGetProStock, [id], callback);
 };
 
-const updateProStock = (updateData, callback) =>{
-    const sqlUpdateProStock = `UPDATE prostock p 
-  JOIN prostockbatch i ON p.proStockID = i.proStockID
-  SET 
-    p.proStockName = ?,  
-    p.pricePerItem = ?
-    i.manuDate = ?, 
-    i.expDate = ?,
-    i.quantity =?,
-    p.category = ?, 
-    p.subCategory = ?, 
-    p.availableFrom = ?, 
-    p.availableTill = ?, 
-    p.branchID=?,
-  WHERE i.proStockBatchID = ?`;
+const updateProStock = (updateData, callback) => {
+  const sqlUpdateProStock = `
+    UPDATE prostock
+    SET 
+      proStockName = ?,  
+      pricePerItem = ?,
+      category = ?, 
+      subCategory = ?, 
+      availableFrom = ?, 
+      availableTill = ?, 
+      branchID = ?
+    WHERE proStockID = ?`;
 
-  // const completeUpdateData = [...updateData, id]
+  const proStockData = [
+    updateData.proStockName,
+    updateData.pricePerItem,
+    updateData.category,
+    updateData.subCategory,
+    updateData.availableFrom,
+    updateData.availableTill,
+    updateData.branchID,
+    updateData.proStockID
+  ];
 
-  db.query(sqlUpdateProStock, updateData, callback)
+  db.query(sqlUpdateProStock, proStockData, callback);
 };
+
+const updateProStockBatch = (updateData, callback) => {
+  const sqlUpdateProStockBatch = `
+    UPDATE prostockbatch
+    SET 
+      manuDate = ?, 
+      expDate = ?,
+      quantity = ?,
+      branchID = ?
+    WHERE proStockBatchID = ?`;
+
+  const proStockBatchData = [
+    updateData.manufactureDate,
+    updateData.expirationDate,
+    updateData.quantity,
+    updateData.branchID,
+    updateData.proStockBatchID
+  ];
+
+  db.query(sqlUpdateProStockBatch, proStockBatchData, callback);
+};
+
+
+
+// const updateProStock = (updateData, callback) =>{
+//     const sqlUpdateProStock = `UPDATE prostock p 
+//   JOIN prostockbatch i ON p.proStockID = i.proStockID
+//   SET 
+//     p.proStockName = ?,  
+//     p.pricePerItem = ?
+//     i.manuDate = ?, 
+//     i.expDate = ?,
+//     i.quantity =?,
+//     p.category = ?, 
+//     p.subCategory = ?, 
+//     p.availableFrom = ?, 
+//     p.availableTill = ?, 
+//     p.branchID= ?,
+//     i.branchID= ?
+//   WHERE i.proStockBatchID = ?`;
+
+//   // const completeUpdateData = [...updateData, id]
+
+//   db.query(sqlUpdateProStock, updateData, callback)
+// };
 
 module.exports = {
   getProStockBatch,
@@ -94,5 +145,5 @@ module.exports = {
   getProStockIDs,
   getProStock,
   updateProStock,
-
+  updateProStockBatch
 };

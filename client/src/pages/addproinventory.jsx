@@ -17,7 +17,7 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrencyInput from "react-currency-input-field";
-import axiosInstance from "../utils/axios"
+import axiosInstance from "../utils/axios";
 import axios from "axios";
 import Dropdown from "../components/dropdown";
 import DropdownWithAdd from "../components/dropdownwithadd";
@@ -25,11 +25,9 @@ import BranchSelector from "../components/branchSelector";
 import { jwtDecode } from "jwt-decode";
 
 const getDecodedToken = () => {
-  const token = localStorage.getItem('token'); // Or however you store your JWT
+  const token = localStorage.getItem("token"); // Or however you store your JWT
   return jwtDecode(token);
 };
-
-
 
 function AddProInventory() {
   const { id } = useParams();
@@ -40,7 +38,6 @@ function AddProInventory() {
   const [userRole, setUserRole] = useState("");
   const [userBranch, setUserBranch] = useState();
   const [selectedBranch, setSelectedBranch] = useState("");
-
 
   const [formData, setFormData] = useState({
     manufactureDate: "",
@@ -69,9 +66,8 @@ function AddProInventory() {
             pricePerItem: data.pricePerItem,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
-            branchID: data.branchID,
           });
-          setSelectedProStockName(data.proStockName); 
+          setSelectedProStockName(data.proStockName);
           setSelectedProStockCategory(data.category);
           setSelectedProStockSubCategory(data.subCategory);
           setSelectedBranch(data.branchID);
@@ -89,11 +85,19 @@ function AddProInventory() {
     });
   };
 
+  const handlePriceChange = (e) => {
+    setFormData({ ...formData, pricePerItem: value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData || !selectedProStockName || !selectedProStockCategory || !selectedProStockSubCategory) {
+    if (
+      !formData ||
+      !selectedProStockName ||
+      !selectedProStockCategory ||
+      !selectedProStockSubCategory
+    ) {
       toast.error("Please fill out all the fields.");
       return;
     }
@@ -102,18 +106,15 @@ function AddProInventory() {
       ...formData,
       proStockName: selectedProStockName,
       category: selectedProStockCategory,
-      subCategory: selectedProStockSubCategory,  
-      branchID: userBranch
+      subCategory: selectedProStockSubCategory,
+      branchID: userBranch,
     };
 
     console.log("Data to send:", dataToSend);
 
     const request = id
-      ?  axiosInstance.put(
-          `/updateProStock/${id}`,
-          dataToSend
-        )
-      :  axiosInstance.post("/addProStock", dataToSend);
+      ? axiosInstance.put(`/updateProStock/${id}`, dataToSend)
+      : axiosInstance.post("/addProStock", dataToSend);
 
     request
       .then((response) => {
@@ -137,10 +138,10 @@ function AddProInventory() {
           availableTill: "",
           branchID: "",
         });
-        setSelectedProStockName(null); 
+        setSelectedProStockName(null);
         setSelectedProStockCategory(null);
         setSelectedProStockSubCategory(null);
-        setSelectedBranch("")
+        setSelectedBranch("");
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);

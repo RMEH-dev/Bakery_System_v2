@@ -18,54 +18,65 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios"; // Import Axios
 import Dropdown from "../../components/dropdown";
+import DropdownWithAdd from "../../components/dropdownwithadd";
+import axiosInstance from "../../utils/axios";
+import { jwtDecode } from "jwt-decode";
 
-const categoryMap = {
-  Flour: ["kg", "g", "mg", "L", "ml", "No Units"],
-  Oils: ["kg", "g", "mg", "L", "ml", "No Units"],
-  "Frozen Stock": ["kg", "g", "mg", "L", "ml", "No Units"],
-  "Spices & Flavors": ["kg", "g", "mg", "L", "ml", "No Units"],
-  Additives: ["kg", "g", "mg", "L", "ml", "No Units"],
-  Other: ["kg", "g", "mg", "L", "ml", "No Units"],
+const getDecodedToken = () => {
+  const token = localStorage.getItem("token"); // Or however you store your JWT
+  return jwtDecode(token);
 };
 
 function AddRawInventory() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedProStock, setSelectedProStock] = useState("");
+  const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockID, setSelectedProStockID] = useState("");
+  const [selectedRawStockName, setSelectedRawStockName] = useState("");
+  const [RawStockName, setRawStockName] = useState("");
+  const [selectedRawStockCategory, setSelectedRawStockCategory] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+  const [selectedUnits, setSelectedUnits] = useState("");
+  const [userRole, setUserRole] = useState("");
+  const [userBranch, setUserBranch] = useState();
+  const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
   const [isDropdownOpen2, setIsDropdownOpen2] = useState("");
   const [selectedOption1, setSelectedOption1] = useState("");
   const [isDropdownOpen1, setIsDropdownOpen1] = useState("");
   const [isDropdownOpen3, setIsDropdownOpen3] = useState("");
-
   const [proStockIDs, setProStockIDs] = useState([]);
 
   const [formData, setFormData] = useState({
-    rawStockName: "",
     manufactureDate: "",
     expirationDate: "",
     quantity: "",
-    supplier: "",
+    branchID: "",
   });
 
   useEffect(() => {
+    const user = getDecodedToken(); // Decode JWT to get user data
+    setUserRole(user.userType);
+    setUserBranch(user.branchID);
+
     if (id) {
-      axios
-        .get(`http://localhost:5050/api/routes/getEditRawStock/${id}`)
+      axiosInstance
+        .get(`/getEditRawStock/${id}`)
         .then((response) => {
           const data = response.data;
 
           setFormData({
-            rawStockName: data.rawStockName,
-            manufactureDate: data.rawManuDate,
-            expirationDate: data.rawExpDate,
-            quantity: data.rawStockQuantity,
-            supplier: data.supplier,
+            manufactureDate: data.manuDate,
+            expirationDate: data.expDate,
+            quantity: data.quantity,
           });
-          setSelectedOption1(data.category);
-          setSelectedOption2(data.packageAmount);
+          setSelectedProStockName(data.proStockName);
           setSelectedProStockID(data.proStockID);
+          setSelectedRawStockName(data.rawStockName);
+          setSelectedRawStockCategory(data.category);
+          setSelectedSupplier(data.supplier);
+          setSelectedBranch(data.branchID);
+          setSelectedUnits(data.units);
         })
         .catch((error) => {
           console.error("Error fetching raw stock data:", error);
@@ -74,10 +85,10 @@ function AddRawInventory() {
   }, [id]);
 
   useEffect(() => {
-    if (selectedProStock) {
-      axios
-        .get(`http://localhost:5050/api/routes/getProStockIDs`, {
-          params: { proStockName: selectedProStock },
+    if (selectedProStockName) {
+      axiosInstance
+        .get(`/getProStockIDs`, {
+          params: { proStockName: selectedProStockName },
         })
         .then((response) => {
           setProStockIDs(response.data);
@@ -86,7 +97,19 @@ function AddRawInventory() {
           console.error("Error fetching produced stock IDs:", error);
         });
     }
-  }, [selectedProStock]);
+  }, [selectedProStockName]);
+
+  useEffect(() => {
+    axiosInstance
+      .get("/getRawStockNames")
+      .then((response) => {
+        setRawStockName(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching raw stock names:", error);
+        toast.error("Error fetching raw stock names");
+      });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -95,24 +118,17 @@ function AddRawInventory() {
     });
   };
 
-  const handleSelect2 = (option) => {
-    setSelectedOption2(option);
-    setIsDropdownOpen2(false);
-  };
-
-  const handleSelect1 = (option) => {
-    setSelectedOption1(option);
-    setIsDropdownOpen1(false);
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (
       !formData ||
-      !selectedOption1 ||
-      !selectedOption2 ||
-      !selectedProStockID
+      !selectedProStockName ||
+      !selectedProStockID ||
+      !selectedRawStockName ||
+      !selectedRawStockCategory ||
+      !selectedSupplier ||
+      !selectedUnits
     ) {
       toast.error("Please fill out all the fields.");
       return;
@@ -121,39 +137,49 @@ function AddRawInventory() {
     // Include the selected category in the formData
     const dataToSend = {
       ...formData,
-      category: selectedOption1,
-      packageAmount: selectedOption2,
-      proStockName: selectedProStock,
       proStockID: selectedProStockID,
+      rawStockName: selectedRawStockName,
+      category: selectedRawStockCategory,
+      supplierName: selectedSupplier,
+      units: selectedUnits,
+      branchID: userBranch,
+      quantity: parseInt(formData.quantity, 10)
     };
 
+    console.log("Data to send:", dataToSend);
+
     const request = id
-      ? axios.put(
-          `http://localhost:5050/api/routes/updateRawStock/${id}`,
-          dataToSend
-        )
-      : axios.post("http://localhost:5050/api/routes/addRawStock", dataToSend);
+      ? axiosInstance.put(`/updateRawStock/${id}`, dataToSend)
+      : axiosInstance.post("/addRawStock", dataToSend);
 
     request
       .then((response) => {
+        console.log(
+          id
+            ? "Produced stock updated successfully"
+            : "Produced Stock added successfully",
+          response.data
+        );
         toast.success(
           id ? "Raw Stock updated successfully" : "Raw Stock added successfully"
         );
         // Reset form fields if needed
         setFormData({
-          rawStockName: "",
           manufactureDate: "",
           expirationDate: "",
           quantity: "",
-          supplier: "",
         });
-        setSelectedOption1(null);
-        setSelectedOption2(null);
-        setSelectedProStock(null);
+        setSelectedProStockName(null);
         setSelectedProStockID(null);
+        setSelectedRawStockName(null);
+        setSelectedRawStockCategory(null);
+        setSelectedSupplier(null);
+        setSelectedBranch(null);
+        setSelectedUnits(null);
       })
       .catch((error) => {
         console.error("Error sending data to the backend:", error);
+        toast.error("Error sending data to the Server");
       });
   };
 
@@ -182,12 +208,12 @@ function AddRawInventory() {
                     </Typography>
                     <Dropdown
                       endpoint="getProStockNames"
-                      selectedOption={selectedProStock}
-                      setSelectedOption={setSelectedProStock}
+                      selectedOption={selectedProStockName}
+                      setSelectedOption={setSelectedProStockName}
                       label="Pro Name"
                     />
                     <Typography className="text-c1 mt-5 rounded-2xl bg-c2 font-semibold font-[Montserrat] pl-2 mb-2">
-                      Selected Product Name is: {selectedProStock}
+                      Selected Product Name is: {selectedProStockName}
                     </Typography>
                     <Typography className="text-c1 mt-5 font-semibold font-[Montserrat] mb-2">
                       Select Product StockID
@@ -238,18 +264,12 @@ function AddRawInventory() {
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Expiration Date
                       </Typography>
-                      <Input
-                        type="text"
-                        size="md"
-                        placeholder="Raw Stock Name"
-                        name="rawStockName"
-                        value={formData.rawStockName}
-                        onChange={handleChange}
-                        className="w-[350px] 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c1 rounded-[30px]"
-                        labelProps={{
-                          className: "before:content-none after:content-none",
-                        }}
-                        required
+                      <DropdownWithAdd
+                        endpoint="getRawStockNames"
+                        selectedOption={selectedRawStockName}
+                        setSelectedOption={setSelectedRawStockName}
+                        label="Raw Stock Name"
+                        // disabled={!!id}
                       />
                       <Input
                         type="date"
@@ -286,33 +306,13 @@ function AddRawInventory() {
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Supplier
                       </Typography>
-                      <Typography
-                        className="cursor-pointer pl-2 mt-2 pt-0.5 items-center w-[200px] bg-deep-orange-800 py-2 justify-center rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                        onClick={() => setIsDropdownOpen1(!isDropdownOpen1)}
-                      >
-                        {selectedOption1 || "Select Category"}
-                        <ChevronDownIcon className="ml-40 -mt-6 w-5 h-5" />
-                        {isDropdownOpen1 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {Object.keys(categoryMap).map((category) => (
-                              <li
-                                key={category}
-                                onClick={() => handleSelect1(category)}
-                                className={
-                                  selectedOption1 === category
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {category}
-                                {selectedOption1 === category && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </Typography>
+                      <DropdownWithAdd
+                        endpoint="getRawStockCategory"
+                        selectedOption={selectedRawStockCategory}
+                        setSelectedOption={setSelectedRawStockCategory}
+                        label="Raw Stock Category"
+                        disabled={!!id}
+                      />
                       <Input
                         type="number"
                         size="md"
@@ -328,18 +328,12 @@ function AddRawInventory() {
                         }}
                         required
                       />
-                      <Input
-                        type="text"
-                        size="md"
-                        name="supplier"
-                        value={formData.supplier}
-                        onChange={handleChange}
-                        placeholder="Supplier Name"
-                        className="w-[350px] 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
-                        labelProps={{
-                          className: "before:content-none after:content-none",
-                        }}
-                        required
+                      <DropdownWithAdd
+                        endpoint="getSupplier"
+                        selectedOption={selectedSupplier}
+                        setSelectedOption={setSelectedSupplier}
+                        label="Supplier Name"
+                        // disabled={!!id}
                       />
                     </div>
                   </div>
@@ -347,33 +341,15 @@ function AddRawInventory() {
                 <Typography className="text-c1 ml-20 mt-5 mb-2 right-0 justify-end font-semibold font-[Montserrat]">
                   Package Amount
                 </Typography>
-
-                <Typography
-                  className="cursor-pointer  ml-20 right-0 justify-end pl-2 pb-2 mt-2 w-[250px] bg-deep-orange-800 py-2 rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                  onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
-                >
-                  {selectedOption2 ? selectedOption2 : "Select package amount"}
-                  {isDropdownOpen2 && (
-                    <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                      {categoryMap[selectedOption1].map((packageAmount) => (
-                        <li
-                          key={packageAmount}
-                          onClick={() => handleSelect2(packageAmount)}
-                          className={
-                            selectedOption2 === packageAmount
-                              ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                              : "flex justify-between items-center p-4"
-                          }
-                        >
-                          {packageAmount}
-                          {selectedOption2 === packageAmount && (
-                            <CheckIcon className="w-5 h-5 text-green-500" />
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </Typography>
+                <div className="ml-20">
+                  <DropdownWithAdd
+                    endpoint="getUnits"
+                    selectedOption={selectedUnits}
+                    setSelectedOption={setSelectedUnits}
+                    label="Units"
+                    // disabled={!!id}
+                  />
+                </div>
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addRawInventory">
                     <Button
