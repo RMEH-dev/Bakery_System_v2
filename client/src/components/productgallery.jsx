@@ -4,6 +4,7 @@ import { ProductList } from "./primary/productlist";
 import { Typography } from "@material-tailwind/react";
 import { ProductCard } from "./primary/productcard";
 import axios from "axios";
+import axiosInstance from "../utils/axios";
 
 export function ProductGallery() {
   const [products, setProducts] = useState([]);
@@ -16,8 +17,8 @@ export function ProductGallery() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5050/api/routes/getProductsByCategory",
+        const response = await axiosInstance.get(
+          "/getProductsByCategory",
           {
             params: {
               page: currentPage,

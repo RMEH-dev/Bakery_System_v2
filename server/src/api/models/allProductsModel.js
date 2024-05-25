@@ -1,9 +1,9 @@
 const db = require("../../config/databaseConnection");
 
 exports.getProducts = async (offset, limit) => {
-  const sqlGetProducts = `SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, i.pricePerItem
-    FROM producedstock p
-    JOIN proitemdetails i ON p.proStockID = i.proStockID
+  const sqlGetProducts = `SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem
+    FROM prostock p
+    JOIN prostockbatch i ON p.proStockID = i.proStockID
     LIMIT ?, ?;`;
 
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ exports.getProducts = async (offset, limit) => {
 exports.getTotalCount = async () => {
   const sqlGetTotalCount = `
         SELECT COUNT(*) AS total
-        FROM proitemdetails;
+        FROM prostockbatch;
     `;
 
   return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ exports.getTotalCount = async () => {
 exports.getCategories = async () => {
   const sqlGetCategories = `
         SELECT category, subCategory
-        FROM proitemdetails;
+        FROM prostock;
     `;
 
   return new Promise((resolve, reject) => {
@@ -70,15 +70,15 @@ exports.getProductsByCategory = async (
   limit
 ) => {
   let sqlGetProductsByCategory = `
-    SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, i.pricePerItem
-    FROM producedstock p
-    JOIN proitemdetails i ON p.proStockID = i.proStockID
-    WHERE i.category =?`;
+    SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem
+    FROM prostock p
+    JOIN prostockbatch i ON p.proStockID = i.proStockID
+    WHERE p.category =?`;
 
   const params = [category];
 
   if (subCategory) {
-    sqlGetProductsByCategory += " AND i.subCategory = ?";
+    sqlGetProductsByCategory += " AND p.subCategory = ?";
     params.push(subCategory);
   }
 
@@ -100,7 +100,7 @@ exports.getProductsByCategory = async (
 exports.getTotalCountByCategory = async (category, subCategory) => {
   let sqlGetTotalCountByCategory = `
         SELECT COUNT(*) AS total
-        FROM proitemdetails
+        FROM prostock
         WHERE category = ?
     `;
 

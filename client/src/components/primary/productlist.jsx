@@ -2,6 +2,8 @@ import "../../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import axiosInstance from "../../utils/axios";
+
 
 export const ProductList = () => {
   const [categories, setCategories] = useState([]);
@@ -10,8 +12,8 @@ export const ProductList = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5050/api/routes/getCategories"
+        const response = await axiosInstance.get(
+          "/getCategories"
         );
         setCategories(response.data);
       } catch (error) {
