@@ -23,11 +23,30 @@ import Dropdown from "../components/dropdown";
 import DropdownWithAdd from "../components/dropdownwithadd";
 import BranchSelector from "../components/branchSelector";
 import { jwtDecode } from "jwt-decode";
+import firebase from "firebase/app";
+import "firebase/storage";
+
+
 
 const getDecodedToken = () => {
   const token = localStorage.getItem("token"); // Or however you store your JWT
   return jwtDecode(token);
 };
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "perera-bakers",
+  storageBucket: "perera-bakers.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+// Initialize Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 function AddProInventory() {
   const { id } = useParams();
@@ -150,8 +169,8 @@ function AddProInventory() {
   };
   return (
     <AdminDashboard>
-      <div className="bg-c1 pb-20 h-[50px] 2xl:h-[150px]">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c2 pt-10 h-[100px] rounded-2xl text-c3 hover:text-c1">
+      <div className="bg-c1 pt-10 pb-10">
+        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 bg-c2  h-[100px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[100px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
@@ -163,7 +182,7 @@ function AddProInventory() {
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 ml-10 h-[500px] mr-[50px] bg-white  rounded-2xl z-80"
+                className="flex flex-col mb-10 ml-10 h-[900px] mr-[50px] bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px]  sm:w-96">
@@ -304,15 +323,9 @@ function AddProInventory() {
                       required
                     />
                   </div>
-                  {/* {userRole === "Admin" && (
-                    <div className="mb-4">
-                      <BranchSelector
-                        selectedBranch={selectedBranch}
-                        setSelectedBranch={setSelectedBranch}
-                        userType={userRole}
-                      />
-                    </div>
-                  )} */}
+                  <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                      Upload Image
+                  </Typography>                    
                 </form>
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addProInventory">

@@ -12,7 +12,7 @@ export function ProductCard({ product }) {
     <Card className="w-[250px] bg-white text-c3 hover:text-white hover:bg-deep-orange-900 hover:bg-opacity-80 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
       <CardHeader shadow={false} floated={false} className="h-[150px] hover:text-c2">
         <img
-          src="https://countrywoodsmoke.com/wp-content/uploads/2020/03/IMG_20200130_154847-01-1536x734.jpeg"
+          src= {product.imageUrl}
           alt="card-image"
           className="h-full w-full object-cover hover:text-c2"
         />

@@ -1,5 +1,6 @@
 const express = require("express"); //instance of express library created
 const cors = require("cors");
+const multer = require("multer");
 const bodyParser = require("body-parser");
 const authRoutes = require("./src/api/routes/authRoutes");
 const rawStockRoutes = require("./src/api/routes/rawStockRoutes");
@@ -11,6 +12,8 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT
+
+
 
 app.use(cors());
 app.use(express.json());
