@@ -21,7 +21,7 @@ import Dropdown from "../../components/dropdown";
 import DropdownWithAdd from "../../components/dropdownwithadd";
 import axiosInstance from "../../utils/axios";
 import { jwtDecode } from "jwt-decode";
-import FirebaseFirestore from "@google-cloud/firestore";
+
 const getDecodedToken = () => {
   const token = localStorage.getItem("token"); // Or however you store your JWT
   return jwtDecode(token);

@@ -9,7 +9,8 @@ const  checkBranchAccess  = require('../middlewares/userRoleBranch');
 
 const upload = multer({storage: multer.memoryStorage()});
 
-router.post('/upload', upload.single('file'), proStockController.uploadFile)
+
+// router.post('/upload', upload.single('file'), proStockController.uploadFile)
 router.get('/proStock',  proStockController.getProStockInfo);
 router.post('/addProStock',  proStockInput.proStockInputValidate, proStockController.addProStock);
 router.get('/getProStockNames',  proStockController.getProStockNames);

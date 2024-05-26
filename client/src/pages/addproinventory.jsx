@@ -23,40 +23,28 @@ import Dropdown from "../components/dropdown";
 import DropdownWithAdd from "../components/dropdownwithadd";
 import BranchSelector from "../components/branchSelector";
 import { jwtDecode } from "jwt-decode";
-import firebase from "firebase/app";
-import "firebase/storage";
-
-
+import { storage } from "../utils/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 
 const getDecodedToken = () => {
   const token = localStorage.getItem("token"); // Or however you store your JWT
   return jwtDecode(token);
 };
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "perera-bakers",
-  storageBucket: "perera-bakers.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
-// Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+// const storage = firebase.storage();
 
 function AddProInventory() {
   const { id } = useParams();
   // const [selectedOption1, setSelectedOption1] = useState(null);
   const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
-  const [selectedProStockSubCategory, setSelectedProStockSubCategory] = useState("");
+  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =
+    useState("");
   const [userRole, setUserRole] = useState("");
   const [userBranch, setUserBranch] = useState();
   const [selectedBranch, setSelectedBranch] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   const [formData, setFormData] = useState({
     manufactureDate: "",
@@ -104,11 +92,17 @@ function AddProInventory() {
     });
   };
 
-  const handlePriceChange = (e) => {
+  const handlePriceChange = (value) => {
     setFormData({ ...formData, pricePerItem: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -121,12 +115,28 @@ function AddProInventory() {
       return;
     }
 
+    try {
+      let imageUrl = null;
+      if (imageFile) {
+        const imageRef = ref(storage, "images/${imageFile.name + v4()}");
+        const snapshot = await uploadBytes(imageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+      saveFromData(imageUrl);
+    } catch (error) {
+      console.error("Error uploading image to Firebase Storage", error);
+      toast.error("Error uploading image to Firebase Storage");
+    }
+  };
+
+  const saveFromData = (imageUrl) => {
     const dataToSend = {
       ...formData,
       proStockName: selectedProStockName,
       category: selectedProStockCategory,
       subCategory: selectedProStockSubCategory,
       branchID: userBranch,
+      imageUrl: imageUrl,
     };
 
     console.log("Data to send:", dataToSend);
@@ -161,16 +171,18 @@ function AddProInventory() {
         setSelectedProStockCategory(null);
         setSelectedProStockSubCategory(null);
         setSelectedBranch("");
+        setImageFile(null);
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);
         toast.error("Error sending data to the Server");
       });
   };
+
   return (
     <AdminDashboard>
       <div className="bg-c1 pt-10 pb-10">
-        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 bg-c2  h-[100px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 pr-10 bg-c2  h-[100px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[100px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
@@ -182,7 +194,7 @@ function AddProInventory() {
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 ml-10 h-[900px] mr-[50px] bg-white  rounded-2xl z-80"
+                className="flex flex-col mb-10 pr-5 ml-10 h-[900px]  bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px]  sm:w-96">
@@ -323,9 +335,19 @@ function AddProInventory() {
                       required
                     />
                   </div>
-                  <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
-                      Upload Image
-                  </Typography>                    
+                  <Typography className="text-c1 w-[300px] mt-10 font-semibold font-[Montserrat] mb-2">
+                    Upload Image
+                  </Typography>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="w-[200px] mt-10 pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                    labelProps={{
+                      className: "before:content-none after:content-none",
+                    }}
+                    required
+                  />
                 </form>
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addProInventory">
