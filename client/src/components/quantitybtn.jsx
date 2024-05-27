@@ -1,20 +1,29 @@
 import { Typography } from "@material-tailwind/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function QuantityBtn({ minValue = 1, maxValue = 100 }) {
-  const [count, setCount] = useState(minValue);
+export default function QuantityBtn({ minValue = 1, maxValue = 100, onChange }) {
+  const [quantity, setQuantity] = useState(count || minValue);
+
+
+  useEffect(() => {
+    setQuantity(count);
+  }, [count]);
 
   //function to handle increment
   const handleIncrementCounter = () => {
-    if (count < maxValue) {
-      setCount((prevState) => prevState + 1);
+  if (quantity < maxValue) {
+      const newQuantity = quantity + 1;
+      setQuantity(newQuantity);
+      onChange(newQuantity);
     }
   };
 
   //function to handle decrement
   const handleDecrementCounter = () => {
-    if (count > minValue) {
-      setCount((prevState) => prevState - 1);
+    if (quantity > minValue) {
+      const newQuantity = quantity - 1;
+      setQuantity(newQuantity);
+      onChange(newQuantity);
     }
   };
 
@@ -26,7 +35,7 @@ export default function QuantityBtn({ minValue = 1, maxValue = 100 }) {
       >
         <span className="text-extrabold text-2xl ">-</span>
       </button>
-      <Typography>{count}</Typography>
+      <Typography>{quantity}</Typography>
       <button
         className="justify-center items-center flex w-8 h-8 rounded-r-xl ml-2 bg-white hover:bg-deep-orange-900 hover:text-white duration-500 text-deep-orange-900"
         onClick={handleIncrementCounter}

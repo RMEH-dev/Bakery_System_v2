@@ -118,7 +118,9 @@ function AddProInventory() {
     try {
       let imageUrl = null;
       if (imageFile) {
-        const imageRef = ref(storage, "images/${imageFile.name + v4()}");
+      // Generate a unique name for the image
+      const uniqueImageName = `${imageFile.name}-${v4()}`;
+      const imageRef = ref(storage, `images/${uniqueImageName}`);
         const snapshot = await uploadBytes(imageRef, imageFile);
         imageUrl = await getDownloadURL(snapshot.ref);
       }
@@ -327,7 +329,7 @@ function AddProInventory() {
                       min="1"
                       step="1"
                       onChange={handleChange}
-                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c1 rounded-[30px]"
+                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
                       labelProps={{
                         className: "before:content-none after:content-none",
                       }}
@@ -335,14 +337,14 @@ function AddProInventory() {
                       required
                     />
                   </div>
-                  <Typography className="text-c1 w-[300px] mt-10 font-semibold font-[Montserrat] mb-2">
+                  <Typography className="text-c1 w-[300px]  font-semibold font-[Montserrat] mt-5 mb-2">
                     Upload Image
                   </Typography>
                   <Input
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="w-[200px] mt-10 pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                    className="w-[200px] pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
                     labelProps={{
                       className: "before:content-none after:content-none",
                     }}

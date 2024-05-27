@@ -38,8 +38,8 @@ import InventoryLogs from "./pages/admin/inventoryLogs.jsx";
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/products", element: <Products />},
-  { path: "/bakery/:category", element: <Products /> },
-  { path: "/bakery/:category/:subCategory", element: <Products /> },
+  { path: "/products/:category", element: <Products /> },
+  { path: "/products/:category/:subCategory", element: <Products /> },
   { path: "/adminDashboard", element:<ProtectedRoute component={AdminReports} allowedRoles={['Admin']} />},
   { path: "/inventoryLogs", element:<ProtectedRoute component={InventoryLogs} allowedRoles={['Admin']} />},
   { path: "/staffDashboard", element: <ProtectedRoute component={StaffReports} allowedRoles={['Staff', 'Admin']} />},

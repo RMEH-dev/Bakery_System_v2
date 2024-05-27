@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -7,7 +8,9 @@ import {
   Button,
 } from "@material-tailwind/react";
 
-export function ProductCard({ product }) {
+
+
+export function ProductCard({ product, addToCart }) {
   return (
     <Card className="w-[250px] bg-white text-c3 hover:text-white hover:bg-deep-orange-900 hover:bg-opacity-80 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
       <CardHeader shadow={false} floated={false} className="h-[150px] hover:text-c2">
@@ -34,7 +37,7 @@ export function ProductCard({ product }) {
             From: {product.availableFrom}
             <br />
             Till: {product.availableTill}
-            <button class="flex items-center ml-10 justify-center bg-c3 w-14 h-8 rounded-3xl text-white hover:bg-c1 hover:text-c2 duration-500">
+            <button onClick = {() => addToCart(product)} class="flex items-center ml-10 justify-center bg-c3 w-14 h-8 rounded-3xl text-white hover:bg-c1 hover:text-c2 duration-500">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

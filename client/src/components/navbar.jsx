@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../index.css";
 import {
   Navbar,
@@ -18,7 +18,7 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Bars4Icon,
   GlobeAmericasIcon,
@@ -30,73 +30,84 @@ import {
   TagIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
-
-const navListMenuItems = [
-  {
-    title: "Breads & Buns",
-  },
-  {
-    title: "Pastries",
-  },
-  {
-    title: "Cakes",
-  },
-  {
-    title: "Cupcakes",
-  },
-  {
-    title: "Sweets & Desserts",
-  },
-  {
-    title: "Platters",
-  },
-  {
-    title: "Beverages",
-  },
-];
-
-// const cartItems = [
-//   {
-//     title: "Breads & Buns",
-//     image:
-
-//   },
-//   {
-//     title: "Pastries",
-//   },
-//   {
-//     title: "Cakes",
-//   },
-//   {
-//     title: "Cupcakes",
-//   },
-//   {
-//     title: "Sweets & Desserts",
-//   },
-//   {
-//     title: "Platters",
-//   },
-//   {
-//     title: "Beverages",
-//   },
-// ];
+import axiosInstance from "../utils/axios";
 
 function NavListMenu() {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const renderItems = navListMenuItems.map(({ title }, key) => (
-    <Link to="/products" key={key}>
-      <MenuItem className="flex items-center gap-3 rounded-lg hover:text-c1 hover:bg-c4">
-        <div className="">
-          <Typography
-            variant="h4"
-            className="flex items-center text-sm  font-bold font-[Montserrat] hover:text-c1 text-c1"
+  const [categories, setCategories] = useState([]);
+  const [openSubCategories, setOpenSubCategories] = useState({});
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get("/getCategories");
+        setCategories(response.data);
+      } catch (error) {
+        console.error("error fetching categories: ", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleToggleSubCategories = (category) => {
+    setOpenSubCategories((prevState) => ({
+      ...prevState,
+      [category]: !prevState[category],
+    }));
+  };
+
+  const renderItems = categories.map(({ category, subCategories }, key) => (
+    <React.Fragment key={key}>
+      <div className="flex items-center justify-between">
+        <Link to={`/products/${category.toLowerCase()}`} key={category}>
+          <MenuItem className="flex items-center gap-3 rounded-lg hover:text-c1 hover:bg-c4">
+            <div>
+              <Typography
+                variant="h4"
+                className="flex items-center text-sm font-bold font-[Montserrat] hover:text-c1 text-c1"
+              >
+                {category}
+              </Typography>
+            </div>
+          </MenuItem>
+        </Link>
+        {subCategories && subCategories.length > 0 && (
+          <IconButton
+            variant="text"
+            color="black"
+            onClick={() => handleToggleSubCategories(category)}
+            className="focus:outline-none"
           >
-            {title}
-          </Typography>
-        </div>
-      </MenuItem>
-    </Link>
+            <ChevronDownIcon
+              className={`h-5 w-5 transition-transform ${
+                openSubCategories[category] ? "rotate-180" : ""
+              }`}
+            />
+          </IconButton>
+        )}
+      </div>
+      {subCategories &&
+        openSubCategories[category] &&
+        subCategories.map((subCategory, subKey) => (
+          <Link
+            to={`/products/${category.toLowerCase()}/${subCategory.toLowerCase()}`}
+            key={subKey}
+          >
+            <MenuItem className="flex items-center gap-3 pl-6 rounded-lg hover:text-c1 hover:bg-c4">
+              <div>
+                <Typography
+                  variant="h6"
+                  className="flex items-center text-sm font-medium font-[Montserrat] hover:text-c1 text-c1"
+                >
+                  {subCategory}
+                </Typography>
+              </div>
+            </MenuItem>
+          </Link>
+        ))}
+    </React.Fragment>
   ));
 
   return (
@@ -149,18 +160,6 @@ function NavListMenu() {
 }
 
 function NavList() {
-  // const [searchList, setSearchList] = useState({});
-  // const [searchTask, setSearchTask] = useState("");
-
-  // const handleChange = (event) => {
-  //   setNewTask(event.target.value);
-  // };
-
-  // const addTask = (task) => {
-  //   const newSearchList = [...searchList, searchTask]
-  //   setSearchList(newSearchList);
-  // };
-
   return (
     <List className="flex text-nowrap md:px-0 mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <Typography
@@ -175,34 +174,36 @@ function NavList() {
       </Typography>
       <NavListMenu />
       <Link to="/staffDashboard">
-      <Typography
-        as="a"
-        href="#"
-        variant="medium"
-        className="font-bold font-[Montserrat] text-c2"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">About</ListItem>
-      </Typography>
+        <Typography
+          as="a"
+          href="#"
+          variant="medium"
+          className="font-bold font-[Montserrat] text-c2"
+        >
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            About
+          </ListItem>
+        </Typography>
       </Link>
       <Link to="/adminDashboard">
-      <Typography
-        variant="medium"
-        className="font-bold font-[Montserrat]  text-c2"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          Contact Us
-        </ListItem>
-      </Typography>
+        <Typography
+          variant="medium"
+          className="font-bold font-[Montserrat]  text-c2"
+        >
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            Contact Us
+          </ListItem>
+        </Typography>
       </Link>
       <Link to="/cart">
-      <Typography
-        variant="medium"
-        className="font-bold font-[Montserrat]  text-c2"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">
-          Outlets
-        </ListItem>
-      </Typography>
+        <Typography
+          variant="medium"
+          className="font-bold font-[Montserrat]  text-c2"
+        >
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            Outlets
+          </ListItem>
+        </Typography>
       </Link>
       <Typography
         as="a"
@@ -217,7 +218,6 @@ function NavList() {
             type="search"
             name="search"
             placeholder="Search..."
-            // onChange={handleChange}
           />
           <button
             type="submit"
@@ -269,7 +269,7 @@ function NavList() {
       </Typography>
       <Typography as="a" href="#">
         <button class="flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
-          <Link to= '/shoppingCart'>
+          <Link to="/shoppingCart">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -285,35 +285,33 @@ function NavList() {
               />
             </svg>
             {/* <CartIcon/> */}
-            </Link>
+          </Link>
         </button>
       </Typography>
 
       <Typography as="a" href="#" className="pl-2">
         <button class="flex items-center justify-center bg-c1 w-20 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
-          <Link to='/profileUser'>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-6 h-6"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-            />
-          </svg>
+          <Link to="/profileUser">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-6 h-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+              />
+            </svg>
           </Link>
         </button>
       </Typography>
     </List>
   );
 }
-
-
 
 export function MegaMenuWithHover() {
   const [openNav, setOpenNav] = React.useState(false);
@@ -339,7 +337,6 @@ export function MegaMenuWithHover() {
       window.removeEventListener("resize", () => {});
     };
   }, []);
-  
 
   return (
     <Navbar className="max-w-screen-3xl px-4 py-4 bg-gradient-to-r from-c1 to-c3 bg-opacity-100 outline outline-none shadow-md shadow-c1  rounded-none">
@@ -354,7 +351,7 @@ export function MegaMenuWithHover() {
           PERERA BAKERS
         </Typography>
         <div className="hidden lg:block text-c2">
-          <NavList className="text-c2"/>
+          <NavList className="text-c2" />
         </div>
         {/* <SearchBar /> */}
         <IconButton
@@ -366,7 +363,7 @@ export function MegaMenuWithHover() {
           {openNav ? (
             <XMarkIcon className="h-6 w-6 text-c2" strokeWidth={2} />
           ) : (
-            <Bars3Icon className="h-6 w-6 text-c2"  strokeWidth={2} />
+            <Bars3Icon className="h-6 w-6 text-c2" strokeWidth={2} />
           )}
         </IconButton>
       </div>

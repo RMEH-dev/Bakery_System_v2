@@ -1,7 +1,7 @@
 const db = require("../../config/databaseConnection");
 
 exports.getProducts = async (offset, limit) => {
-  const sqlGetProducts = `SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem
+  const sqlGetProducts = `SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
     FROM prostock p
     JOIN prostockbatch i ON p.proStockID = i.proStockID
     LIMIT ?, ?;`;
@@ -70,7 +70,7 @@ exports.getProductsByCategory = async (
   limit
 ) => {
   let sqlGetProductsByCategory = `
-    SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem
+    SELECT p.proStockID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
     FROM prostock p
     JOIN prostockbatch i ON p.proStockID = i.proStockID
     WHERE p.category =?`;

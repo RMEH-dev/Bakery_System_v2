@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Cart } from "./cart";
 import { FooterWithSocialLinks } from "./footer";
 import {
@@ -15,23 +15,29 @@ import {
 import { Link } from "react-router-dom";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import QuantityBtn from "./quantitybtn";
+import axiosInstance from "../utils/axios";
 
 const TABLE_HEAD = ["Product", "Price", "Quantity", "SubTotal"];
-
-const TABLE_ROWS = [
-  {
-    Product: "",
-    Price: "",
-    Quantity: "",
-    SubTotal: "",
-  },
-];
 
 export function ShoppingCart() {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption2, setSelectedOption2] = useState(null);
   const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  const fetchCartItems = async () => {
+    try{
+      const response = await axiosInstance.get("/cart");
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error fetching cart items: ", error.message);
+    }
+  }
 
   const handleSelect = (option) => {
     setSelectedOption(option);
@@ -43,19 +49,29 @@ export function ShoppingCart() {
     setIsDropdownOpen2(false);
   };
 
-  const products = [1, 2, 3, 4];
+  const addToCart = async (product) => {
+    try{
+      await axiosInstance.post("/cart", { productId: product.id });
+      fetchCartItems(); // Refresh cart items after adding a new item
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+    }
+  }
+
+  const updateQuantity = (productID , quantity) => {
+    setCartItems(cartItems.map(item => {
+      if (item.productId === productId) {
+        return { ...item, quantity };
+      }
+      return item;
+    }));
+  }
+
   return (
     <div>
       <Cart>
       <div className=" bg-white w-[600px] h-[1000px] pb-36 lg:w-auto md:w-auto sm:w-auto sm:h-auto sm:text-wrap sm:text-md">
-        
         <Card className="mt-20 ml-20 justify-left w-[150px] lg:w-[750px]  h-[500px] z-120 flex bg-c4">
-          {/* <Typography className="pl-12 pt-5 text-2xl text-black font-bold font-[Montserrat]">
-              Log In
-            </Typography>
-            <Typography className="text-black mt-0 font-medium font-[Montserrat] pl-12 pt-2">
-              To taste the flavors of freshness!
-            </Typography> */}
           <table className=" bg-c2 w-[150px] lg:w-[750px] min-w-max table-auto rounded-xl">
             <thead>
               <tr>
@@ -76,22 +92,17 @@ export function ShoppingCart() {
               </tr>
             </thead>
             <tbody>
-              {TABLE_ROWS.map(
-                ({ Product, Price, Quantity, SubTotal }, index) => {
-                  const isLast = index === TABLE_ROWS.length - 1;
-                  const classes = isLast
-                    ? "p-4"
-                    : "p-4 border-b border-blue-gray-50";
-
+              {cartItems.map(
+                (item) => {
                   return (
-                    <tr key={Product}>
+                    <tr key={item.productId}>
                       <td className={classes}>
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {Product}
+                          {item.productName}
                         </Typography>
                       </td>
                       <td className={classes}>
@@ -100,7 +111,7 @@ export function ShoppingCart() {
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {Price}
+                          {item.price}
                         </Typography>
                       </td>
                       <td className={classes}>
@@ -109,7 +120,12 @@ export function ShoppingCart() {
                           color="blue-gray"
                           className="font-normal pl-16 justify-center items-center"
                         >
-                          <QuantityBtn />
+                          <QuantityBtn
+                          minValue={1}
+                          maxValue={item.availableQuantity}
+                          count={item.quantity}
+                          onChange={(newQuantity) => updateQuantity(item.productId, newQuantity)}
+                        />
                         </Typography>
                       </td>
                       <td className={classes}>
@@ -118,7 +134,7 @@ export function ShoppingCart() {
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {SubTotal}
+                          {item.price*item.quantity}
                         </Typography>
                       </td>
                     </tr>

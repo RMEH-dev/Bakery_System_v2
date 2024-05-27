@@ -26,10 +26,10 @@ export const ProductList = () => {
   const handleCategoryClick = (category, subCategory = null) => {
     if (subCategory) {
       navigate(
-        `/bakery/${category.toLowerCase()}/${subCategory.toLowerCase()}`
+        `/products/${category.toLowerCase()}/${subCategory.toLowerCase()}`
       );
     } else {
-      navigate(`/bakery/${category.toLowerCase()}`);
+      navigate(`/products/${category.toLowerCase()}`);
     }
   };
 
