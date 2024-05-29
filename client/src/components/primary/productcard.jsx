@@ -1,21 +1,47 @@
-import { useState } from "react";
 import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   Typography,
-  Button,
 } from "@material-tailwind/react";
+import React, { useState, useEffect } from "react";
+import { getDecodedToken } from "../../services/jwtdecoder";
+import axiosInstance from "../../utils/axios";
 
+export function ProductCard({ product }) {
+  // console.log("ProductCard received addToCart:", addToCart);
 
+  const addToCart = async (product) => {
+    console.log("addToCart called with product:", product);
+    try {
+      const token = localStorage.getItem("token");
+      const decodedToken = getDecodedToken(token);
+      const userID = decodedToken.id;
+      const response = await axiosInstance.post("/cart", {
+        userID,
+        proStockBatchID: product.proStockBatchID,
+      });
+      console.log("Item added to cart:", response.data);
+    } catch (error) {
+      console.error("Error adding item to cart:", error.message);
+    }
+  };
 
-export function ProductCard({ product, addToCart }) {
+  const handleAddToCart = () => {
+    console.log("handleAddToCart called");
+    addToCart(product);
+    console.log("addToCart called");
+  };
+
   return (
     <Card className="w-[250px] bg-white text-c3 hover:text-white hover:bg-deep-orange-900 hover:bg-opacity-80 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
-      <CardHeader shadow={false} floated={false} className="h-[150px] hover:text-c2">
+      <CardHeader
+        shadow={false}
+        floated={false}
+        className="h-[150px] hover:text-c2"
+      >
         <img
-          src= {product.imageUrl}
+          src={product.imageUrl}
           alt="card-image"
           className="h-full w-full object-cover hover:text-c2"
         />
@@ -37,7 +63,10 @@ export function ProductCard({ product, addToCart }) {
             From: {product.availableFrom}
             <br />
             Till: {product.availableTill}
-            <button onClick = {() => addToCart(product)} class="flex items-center ml-10 justify-center bg-c3 w-14 h-8 rounded-3xl text-white hover:bg-c1 hover:text-c2 duration-500">
+            <button
+              onClick={handleAddToCart}
+              class="flex items-center ml-10 justify-center bg-c3 w-14 h-8 rounded-3xl text-white hover:bg-c1 hover:text-c2 duration-500"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

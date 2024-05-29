@@ -38,8 +38,16 @@ function NavListMenu() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [categories, setCategories] = useState([]);
   const [openSubCategories, setOpenSubCategories] = useState({});
+  const [openCategory, setOpenCategory] = useState(null); // State to manage opened category
 
   useEffect(() => {
+    // Initialize state to set all categories initially open
+    const initialSubCategoriesState = {};
+    categories.forEach(({ category }) => {
+      initialSubCategoriesState[category] = true;
+    });
+    setOpenSubCategories(initialSubCategoriesState);
+  
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("/getCategories");
@@ -51,16 +59,29 @@ function NavListMenu() {
     fetchCategories();
   }, []);
 
-  const handleToggleSubCategories = (category) => {
+  const handleToggleSubCategories = (category, isOpen) => {
     setOpenSubCategories((prevState) => ({
       ...prevState,
-      [category]: !prevState[category],
+      [category]: isOpen !== undefined ? isOpen : !prevState[category],
     }));
   };
 
+  const handleMouseEnter = (category) => {
+    setOpenCategory(category);
+  };
+  
+  const handleMouseLeave = () => {
+    setOpenCategory(null);
+  };
+
+  
   const renderItems = categories.map(({ category, subCategories }, key) => (
     <React.Fragment key={key}>
-      <div className="flex items-center justify-between">
+    <div
+      className="flex items-center justify-between"
+      onMouseEnter={() => handleMouseEnter(category)}
+      onMouseLeave={handleMouseLeave}
+    >
         <Link to={`/products/${category.toLowerCase()}`} key={category}>
           <MenuItem className="flex items-center gap-3 rounded-lg hover:text-c1 hover:bg-c4">
             <div>

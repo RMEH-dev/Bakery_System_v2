@@ -8,6 +8,7 @@ const proStockRoutes = require("./src/api/routes/proStockRoutes");
 const rawStockUsageRoutes = require("./src/api/routes/rawStockUsageRoutes");
 const productsRoutes = require('./src/api/routes/productsRoutes');
 const branchesRoutes = require('./src/api/routes/branchesRoutes');
+const cartRoutes = require('./src/api/routes/cartRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/routes", proStockRoutes);
 app.use("/api/routes", rawStockUsageRoutes);
 app.use("/api/routes", productsRoutes);
 app.use("/api/routes", branchesRoutes);
+app.use("/api/routes", cartRoutes);
 
 
 

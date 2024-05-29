@@ -15,55 +15,6 @@ const generateProBatchNo = require("../helpers/generateProBatchNo");
 const db = require("../../config/databaseConnection");
 const bucket = require("../../config/firebaseConfig");
 
-//produced stock image upload controller
-// exports.uploadFile = async (req, res) => {
-//   try {
-//     const file = req.file;
-
-//     if (!file) {
-//       return res.status(400).send("no file uploaded");
-//     }
-
-//     const folderName = "images"; // Replace with your desired folder name
-//     const blob = bucket.file(
-//       `${folderName}/${uuidv4()}${path.extname(file.originalname)}`
-//     );
-//     const blobStream = blob.createWriteStream({
-//       resumable: false,
-//       metadata: {
-//         contentType: file.mimetype,
-//       },
-//     });
-//     //console.firebase.google.com/u/0/project/perera-bakers/storage/perera-bakers.appspot.com/files
-
-//     https: blobStream.on("error", (err) => {
-//       console.error(err);
-//       res.status(500).send("Something went wrong while uploading the file.");
-//     });
-
-//     blobStream.on("error", (err) => {
-//       console.log(err);
-//       res.status(500).json({ error: "Internal Server error" });
-//     });
-
-//     blobStream.on("finish", async () => {
-//       const publicUrl = `https://storage.googleapis.com/${perera-bakers.appspot.com}/${blob.name}`;
-
-//       const query = ` INSERT INTO prostock (imageUrl) Values (?) `;
-//       await db.query(query, [publicUrl]);
-
-//       res.status(200).json({
-//         message: "File uploaded successfully",
-//         imageUrl: publicUrl,
-//       });
-//     });
-
-//     blobStream.end(file.buffer);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send('Something went wrong');
-//   }
-// };
 
 exports.getProStockInfo = (req, res) => {
   getProStockBatch([], (error, results) => {

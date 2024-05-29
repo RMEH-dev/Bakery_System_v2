@@ -39,8 +39,7 @@ function AddProInventory() {
   // const [selectedOption1, setSelectedOption1] = useState(null);
   const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
-  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =
-    useState("");
+  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =useState("");
   const [userRole, setUserRole] = useState("");
   const [userBranch, setUserBranch] = useState();
   const [selectedBranch, setSelectedBranch] = useState("");
