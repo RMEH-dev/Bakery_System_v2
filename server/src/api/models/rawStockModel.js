@@ -128,6 +128,36 @@ const getEditRawStock = (id, callback) => {
   db.query(sqlGetRawStockDetails, [id], callback);
 };
 
+const updateRawStock = (updatedData, callback) => {
+  const sqlUpdateRawStock = `
+  UPDATE rawstock r
+  JOIN rawstockbatch rb ON r.rawStockID = rb.rawStockID
+  JOIN supplier s ON r.supplierID = s.supplierID
+  JOIN prostock p ON r.proStockID = p.proStockID
+  SET
+  p.proStockName = ?,
+  p.proStockID = ?,
+  r.rawStockName = ?,
+  r.manuDate = ?,
+  r.expDate = ?,
+  rb.quantity = ?,
+  s.supplierName = ?,
+  r.category = ?,
+  r.units = ?,
+  r.branchID = ?
+  WHERE rb.rawStockBatchID = ?`;
+
+  db.query(sqlUpdateRawStock, updatedData, (error, results) => {
+    if (error) {
+      console.error("SQL Error: ", error);
+    } else {
+      console.log("SQL Results: ", results);
+    }
+    callback(error, results);
+  });
+  console.log("SQL Batch Update Data: ", updatedData);
+};
+
 module.exports = {
   rawStock,
   getRawStockNames,
@@ -138,5 +168,6 @@ module.exports = {
   getEditRawStock,
   insertSupplierAsync,
   getSupplierIDAsync,
+  updateRawStock,
   insertRawStockUsageTable,
 };

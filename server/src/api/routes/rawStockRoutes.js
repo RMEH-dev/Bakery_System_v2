@@ -11,7 +11,7 @@ router.get('/getRawStockNames',  rawStockController.getRawStockNames);
 router.get('/getRawStockCategory', rawStockController.getRawStockCategory);
 router.get('/getSupplier',  rawStockController.getSupplier);
 router.get('/getUnits',  rawStockController.getUnits);
-router.get('/getEditRawStock/:id', isAdmin, rawStockController.getRawStock);
-router.put('/updateRawStock/:id', isAdmin, rawStockController.updateRawStock);
+router.get('/getEditRawStock/:id', rawStockController.getRawStock);
+router.put('/updateRawStock/:id', rawStockController.updateRawStock);
 
 module.exports = router;

@@ -76,6 +76,7 @@ function AddRawInventory() {
           setSelectedRawStockCategory(data.category);
           setSelectedSupplier(data.supplierName);
           setSelectedUnits(data.units);
+          setSelectedBranch(data.branchID);
         })
         .catch((error) => {
           console.error("Error fetching raw stock data:", error);
@@ -108,7 +109,7 @@ function AddRawInventory() {
         console.error("Error fetching raw stock names:", error);
         toast.error("Error fetching raw stock names");
       });
-  }, []);
+  }, [selectedRawStockName]);
 
   const handleChange = (e) => {
     setFormData({
@@ -136,16 +137,16 @@ function AddRawInventory() {
     // Include the selected category in the formData
     const dataToSend = {
       ...formData,
+      proStockName: selectedProStockName,
       proStockID: selectedProStockID,
       rawStockName: selectedRawStockName,
       category: selectedRawStockCategory,
       supplierName: selectedSupplier,
       units: selectedUnits,
       branchID: userBranch,
-      quantity: parseInt(formData.quantity, 10)
     };
 
-    console.log("Data to send:", dataToSend);
+    console.log("Data to send to the backend:", dataToSend);
 
     const request = id
       ? axiosInstance.put(`/updateRawStock/${id}`, dataToSend)

@@ -163,9 +163,10 @@ exports.updateRawStock = (req, res) => {
     manufactureDate,
     expirationDate,
     quantity,
-    supplier,
+    supplierName,
     category,
     units,
+    branchID
   } = req.body;
 
   if (
@@ -175,24 +176,31 @@ exports.updateRawStock = (req, res) => {
     !manufactureDate ||
     !expirationDate ||
     !quantity ||
-    !supplier ||
+    !supplierName ||
     !category ||
-    !units 
+    !units ||
+    !branchID
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  const updatedData = {
+  const updatedData = [
     proStockName,
     proStockID,
     rawStockName,
     manufactureDate,
     expirationDate,
     quantity,
-    supplier,
+    supplierName,
     category,
     units,
-  } ;
+    branchID,
+    id
+   ] ;
+
+  
+  console.log("Update Data:", updatedData);
+  console.log(id);
 
     updateRawStock(updatedData, (error, results) => {
       if (error) {
