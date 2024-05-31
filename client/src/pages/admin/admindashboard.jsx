@@ -67,7 +67,7 @@ function AdminDashboard({ children }) {
             </Link>
             <Link to="/rawStockUsage">
               <Button className="w-[250px] hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
-                Inventory Usage
+                system users
               </Button>
             </Link>
             <Link to="/profileUser/Addresses">

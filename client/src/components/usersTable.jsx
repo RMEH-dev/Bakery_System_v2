@@ -215,7 +215,7 @@ EnhancedTableToolbar.propTypes = {
   handleEdit: PropTypes.func.isRequired,
 };
 
-export default function RawStockUsageTable() {
+export default function UsersTable() {
   const [rows, setRows] = useState([]); // State to hold fetched data
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("calories");
