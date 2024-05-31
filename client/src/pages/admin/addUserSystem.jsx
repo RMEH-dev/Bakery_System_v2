@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Dropdown from "../components/dropdown";
-import AdminDashboard from "./admin/admindashboard";
+import Dropdown from "../../components/dropdown";
+import AdminDashboard from "./admindashboard";
 import {
   Card,
   Input,
@@ -14,38 +14,48 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios"; // Import Axios
+import axiosInstance from "../../utils/axios";
 
-function AddRawStockUsage() {
+function AddNewUser() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedRawStockName, setSelectedRawStockName] = useState("");
-  const [selectedRawStockNames, setSelectedRawStockNames] = useState([]);
-  const [selectedRawStockID, setSelectedRawStockID] = useState("");
-  const [selectedRawStockIDs, setSelectedRawStockIDs] = useState([]);
-  const [selectedProStockName, setSelectedProStockName] = useState("");
-  const [selectedProStockNames, setSelectedProStockNames] = useState("");
-  const [selectedProStockID, setSelectedProStockID] = useState("");
-  const [selectedProStockIDs, setSelectedProStockIDs] = useState([]);
-  const [isDropdownOpen1, setIsDropdownOpen1] = useState("");
-  const [isDropdownOpen2, setIsDropdownOpen2] = useState("");
+  //   const [selectedRawStockName, setSelectedRawStockName] = useState("");
+  //   const [selectedRawStockNames, setSelectedRawStockNames] = useState([]);
+  //   const [selectedRawStockID, setSelectedRawStockID] = useState("");
+  //   const [selectedRawStockIDs, setSelectedRawStockIDs] = useState([]);
+  //   const [selectedProStockName, setSelectedProStockName] = useState("");
+  //   const [selectedProStockNames, setSelectedProStockNames] = useState("");
+  //   const [selectedProStockID, setSelectedProStockID] = useState("");
+  //   const [selectedProStockIDs, setSelectedProStockIDs] = useState([]);
+  //   const [isDropdownOpen1, setIsDropdownOpen1] = useState("");
+  //   const [isDropdownOpen2, setIsDropdownOpen2] = useState("");
+  const [selectedBranchName, setSelectedBranchName] = useState([]);
+  const [selectedUserType, setSelectedUserType] = useState("");
 
   const [formData, setFormData] = useState({
-    thresholdQuantity: "",
+    firstName: "",
+    lastName: "",
+    userName: "",
+    email: "",
+    contact: "",
+    password: "",
   });
 
   useEffect(() => {
     if (id) {
-      axios
-        .get(`http://localhost:5050/api/routes/editRawStockUsage/${id}`)
+      axiosInstance
+        .get(`/editUsers/${id}`)
         .then((response) => {
           const data = response.data;
           setFormData({
-            thresholdQuantity: data.thresholdQuantity,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            userName: data.userName,
+            email: data.email,
+            contact: data.contact,
           });
-          setSelectedRawStockID(data.rawStockID);
-          setSelectedProStockID(data.proStockID);
-          setSelectedProStockName(data.proStockName);
-          setSelectedRawStockName(data.rawStockName);
+          setSelectedBranchName(data.branchName);
+          setSelectedUserType(data.userType);
         })
         .catch((error) => {
           console.error("Error fetching raw stock usage data:", error);
@@ -54,34 +64,34 @@ function AddRawStockUsage() {
   }, [id]);
 
   useEffect(() => {
-    if (selectedRawStockName) {
-      axios
-        .get(`http://localhost:5050/api/routes/getRawStockIDUsage`, {
-          params: { rawStockName: selectedRawStockName },
+    if (selectedUserType) {
+      axiosInstance
+        .get(`/getUserTypes`, {
+          params: { userType: selectedUserType },
         })
         .then((response) => {
-          setSelectedRawStockIDs(response.data);
+          setSelectedBranchName(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching raw stock IDs:", error);
+          console.error("Error fetching UserType:", error);
         });
     }
-  }, [selectedRawStockName]);
+  }, [selectedUserType]);
 
   useEffect(() => {
-    if (selectedProStockName) {
-      axios
-        .get(`http://localhost:5050/api/routes/getProStockIDUsage`, {
-          params: { proStockName: selectedProStockName },
+    if (selectedBranchName) {
+      axiosInstance
+        .get(`/getBranchName`, {
+          params: { branchName: selectedBranchName },
         })
         .then((response) => {
-          setSelectedProStockIDs(response.data);
+          setSelectedBranchName(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching produced stock IDs:", error);
+          console.error("Error fetching Branch names:", error);
         });
     }
-  }, [selectedProStockName]);
+  }, [selectedBranchName]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -90,37 +100,25 @@ function AddRawStockUsage() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (
-      !selectedRawStockIDs ||
-      !selectedProStockIDs ||
-      !formData
-    ) {
+    if (!selectedUserType || !selectedBranchName || !formData) {
       toast.error("Please fill out all the fields.");
       return;
     }
 
     const dataToSend = {
       ...formData,
-      rawStockName: selectedRawStockName,
-      rawStockID: selectedRawStockIDs,
-      proStockName: selectedProStockName,
-      proStockID: selectedProStockIDs,
+      branchName: selectedBranchName,
+      userType: selectedUserType,
     };
 
     const dataToSend2 = {
       ...formData,
-      rawStockID: selectedRawStockIDs,
-      proStockID: selectedProStockIDs,
+      branchName: selectedBranchName,
+      userType: selectedUserType,
     };
     const request = id
-      ? axios.put(
-          `http://localhost:5050/api/routes/updateRawStockUsage/${id}`,
-          dataToSend2
-        )
-      : axios.post(
-          "http://localhost:5050/api/routes/addRawStockUsage",
-          dataToSend
-        );
+      ? axios.put(`/updateUser/${id}`, dataToSend2)
+      : axios.post("/addUser", dataToSend);
 
     request
       .then((response) => {
@@ -130,12 +128,15 @@ function AddRawStockUsage() {
             : "Raw Stock Usage added successfully"
         );
         setFormData({
-          thresholdQuantity: "",
+          firstName: "",
+          lastName: "",
+          userName: "",
+          email: "",
+          contact: "",
+          password: "",
         });
-        setSelectedRawStockName(null);
-        setSelectedRawStockID(null);
-        setSelectedProStockName(null);
-        setSelectedProStockID(null);
+        setSelectedUserType(null);
+        setSelectedBranchName(null);
       })
       .catch((error) => {
         console.error("Error sending data to the backend:", error);
@@ -144,8 +145,8 @@ function AddRawStockUsage() {
 
   return (
     <AdminDashboard>
-      <div className="bg-c5 pb-5">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c5 pt-10 h-[50px] rounded-2xl text-c3 hover:text-c1">
+      <div className="bg-deep-orange-900 pb-5">
+        <div className="z-150 ml-5 mb-5 mr-5 bg-deep-orange-900 pt-10 h-[50px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[50px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={true}
@@ -153,128 +154,145 @@ function AddRawStockUsage() {
             <div className="mb-2 gap-5 flex flex-col">
               <div className="gap-80 right-0 mr-10 w-[800px] flex-cols grid-cols-2 grid">
                 <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
-                  {id ? "Edit Inventory Usage" : "Add Inventory Usage"}
+                  {id ? "Edit User Data" : "Add New User"}
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 ml-10 h-[450px] mr-[50px] bg-white  rounded-2xl z-80"
+                className="flex flex-col pb-10 mb-10 ml-5 mr-5 h-[600px] bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px] sm:w-96">
                   <div className="mb-1 flex flex-col gap-y-8">
                     <div className="grid grid-cols-3 gap-10 mb-6">
-                    <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
-                        Produced Stock Name
+                      <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
+                        First Name
                       </Typography>
                       <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
-                        Produced Stock ID
+                        Last Name
                       </Typography>
                       <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
-                        Raw Stock Name
+                        User Name
                       </Typography>
-                      <Dropdown
-                        endpoint="getProStockNameUsage"
-                        selectedOption={selectedProStockName}
-                        setSelectedOption={setSelectedProStockName}
-                        label="Pro Stock Name"
-                        disabled={!!id}
-                      />
-                     
-                      <div>
-                        <div
-                          className="cursor-pointer pl-2 mt-2 pt-0.5 items-center w-[200px] bg-deep-orange-800 py-2 justify-center rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                          onClick={() => !id && setIsDropdownOpen2(!isDropdownOpen2)}
-                        >
-                          {selectedProStockID || "Pro Stock ID"}
-                        </div>
-                        {isDropdownOpen2 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {selectedProStockIDs.map((option) => (
-                              <li
-                                key={option.proStockID}
-                                onClick={() => {
-                                  setSelectedProStockID(option.proStockID);
-                                  setIsDropdownOpen2(false);
-                                }}
-                                className={
-                                  selectedProStockID === option.proStockID
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {option.proStockID}
-                                {selectedProStockID === option.proStockID && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                      <Dropdown
-                        endpoint="getRawStockNameUsage"
-                        selectedOption={selectedRawStockName}
-                        setSelectedOption={setSelectedRawStockName}
-                        label="Raw Stock Name"
-                        disabled={!!id}
-                      />
-                     
-                    </div>
-                    <div className="grid grid-cols-2 w-[600px] gap-10 mb-6">
-                    <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
-                        Raw Stock ID
-                      </Typography>
-                      <Typography className="text-c1 ml-20 pl-2 mt-2 font-bold text-xl font-[Montserrat] mb-2">
-                        Threshold Quantity
-                      </Typography>
-                      <div>
-                        <div
-                          className="cursor-pointer pl-2 mt-2 pt-0.5 items-center w-[200px] bg-deep-orange-800 py-2 justify-center rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                          onClick={() => !id && setIsDropdownOpen1(!isDropdownOpen1)}
-                        >
-                          {selectedRawStockID || "Raw Stock ID"}
-                        </div>
-                        {isDropdownOpen1 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {selectedRawStockIDs.map((option) => (
-                              <li
-                                key={option.rawStockID}
-                                onClick={() => {
-                                  setSelectedRawStockID(option.rawStockID);
-                                  setIsDropdownOpen1(false);
-                                }}
-                                className={
-                                  selectedRawStockID === option.rawStockID
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {option.rawStockID}
-                                {selectedRawStockID === option.rawStockID && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
                       <Input
-                        type="number"
-                        size="md"
-                        name="thresholdQuantity"
-                        value={formData.thresholdQuantity}
+                        type="text"
+                        size="sm"
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleChange}
-                        min={1}
-                        placeholder="thresholdQuantity"
-                        className=" text-c1 ml-20 pl-5 mt-2 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        placeholder="firstName"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] w-[100px] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        required
+                      />
+                      <Input
+                        type="text"
+                        size="sm"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="lastName"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] w-[100px] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        required
+                      />
+                      <Input
+                        type="text"
+                        size="sm"
+                        name="userName"
+                        value={formData.userName}
+                        onChange={handleChange}
+                        placeholder="userName"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] w-[100px] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
                         labelProps={{
                           className: "before:content-none after:content-none",
                         }}
                         required
                       />
                     </div>
+                    <div className="grid grid-cols-3 gap-10 mb-6">
+                      <Typography className="text-c1 mt-2 font-bold text-xl font-[Montserrat] mb-2">
+                        Email Address
+                      </Typography>
+                      <Typography className="text-c1 pl-2 mt-2 font-bold text-xl font-[Montserrat] mb-2">
+                        Contact No.
+                      </Typography>
+                      <Typography className="text-c1 pl-2 mt-2 font-bold text-xl font-[Montserrat] mb-2">
+                        Password
+                      </Typography>
+
+                      <Input
+                        type="email"
+                        size="md"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        min={1}
+                        placeholder="email"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        required
+                      />
+                      <Input
+                        type="tel"
+                        size="md"
+                        name="contact"
+                        value={formData.contact}
+                        onChange={handleChange}
+                        min={1}
+                        placeholder="contact"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        required
+                      />
+                      <Input
+                        type="password"
+                        size="md"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        min={1}
+                        placeholder="password"
+                        className=" text-c1 pl-5 mt-2 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        required
+                      />
+                    </div>
+                    <div className="w-[600px] grid grid-cols-2 gap-5 mb-6">
+                      <Typography className="text-c1 pl-2 mt-2 font-bold text-xl font-[Montserrat] mb-2">
+                        User Type
+                      </Typography>
+                      <Typography className="text-c1 pl-2 mt-2 ml-20 font-bold text-xl font-[Montserrat] mb-2">
+                        Branch Name
+                      </Typography>
+                      <Dropdown
+                        endpoint="getUserTypes"
+                        selectedOption={selectedUserType}
+                        setSelectedOption={setSelectedUserType}
+                        label="Set User Type..."
+                        disabled={!!id}
+                      />
+                      <div className="ml-20">
+                        <Dropdown
+                          endpoint="getBranchName"
+                          selectedOption={selectedBranchName}
+                          setSelectedOption={setSelectedBranchName}
+                          label="Set Branch"
+                          disabled={!!id}
+                        />
+                      </div>
+                    </div>
                     <div className="w-[700px] flex justify-end">
-                      <Link to="/addRawStockUsage">
+                      <Link to="/addUsers">
                         <Button
                           onClick={handleSubmit}
                           className="items-center hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]"
@@ -296,4 +314,4 @@ function AddRawStockUsage() {
   );
 }
 
-export default AddRawStockUsage;
+export default AddNewUser;

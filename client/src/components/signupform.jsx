@@ -129,7 +129,7 @@ export function SignUpForm() {
   }, [isButtonClicked]); // Run this effect whenever isButtonClicked changes
 
   const handleButtonClick = () => {
-    setIsButtonClicked(false);
+    setIsButtonClicked(true);
   };
 
   return (

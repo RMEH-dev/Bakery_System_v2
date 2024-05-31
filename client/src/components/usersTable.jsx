@@ -26,6 +26,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import axiosInstance from "../utils/axios";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -75,13 +76,14 @@ const headCells = [
     label: "User ID",
   },
   { id: "userType", numeric: false, disablePadding: false, label: "User Type" },
+  { id: "branchName", numeric: false, disablePadding: false, label: "Branch" },
   {
     id: "contact",
     numeric: false,
     disablePadding: false,
     label: "Contact No.",
   },
-  { id: "email", numeric: false, disablePadding: false, label: "email address" },
+  { id: "email", numeric: false, disablePadding: false, label: "Email address" },
 ];
 
 function EnhancedTableHead(props) {
@@ -227,9 +229,10 @@ export default function UsersTable() {
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
-    axios
-      .get("http://localhost:5050/api/routes/getRawStockUsage") // Assuming your backend endpoint is /api/stocks
+    axiosInstance
+      .get("/getUsers") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
+        console.log(response.data);
         setRows(response.data); // Update the state with fetched data
       })
       .catch((error) => {
@@ -285,15 +288,15 @@ export default function UsersTable() {
   };
 
   const handleDelete = () => {
-    const newRows = rows.filter(row => !selected.includes(row.usageID));
+    const newRows = rows.filter(row => !selected.includes(row.userID));
     setRows(newRows);
     setSelected([]);
   };
 
   const handleEdit = () => {
-    const selectedRow = rows.find(row => selected.includes(row.usageID));
+    const selectedRow = rows.find(row => selected.includes(row.userID));
     if (selectedRow) {
-      navigate(`/editRawStockUsage/${selectedRow.usageID}`);
+      navigate(`/editUsers${selectedRow.userID}`);
     }
   };
 
@@ -343,17 +346,17 @@ export default function UsersTable() {
             />
             <TableBody className="bg-c2 text-c1 text-xl font-semibold font-[Montserrat]">
               {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.usageID);
+                const isItemSelected = isSelected(row.userID);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.usageID)}
+                    onClick={(event) => handleClick(event, row.userID)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.usageID}
+                    key={row.userID}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
@@ -373,32 +376,37 @@ export default function UsersTable() {
                       padding="none"
                     >
                       <Typography variant="body1" fontWeight="bold">
-                        {row.rawStockName}
+                        {row.firstName}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.rawStockID}
+                        {row.userName}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.usageID}
+                        {row.userID}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.proStockName}
+                        {row.userType}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.proStockID}
+                        {row.branchName || "no branch"}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="bold">
-                        {row.thresholdQuantity}
+                        {row.contact}
+                      </Typography>
+                    </TableCell>  
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="bold">
+                        {row.email}
                       </Typography>
                     </TableCell>                                           
                   </TableRow>

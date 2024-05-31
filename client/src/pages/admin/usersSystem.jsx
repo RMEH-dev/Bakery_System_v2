@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminDashboard from "./admin/admindashboard";
+import AdminDashboard from "./admindashboard";
 import {
   Card,
   Input,
@@ -13,13 +13,13 @@ import {
   CheckIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import RawStockUsageTable from "../components/rawStockUsageTable";
+import UsersTable from "../../components/usersTable";
 
-function RawStockUsage() {
+function UsersSystem() {
   return (
     <AdminDashboard>
       <div className="bg-deep-orange-900 pt-10 pb-5">
-        <div className="z-10 ml-5 mb-5 mr-5 px-2 bg-c5 pt-10 h-[650px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-10 ml-5 mb-5 mr-5 px-2 bg-c5 pt-10 h-[800px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[800px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
@@ -29,16 +29,15 @@ function RawStockUsage() {
                 <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
                   Users Table
                 </Typography>
-                <Link to="/addRawStockUsage">
+                <Link to="/addUsers">
                   <div className="flex pr-5 pt-2  justify-end">
-                    
                     <Button className=" mt-3 w-[280px] hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
                       add new user
                     </Button>
                   </div>
                 </Link>
               </div>
-              <RawStockUsageTable />
+              <UsersTable />
             </div>
           </Card>
         </div>
@@ -47,4 +46,4 @@ function RawStockUsage() {
   );
 }
 
-export default RawStockUsage;
+export default UsersSystem;
