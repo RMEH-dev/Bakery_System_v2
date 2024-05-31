@@ -80,10 +80,9 @@ exports.addRawStock = async (req, res) => {
     // Generate new rawStockID
     const newRawStockID = await generateRawStockIDAsync();
 
-    // Check if supplier exists, if not , insert it 
+    // Check if supplier exists, if not , insert it
     let supplierID;
     const existingSupplier = await getSupplierIDAsync(supplierName);
-
 
     if (existingSupplier.length === 0) {
       const supplierValues = [supplierName];
@@ -124,10 +123,7 @@ exports.addRawStock = async (req, res) => {
     ];
     await insertRawStockBatchAsync(valuesRawStockBatch);
 
-
-
     // Update supplierID in rawstock table
-
 
     res.status(200).json({
       message: "Produced stock added successfully",
@@ -142,8 +138,8 @@ exports.addRawStock = async (req, res) => {
 
 //fetching the raw stock using rawStockID
 exports.getRawStock = (req, res) => {
-  const id = req.params.id;
-
+  const { id } = req.params;
+  console.log(id);
   getEditRawStock(id, (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Database query error" });
@@ -152,58 +148,59 @@ exports.getRawStock = (req, res) => {
       return res.status(404).json({ error: "Raw Stock Not Found" });
     }
     res.json(results[0]);
+    console.log(results);
   });
   // res.json(rawStock);
 };
 
 //Updating the raw stock using rawStockID
 exports.updateRawStock = (req, res) => {
-  const id = req.params.id;
-  const updatedData = req.body;
-
+  const { id }  = req.params;
   const {
+    proStockName,
+    proStockID,
     rawStockName,
     manufactureDate,
     expirationDate,
     quantity,
     supplier,
     category,
-    packageAmount,
-  } = updatedData;
+    units,
+  } = req.body;
 
-  const sqlUpdateRawStock = `
-    UPDATE rawStock r
-    JOIN rawitemdetails i ON r.rawStockID = i.rawStockID
-    SET 
-      r.rawStockName = ?, 
-      r.rawManuDate = ?, 
-      r.rawExpDate = ?, 
-      r.rawStockQuantity = ?, 
-      i.supplier = ?, 
-      i.category = ?, 
-      i.packageAmount = ?
-    WHERE r.rawStockID = ?;
-  `;
+  if (
+    !proStockName ||
+    !proStockID ||
+    !rawStockName ||
+    !manufactureDate ||
+    !expirationDate ||
+    !quantity ||
+    !supplier ||
+    !category ||
+    !units 
+  ) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
 
-  db.query(
-    sqlUpdateRawStock,
-    [
-      rawStockName,
-      manufactureDate,
-      expirationDate,
-      quantity,
-      supplier,
-      category,
-      packageAmount,
-      id,
-    ],
-    (error, results) => {
+  const updatedData = {
+    proStockName,
+    proStockID,
+    rawStockName,
+    manufactureDate,
+    expirationDate,
+    quantity,
+    supplier,
+    category,
+    units,
+  } ;
+
+    updateRawStock(updatedData, (error, results) => {
       if (error) {
-        return res.status(500).json({
-          error: "An error occurred while updating the raw stock data.",
-        });
+        return res.status(500).json({error: "Database query error"});
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ error: "Raw Stock Not Found" });
       }
       res.json({ message: "Raw stock data updated successfully." });
-    }
-  );
+  });
 };

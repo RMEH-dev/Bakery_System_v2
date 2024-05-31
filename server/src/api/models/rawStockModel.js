@@ -50,24 +50,6 @@ const queryAsync = (sql, values) => {
   });
 };
 
-// const getOrCreateSupplierID = async (supplierName, rawStockBatchID) => {
-//   const sqlGetSupplierID =
-//     "SELECT supplierID FROM supplier WHERE supplierName = ?";
-//   const result = await queryAsync(sqlGetSupplierID, [supplierName]);
-
-//   if (result.length === 0) {
-//     const sqlInsertSupplier =
-//       "INSERT INTO supplier (supplierName, rawStockBatchID) VALUES (?, ?)";
-//     const insertResult = await queryAsync(sqlInsertSupplier, [
-//       supplierName,
-//       rawStockBatchID,
-//     ]);
-//     return insertResult.insertId;
-//   } else {
-//     return result[0].supplierID;
-//   }
-// };
-
 const insertSupplierAsync = (values) => {
   return new Promise((resolve, reject) => {
     const sqlInsertSupplier = `
@@ -109,8 +91,6 @@ const insertRawStockAsync = (values) => {
   });
 };
 
-
-
 const insertRawStockUsageTable = (values, callback) => {
   const sqlInsertRawStockUsage =
     "INSERT INTO rawstockusage (rawStockID) VALUES (?)";
@@ -144,14 +124,14 @@ JOIN
 };
 
 const getEditRawStock = (id, callback) => {
-  const sqlGetRawStockDetails = `SELECT r.rawStockName, r.rawStockID, DATE_FORMAT(r.rawManuDate, '%Y-%m-%d') AS rawManuDate , DATE_FORMAT(r.rawExpDate, '%Y-%m-%d') AS rawExpDate, r.rawStockQuantity, r.proStockID, i.supplier, i.category, i.packageAmount FROM rawstock r JOIN rawitemdetails i ON r.rawStockID = i.rawStockID WHERE r.rawStockID = ?`;
+  const sqlGetRawStockDetails = `SELECT p.proStockName, p.proStockID, r.rawStockName, DATE_FORMAT(r.manuDate, '%Y-%m-%d') AS manuDate , DATE_FORMAT(r.expDate, '%Y-%m-%d') AS expDate, r.category, i.quantity, s.supplierName, r.units FROM rawstock r JOIN rawstockbatch i ON r.rawStockID = i.rawStockID JOIN supplier s ON r.supplierID = s.supplierID JOIN prostock p ON r.proStockID = p.proStockID WHERE i.rawStockBatchID = ?`;
   db.query(sqlGetRawStockDetails, [id], callback);
 };
 
 module.exports = {
   rawStock,
   getRawStockNames,
-  getRawStockCategory,
+  getRawStockCategory, 
   getSupplier,
   getUnits,
   insertRawStockAsync,

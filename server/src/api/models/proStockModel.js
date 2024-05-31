@@ -60,57 +60,41 @@ const getProStockIDs = (proStockName, callback) => {
 };
 
 const getProStock = (id, callback) => {
-  const sqlGetProStock = `SELECT p.proStockName, DATE_FORMAT(i.manuDate, '%Y-%m-%d') AS manuDate , DATE_FORMAT(i.expDate, '%Y-%m-%d') AS expDate, p.category, p.subCategory, p.availableFrom, p.availableTill, p.pricePerItem,  i.quantity FROM prostock p JOIN prostockbatch i ON p.proStockID = i.proStockID WHERE i.proStockBatchID = ?`; 
+  const sqlGetProStock = `SELECT p.proStockName, DATE_FORMAT(i.manuDate, '%Y-%m-%d') AS manuDate , DATE_FORMAT(i.expDate, '%Y-%m-%d') AS expDate, p.category, p.subCategory, p.availableFrom, p.availableTill, p.pricePerItem,  i.quantity, p.imageUrl FROM prostock p JOIN prostockbatch i ON p.proStockID = i.proStockID WHERE i.proStockBatchID = ?`; 
   db.query(sqlGetProStock, [id], callback);
-};
-
-const updateProStock = (updateData, callback) => {
-  const sqlUpdateProStock = `
-    UPDATE prostock
-    SET 
-      proStockName = ?,  
-      pricePerItem = ?,
-      category = ?, 
-      subCategory = ?, 
-      availableFrom = ?, 
-      availableTill = ?, 
-      branchID = ?
-    WHERE proStockID = ?`;
-
-  const proStockData = [
-    updateData.proStockName,
-    updateData.pricePerItem,
-    updateData.category,
-    updateData.subCategory,
-    updateData.availableFrom,
-    updateData.availableTill,
-    updateData.branchID,
-    updateData.proStockID
-  ];
-
-  db.query(sqlUpdateProStock, proStockData, callback);
 };
 
 const updateProStockBatch = (updateData, callback) => {
   const sqlUpdateProStockBatch = `
-    UPDATE prostockbatch
+    UPDATE prostock p
+    JOIN prostockbatch pb ON p.proStockID = pb.proStockID
     SET 
-      manuDate = ?, 
-      expDate = ?,
-      quantity = ?,
-      branchID = ?
-    WHERE proStockBatchID = ?`;
+      p.proStockName = ?,  
+      p.pricePerItem = ?,
+      p.category = ?, 
+      p.subCategory = ?, 
+      p.availableFrom = ?, 
+      p.availableTill = ?,
+      pb.quantity = ?,
+      pb.manuDate = ?, 
+      pb.expDate = ?,
+      p.branchID = ?
+    WHERE pb.proStockBatchID = ?`;
 
-  const proStockBatchData = [
-    updateData.manufactureDate,
-    updateData.expirationDate,
-    updateData.quantity,
-    updateData.branchID,
-    updateData.proStockBatchID
-  ];
-
-  db.query(sqlUpdateProStockBatch, proStockBatchData, callback);
+  db.query(sqlUpdateProStockBatch, updateData, (error, results) => {
+    if (error) {
+      console.error("SQL Error:", error);
+    } else {
+      console.log("SQL Results:", results);
+    }
+    callback(error, results);
+  });
+  console.log("SQL Batch Update Data:", updateData);
 };
+
+
+
+
 
 
 
@@ -144,6 +128,5 @@ module.exports = {
   getProStockSubCategory,
   getProStockIDs,
   getProStock,
-  updateProStock,
   updateProStockBatch
 };

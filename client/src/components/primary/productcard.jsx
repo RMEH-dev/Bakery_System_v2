@@ -5,7 +5,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import React, { useState, useEffect } from "react";
-import { getDecodedToken } from "../../services/jwtdecoder";
+import  getDecodedToken  from "../../services/jwtdecoder";
 import axiosInstance from "../../utils/axios";
 
 export function ProductCard({ product }) {

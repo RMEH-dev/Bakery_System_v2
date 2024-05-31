@@ -64,7 +64,7 @@ function AddRawInventory() {
         .get(`/getEditRawStock/${id}`)
         .then((response) => {
           const data = response.data;
-
+          console.log(data);
           setFormData({
             manufactureDate: data.manuDate,
             expirationDate: data.expDate,
@@ -74,8 +74,7 @@ function AddRawInventory() {
           setSelectedProStockID(data.proStockID);
           setSelectedRawStockName(data.rawStockName);
           setSelectedRawStockCategory(data.category);
-          setSelectedSupplier(data.supplier);
-          setSelectedBranch(data.branchID);
+          setSelectedSupplier(data.supplierName);
           setSelectedUnits(data.units);
         })
         .catch((error) => {
@@ -339,7 +338,7 @@ function AddRawInventory() {
                   </div>
                 </form>
                 <Typography className="text-c1 ml-20 mt-5 mb-2 right-0 justify-end font-semibold font-[Montserrat]">
-                  Package Amount
+                  Units of Quantity
                 </Typography>
                 <div className="ml-20">
                   <DropdownWithAdd

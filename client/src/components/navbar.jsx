@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "../index.css";
 import {
   Navbar,
@@ -18,7 +18,7 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import {
   Bars4Icon,
   GlobeAmericasIcon,
@@ -31,6 +31,9 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import axiosInstance from "../utils/axios";
+import ShoppingCartTable2 from "./primary/tablecart2";
+import {jwtDecode} from "jwt-decode"; // Corrected import
+
 
 function NavListMenu() {
   const location = useLocation();
@@ -47,7 +50,7 @@ function NavListMenu() {
       initialSubCategoriesState[category] = true;
     });
     setOpenSubCategories(initialSubCategoriesState);
-  
+
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("/getCategories");
@@ -69,19 +72,18 @@ function NavListMenu() {
   const handleMouseEnter = (category) => {
     setOpenCategory(category);
   };
-  
+
   const handleMouseLeave = () => {
     setOpenCategory(null);
   };
 
-  
   const renderItems = categories.map(({ category, subCategories }, key) => (
     <React.Fragment key={key}>
-    <div
-      className="flex items-center justify-between"
-      onMouseEnter={() => handleMouseEnter(category)}
-      onMouseLeave={handleMouseLeave}
-    >
+      <div
+        className="flex items-center justify-between"
+        onMouseEnter={() => handleMouseEnter(category)}
+        onMouseLeave={handleMouseLeave}
+      >
         <Link to={`/products/${category.toLowerCase()}`} key={category}>
           <MenuItem className="flex items-center gap-3 rounded-lg hover:text-c1 hover:bg-c4">
             <div>
@@ -179,6 +181,17 @@ function NavListMenu() {
     </React.Fragment>
   );
 }
+
+const getDecodedToken = () => {
+  const token = localStorage.getItem("token"); // Or however you store your JWT
+  if (!token) return null;
+  try {
+    return jwtDecode(token);
+  } catch (error) {
+    console.error("Failed to decode token:", error);
+    return null;
+  }
+};
 
 function NavList() {
   return (
@@ -289,8 +302,8 @@ function NavList() {
         </Link>
       </Typography>
       <Typography as="a" href="#">
-        <button class="flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
-          <Link to="/shoppingCart">
+        <Link to="/shoppingCart">
+          <button class="flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -305,14 +318,13 @@ function NavList() {
                 d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
               />
             </svg>
-            {/* <CartIcon/> */}
-          </Link>
-        </button>
+          </button>
+        </Link>
       </Typography>
 
       <Typography as="a" href="#" className="pl-2">
-        <button class="flex items-center justify-center bg-c1 w-20 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
-          <Link to="/profileUser">
+        <Link to="/profileUser">
+          <button class="flex items-center justify-center bg-c1 w-20 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -327,8 +339,8 @@ function NavList() {
                 d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
               />
             </svg>
-          </Link>
-        </button>
+          </button>
+        </Link>
       </Typography>
     </List>
   );
@@ -337,6 +349,36 @@ function NavList() {
 export function MegaMenuWithHover() {
   const [openNav, setOpenNav] = React.useState(false);
   const [logoSrc, setLogoSrc] = React.useState(""); // State to hold logo source
+  const decodedToken = getDecodedToken();
+  const [userId, setUserId] = useState(decodedToken?.id);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (decodedToken?.id) {
+      setUserId(decodedToken.id); // Ensure userId is set only once
+    }
+  }, [decodedToken?.id]);
+
+  // Memoize fetchCartItems to prevent re-creation on each render
+  const fetchCartItems = useCallback(async () => {
+    console.log("Fetching cart items for userId:", userId);
+    try {
+      if (!userId) {
+        console.error("No user ID provided");
+        return;
+      }
+      const response = await axiosInstance.get(`/cart/${userId}`);
+      console.log("Cart items fetched: ", response.data);
+    } catch (error) {
+      console.error("Error fetching cart items: ", error.message);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchCartItems();
+    }
+  }, [fetchCartItems, userId]);
 
   React.useEffect(() => {
     // Dynamically import the logo image
@@ -374,7 +416,6 @@ export function MegaMenuWithHover() {
         <div className="hidden lg:block text-c2">
           <NavList className="text-c2" />
         </div>
-        {/* <SearchBar /> */}
         <IconButton
           variant="text"
           color="black"

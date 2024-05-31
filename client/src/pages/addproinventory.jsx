@@ -24,7 +24,7 @@ import DropdownWithAdd from "../components/dropdownwithadd";
 import BranchSelector from "../components/branchSelector";
 import { jwtDecode } from "jwt-decode";
 import { storage } from "../utils/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; 
 import { v4 } from "uuid";
 
 const getDecodedToken = () => {
@@ -39,7 +39,8 @@ function AddProInventory() {
   // const [selectedOption1, setSelectedOption1] = useState(null);
   const [selectedProStockName, setSelectedProStockName] = useState("");
   const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
-  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =useState("");
+  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =
+    useState("");
   const [userRole, setUserRole] = useState("");
   const [userBranch, setUserBranch] = useState();
   const [selectedBranch, setSelectedBranch] = useState("");
@@ -116,17 +117,25 @@ function AddProInventory() {
 
     try {
       let imageUrl = null;
-      if (imageFile) {
-      // Generate a unique name for the image
-      const uniqueImageName = `${imageFile.name}-${v4()}`;
-      const imageRef = ref(storage, `images/${uniqueImageName}`);
+      if (!id && imageFile) {
+        // Generate a unique name for the image
+        const uniqueImageName = `${imageFile.name}-${v4()}`;
+        const imageRef = ref(storage, `images/${uniqueImageName}`);
         const snapshot = await uploadBytes(imageRef, imageFile);
         imageUrl = await getDownloadURL(snapshot.ref);
       }
-      saveFromData(imageUrl);
+      if (id) {
+        updateData();
+      } else {
+        saveFromData(imageUrl);
+      }
     } catch (error) {
-      console.error("Error uploading image to Firebase Storage", error);
-      toast.error("Error uploading image to Firebase Storage");
+      if (error.code === 'auth/network-request-failed') {
+        toast.error("Network error, please check your internet connection.");
+      } else {
+        console.error("Error uploading image to Firebase Storage", error);
+        toast.error("Error uploading image to Firebase Storage");
+      }
     }
   };
 
@@ -142,42 +151,58 @@ function AddProInventory() {
 
     console.log("Data to send:", dataToSend);
 
-    const request = id
-      ? axiosInstance.put(`/updateProStock/${id}`, dataToSend)
-      : axiosInstance.post("/addProStock", dataToSend);
-
-    request
+    axiosInstance
+      .post("/addProStock", dataToSend)
       .then((response) => {
-        console.log(
-          id
-            ? "Produced stock updated successfully"
-            : "Produced Stock added successfully",
-          response.data
-        );
-        toast.success(
-          id
-            ? "Produced stock updated successfully"
-            : "Produced Stock added successfully"
-        );
-        setFormData({
-          manufactureDate: "",
-          expirationDate: "",
-          quantity: "",
-          pricePerItem: "",
-          availableFrom: "",
-          availableTill: "",
-          branchID: "",
-        });
-        setSelectedProStockName(null);
-        setSelectedProStockCategory(null);
-        setSelectedProStockSubCategory(null);
-        setSelectedBranch("");
-        setImageFile(null);
+        console.log("Produced Stock added successfully", response.data);
+        toast.success("Produced Stock added successfully");
+        resetForm();
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);
         toast.error("Error sending data to the Server");
       });
+  };
+
+  const updateData = () => {
+    const dataToSend = {
+      ...formData,
+      proStockName: selectedProStockName,
+      category: selectedProStockCategory,
+      subCategory: selectedProStockSubCategory,
+      branchID: userBranch,
+    };
+
+    console.log("Data to send2:", dataToSend);
+    console.log(id);
+    axiosInstance
+      .put(`/updateProStock/${id}`, dataToSend)
+      .then((response) => {
+        console.log("Produced stock updated successfully", response.data);
+        toast.success("Produced stock updated successfully");
+        resetForm();
+      })
+      .catch((error) => {
+        console.error("Error sending data to the Server:", error);
+        toast.error("Error sending data to the Server");
+      });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      manufactureDate: "",
+      expirationDate: "",
+      quantity: "",
+      pricePerItem: "",
+      availableFrom: "",
+      availableTill: "",
+      branchID: "",
+    });
+    setSelectedProStockName(null);
+    setSelectedProStockCategory(null);
+    setSelectedProStockSubCategory(null);
+    setSelectedBranch("");
+    setImageFile(null);
   };
 
   return (
@@ -347,7 +372,6 @@ function AddProInventory() {
                     labelProps={{
                       className: "before:content-none after:content-none",
                     }}
-                    required
                   />
                 </form>
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">

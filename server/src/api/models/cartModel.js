@@ -40,28 +40,11 @@ const CartModel = {
     );
   },
 
-  getCartItemsByUserID: (userID, callback) => {
-    const query = `
-      SELECT
-        ci.cartID,
-        ci.proStockBatchID,
-        ci.quantity,
-        pb.proStockID,
-        ps.proStockName,
-        ps.pricePerItem
-      FROM cartitem ci
-      JOIN cart c ON ci.cartID = c.cartID
-      JOIN proStockBatch psb ON ci.proStockBatchID = pb.proStockBatchID
-      JOIN proStock ps ON pb.proStockID = ps.proStockID
-      WHERE c.userID = ?
-    `;
-    db.query(query, [userID], (err, results) => {
-      if (err) {
-        console.error("Error fetching cart items:", err);
-      }
-      callback(err, results);
-    });
-  },
+   getCartItemsByUserID: (values, callback) => {
+    const sqlGetItemsByUserID = `SELECT ci.cartItemID, c.cartID, pb.proStockBatchID, ci.quantity, p.proStockID, p.proStockName, p.pricePerItem, p.imageUrl FROM cartitem ci JOIN cart c ON ci.cartID = c.cartID JOIN proStockBatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN proStock p ON p.proStockID = pb.proStockID WHERE c.userID = ?`;
+    db.query(sqlGetItemsByUserID, values, callback);
+},
+ 
 };
 
 module.exports = CartModel;

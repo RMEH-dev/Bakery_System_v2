@@ -6,7 +6,6 @@ const {
   getProStockSubCategory,
   getProStockIDs,
   getProStock,
-  updateProStock,
   updateProStockBatch
 } = require("../models/proStockModel");
 const { insertProStockBatch } = require("../models/proitemDetailsModel");
@@ -167,8 +166,11 @@ exports.updateProStock = (req, res) => {
     subCategory,
     availableFrom,
     availableTill,
-    branchID,
+    branchID
   } = req.body;
+
+  console.log("Received Data", req.body);
+
 
   if (
     !proStockName ||
@@ -179,32 +181,28 @@ exports.updateProStock = (req, res) => {
     !category ||
     !subCategory ||
     !availableFrom ||
-    !availableTill
+    !availableTill ||
+    !branchID
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  const updateData = {
-    proStockBatchID: id,
+  const updateData = [
     proStockName,
     pricePerItem,
-    manufactureDate,
-    expirationDate,
-    quantity,
     category,
     subCategory,
     availableFrom,
     availableTill,
+    quantity,
+    manufactureDate,
+    expirationDate,
     branchID,
-  };
+    id
+  ];
 
-  updateProStock(updateData, (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: "Database query error" });
-    }
-    if (results.affectedRows === 0) {
-      return res.status(404).json({ error: "Produced Stock Not Found" });
-    }
+  console.log("Update Data:", updateData);
+  console.log(id);
 
     updateProStockBatch(updateData, (error, results) => {
       if (error) {
@@ -215,5 +213,4 @@ exports.updateProStock = (req, res) => {
       }
       res.json({ message: "Produced Stock updated successfully" });
     });
-  });
 };

@@ -1,4 +1,4 @@
-import * as React from "react";
+ import * as React from "react";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import axios from "axios"; // Import Axios
@@ -20,13 +20,13 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import axiosInstance from "../utils/axios";
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -70,15 +70,30 @@ const headCells = [
     label: "StockID",
   },
   { id: "category", numeric: false, disablePadding: false, label: "Category" },
-  { id: "proStockBatchID", numeric: false, disablePadding: false, label: "ProStockID"},
-  { id: "proStockName", numeric: false, disablePadding: false, label: "Pro Stock Name"},
+  {
+    id: "proStockBatchID",
+    numeric: false,
+    disablePadding: false,
+    label: "ProStockID",
+  },
+  {
+    id: "proStockName",
+    numeric: false,
+    disablePadding: false,
+    label: "Pro Stock Name",
+  },
   {
     id: "supplierName",
     numeric: false,
     disablePadding: false,
     label: "Supplier Name",
   },
-  { id: "manuDate", numeric: false, disablePadding: false, label: "Manufacture Date" },
+  {
+    id: "manuDate",
+    numeric: false,
+    disablePadding: false,
+    label: "Manufacture Date",
+  },
   {
     id: "expDate",
     numeric: false,
@@ -103,7 +118,12 @@ const headCells = [
     disablePadding: false,
     label: "Unit",
   },
-  { id: "thresholdAlerts", numeric: false, disablePadding: false, label: "threshold Alerts" },
+  {
+    id: "thresholdAlerts",
+    numeric: false,
+    disablePadding: false,
+    label: "threshold Alerts",
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -209,17 +229,17 @@ function EnhancedTableToolbar(props) {
 
       {numSelected > 0 ? (
         <div className="flex grid-cols gap-5">
-        <Tooltip title="Edit">
-          <IconButton onClick={handleEdit}>
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton onClick={handleDelete}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      </div>
+          <Tooltip title="Edit">
+            <IconButton onClick={handleEdit}>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton onClick={handleDelete}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
       ) : (
         <Tooltip title="Filter list">
           <IconButton>
@@ -307,15 +327,15 @@ export default function RawStockTable() {
   };
 
   const handleDelete = () => {
-    const newRows = rows.filter(row => !selected.includes(row.rawStockName));
+    const newRows = rows.filter((row) => !selected.includes(row.rawStockBatchID));
     setRows(newRows);
     setSelected([]);
   };
 
   const handleEdit = () => {
-    const selectedRow = rows.find(row => selected.includes(row.rawStockName));
+    const selectedRow = rows.find((row) => selected.includes(row.rawStockBatchID));
     if (selectedRow) {
-      navigate(`/editRawInventory/${selectedRow.rawStockID}`);
+      navigate(`/editRawInventory/${selectedRow.rawStockBatchID}`);
     }
   };
 
@@ -365,17 +385,17 @@ export default function RawStockTable() {
             />
             <TableBody className="bg-white text-c1 text-xl font-semibold font-[Montserrat]">
               {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.rawStockID);
+                const isItemSelected = isSelected(row.rawStockBatchID);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.rawStockID)}
+                    onClick={(event) => handleClick(event, row.rawStockBatchID)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.rawStockID}
+                    key={row.rawStockBatchID}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
@@ -440,12 +460,16 @@ export default function RawStockTable() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                           new Date(row.expDate) < new Date() ? "red" : "green",
+                            new Date(row.expDate) < new Date()
+                              ? "red"
+                              : "green",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {new Date(row.expDate) < new Date() ? "Expired" : "Consumable"}
+                          {new Date(row.expDate) < new Date()
+                            ? "Expired"
+                            : "Consumable"}
                         </Typography>
                       </Button>
                     </TableCell>
@@ -463,8 +487,7 @@ export default function RawStockTable() {
                       <Button
                         variant="contained"
                         style={{
-                          backgroundColor:
-                            row.quantity > 5 ? "green" : "red",
+                          backgroundColor: row.quantity > 5 ? "green" : "red",
                           color: "white",
                         }}
                       >

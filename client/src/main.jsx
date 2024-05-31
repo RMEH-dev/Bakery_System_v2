@@ -62,6 +62,7 @@ const router = createBrowserRouter([
   { path: "/logIn", element: <LogIn /> },
   { path: "/cart", element: <ProtectedRoute component={ Cart} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/shoppingCart", element: <ProtectedRoute component={ShoppingCart} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/shoppingCart/:id", element: <ProtectedRoute component={ShoppingCart} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/checkout", element: <ProtectedRoute component={Checkout} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/orderSuccess", element: <ProtectedRoute component={OrderSuccess} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/profileUser", element: <ProtectedRoute component={CustomerProfile} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
