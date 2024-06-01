@@ -55,12 +55,13 @@ const addUser = async (userData, userType, branchName, callback) => {
 };
 
 const editUsers = (id, callback) => {
-  const sqlGetRawStockUsage = ` SELECT ru.usageID, r.rawStockName, ru.rawStockID, p.proStockName, ru.proStockID, ru.thresholdQuantity
-    FROM rawstockusage ru
-    JOIN producedstock p ON ru.proStockID = p.proStockID
-    JOIN rawstock r ON ru.rawStockID = r.rawStockID
-    WHERE ru.usageID = ?`;
-  db.query(sqlGetRawStockUsage, [id], callback);
+  const sqlEditUsers = ` SELECT u.firstName, u.lastName, u.userName, u.email, u.contact, u.password, ut.userType, b.branchName
+    FROM user u
+    JOIN userroles ur ON ur.userID = u.userID
+    JOIN usertypes ut ON ur.userTypeID = ut.userTypeID
+    JOIN branch b ON ur.branchID = b.branchID
+    WHERE u.userID = ?`;
+  db.query(sqlEditUsers, [id], callback);
 };
 
 const getUserTypes = (values, callback) => {
@@ -85,14 +86,141 @@ const getBranchName = (values, callback) => {
   });
 };
 
-const updateUser = (id, data, callback) => {
-  const sqlUpdateUsers = `
-      UPDATE users
+const updateUser = (updatedData, callback) => {
+  try {
+    const sqlUpdateUser = `
+      UPDATE user 
       SET
-      thresholdQuantity = ?
-      WHERE usageID = ?`;
+      firstName = ?, 
+      lastName = ?, 
+      userName = ?, 
+      email = ?, 
+      contact = ?
+      WHERE userID = ?`;
 
-  db.query(sqlUpdateUsers, [data.thresholdQuantity, id], callback);
+    db.query(sqlUpdateUser, updatedData, (err, result) => {
+      if (err) {
+        console.error("Error updating user:", err);
+        return callback(err, null);
+      }
+
+      const [
+        firstName,
+        lastName,
+        userName,
+        email,
+        contact,
+        userType,
+        branchName,
+        userID,
+      ] = updatedData;
+
+      // Get userTypeID
+      const sqlGetUserTypeID = `
+        SELECT userTypeID FROM usertypes WHERE userType = ?`;
+
+      db.query(sqlGetUserTypeID, [userType], (err, [userTypeRow]) => {
+        if (err) {
+          console.error("Error getting userTypeID:", err);
+          return callback(err, null);
+        }
+        const userTypeID = userTypeRow.userTypeID;
+
+        // Get branchID
+        const sqlGetBranchID = `
+         SELECT branchID FROM branch WHERE branchName = ?`;
+
+        db.query(sqlGetBranchID, [branchName], (err, [branchRow]) => {
+          if (err) {
+            console.error("Error getting branchID:", err);
+            return callback(err, null);
+          }
+          const branchID = branchRow.branchID;
+
+          // Update userroles table
+          const sqlUpdateUserRoles = `
+        UPDATE userroles 
+        SET userTypeID = ?, branchID = ?
+        WHERE userID = ?`;
+
+          db.query(
+            sqlUpdateUserRoles,
+            [userTypeID, branchID, userID],
+            (err, result) => {
+              if (err) {
+                console.error("Error updating user roles:", err);
+                return callback(err, null);
+              }
+              callback(null, result);
+            }
+          );
+        });
+      });
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    callback(error, null);
+  }
+};
+
+const deleteUser = (userID, callback) => {
+    // SQL to check userTypeID
+    const checkUserTypeIDSQL = `SELECT userTypeID FROM userroles WHERE userID = ?`;
+
+    // SQL to delete from userroles table
+    const deleteUserRolesSQL = `DELETE FROM userroles WHERE userID = ?`;
+
+    // SQL to delete from user table
+    const deleteUserSQL = `DELETE FROM user WHERE userID = ?`;
+
+    // Begin transaction
+    db.beginTransaction(err => {
+        if (err) {
+            return callback(err);
+        }
+
+        // Check userTypeID
+        db.query(checkUserTypeIDSQL, userID, (error, [userRoleRow]) => {
+            if (error) {
+                return db.rollback(() => {
+                    callback(error, null);
+                });
+            }
+
+            // Check if userTypeID is 1 or 2
+            if (userRoleRow && (userRoleRow.userTypeID === 1 || userRoleRow.userTypeID === 3)) {
+                return callback({ message: 'Deletion not allowed for this user type' }, null);
+            }
+
+            // Delete from userroles table
+            db.query(deleteUserRolesSQL, userID, (error, results) => {
+                if (error) {
+                    return db.rollback(() => {
+                        callback(error, null);
+                    });
+                }
+
+                // Delete from user table
+                db.query(deleteUserSQL, userID, (error, results) => {
+                    if (error) {
+                        return db.rollback(() => {
+                            callback(error, null);
+                        });
+                    }
+
+                    // Commit transaction
+                    db.commit(err => {
+                        if (err) {
+                            return db.rollback(() => {
+                                callback(err, null);
+                            });
+                        }
+                        callback(null, results);
+                    });
+                });
+            });
+        });
+    });
 };
 
 module.exports = {
@@ -102,4 +230,5 @@ module.exports = {
   getUserTypes,
   getBranchName,
   updateUser,
+  deleteUser
 };

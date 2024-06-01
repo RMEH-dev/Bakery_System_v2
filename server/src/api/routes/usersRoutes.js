@@ -7,6 +7,7 @@ router.post('/addUser', usersController.addUser);
 router.get('/getUserTypes', usersController.getUserTypes);
 router.get('/getBranchName', usersController.getBranchName);
 router.put('/updateUser/:id', usersController.updateUser);
+router.delete('/deleteUser/:id', usersController.deleteUser);
 
 
 

@@ -15,6 +15,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios"; // Import Axios
 import axiosInstance from "../../utils/axios";
+import DropdownWithAdd from "../../components/dropdownwithadd";
 
 function AddNewUser() {
   const { id } = useParams();
@@ -47,7 +48,7 @@ function AddNewUser() {
             email: data.email,
             contact: data.contact,
           });
-          setSelectedBranchName(data.branchName);
+          setSelectedBranchName(data.branchName || null);
           setSelectedUserType(data.userType);
         })
         .catch((error) => {
@@ -89,14 +90,14 @@ function AddNewUser() {
     console.log("User Type:", selectedUserType);
     console.log("Branch Name:", selectedBranchName);
 
-    if (!selectedUserType || !selectedBranchName || !formData) {
+    if (!selectedUserType || !formData) {
       toast.error("Please fill out all the fields.");
       return;
     }
 
     const dataToSend = {
       ...formData,
-      branchName: selectedBranchName,
+      branchName: selectedBranchName || null,
       userType: selectedUserType,
     };
 
@@ -248,6 +249,7 @@ function AddNewUser() {
                         labelProps={{
                           className: "before:content-none after:content-none",
                         }}
+                        disabled={!!id}
                         required
                       />
                     </div>
@@ -258,22 +260,20 @@ function AddNewUser() {
                       <Typography className="text-c1 pl-2 mt-2 ml-20 font-bold text-xl font-[Montserrat] mb-2">
                         Branch Name
                       </Typography>
-                      <Dropdown
+                      <DropdownWithAdd
                         endpoint="getUserTypes"
                         selectedOption={selectedUserType}
                         setSelectedOption={setSelectedUserType}
                         label="Set User Type..."
                         options={userTypeOptions}
-                        disabled={!!id}
                       />
                       <div className="ml-20">
-                        <Dropdown
+                        <DropdownWithAdd
                           endpoint="getBranchName"
-                          selectedOption={selectedBranchName}
+                          selectedOption={selectedBranchName || null}
                           setSelectedOption={setSelectedBranchName}
                           label="Set Branch"
                           options={branchOptions}
-                          disabled={!!id}
                         />
                       </div>
                     </div>

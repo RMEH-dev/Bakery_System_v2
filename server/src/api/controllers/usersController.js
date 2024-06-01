@@ -5,6 +5,7 @@ const {
   getUserTypes,
   getBranchName,
   updateUser,
+  deleteUser
 } = require("../models/usersModel");
 const { generateUserID } = require("../helpers/generateUserID");
 const db = require("../../config/databaseConnection");
@@ -130,14 +131,13 @@ exports.updateUser = (req, res) => {
     userName,
     email,
     contact,
-    password,
     userType,
     branchName,
   } = req.body;
 
   if (
     (!firstName || !lastName || !userName || !email,
-    !contact || !password || !userType || !branchName)
+    !contact || !userType)
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -148,9 +148,8 @@ exports.updateUser = (req, res) => {
     userName,
     email,
     contact,
-    password,
     userType,
-    branchName,
+    branchName ?? null,
     id,
   ];
 
@@ -166,3 +165,18 @@ exports.updateUser = (req, res) => {
     res.json({ message: `User ${id} updated successfully` });
   });
 };
+
+exports.deleteUser = (req, res) => {
+    const { id } = req.params;
+
+    deleteUser(id, (error, results) => {
+        if (error) {
+            console.error("Error deleting user: ", error);
+            return res.status(500).json({ error: "Database query error" });
+        }
+        if (results.affectedRows === 0 ){
+            return res.status(404).json({ error: "User Not Found" });
+        }
+        res.json({ message: `User ${id} deleted successfully` });
+    })
+}

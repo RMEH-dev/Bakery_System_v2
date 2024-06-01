@@ -27,6 +27,9 @@ import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import axiosInstance from "../utils/axios";
+import ConfirmationModal from "./primary/confirmationModel";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -225,6 +228,8 @@ export default function UsersTable() {
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
+  const [userIdToDelete, setUserIdToDelete] = useState(null); 
   const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
@@ -239,6 +244,19 @@ export default function UsersTable() {
         console.error("Error fetching data:", error);
       });
   }, []); // Run only once after component is mounted
+
+  useEffect(() => {
+    const deleteUser = async () => {
+      try {
+        const response = await axiosInstance.delete(`/deleteUser/${id}`);
+        // Handle response if needed
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        // Handle error if needed
+      }
+    };
+    deleteUser();
+  },);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -287,16 +305,48 @@ export default function UsersTable() {
     setDense(event.target.checked);
   };
 
-  const handleDelete = () => {
-    const newRows = rows.filter(row => !selected.includes(row.userID));
-    setRows(newRows);
-    setSelected([]);
+  const handleDelete = async () => {
+    try {
+      if (selected.length === 0) {
+        return;
+      }
+      if (!window.confirm('Are you sure you want to delete the selected user(s)?')) {
+        return;
+      }
+  
+      const deletableUsers = [];
+      selected.forEach((userID) => {
+        const user = rows.find((row) => row.userID === userID);
+        if (user.userType === 'Admin' || user.userType === 'Customer') {
+          toast.error('This userType cannot be deleted');
+        } else {
+          deletableUsers.push(userID);
+        }
+      });
+  
+      for (const userID of deletableUsers) {
+        try {
+          await axiosInstance.delete(`/deleteUser/${userID}`);
+        } catch (error) {
+          console.error('Error deleting user:', error);
+          toast.error(`Error deleting user ${userID}: ${error.message}`);
+        }
+      }
+  
+      const updatedRows = rows.filter((row) => !deletableUsers.includes(row.userID));
+      setRows(updatedRows);
+      setSelected([]);
+    } catch (error) {
+      console.error('Error deleting user(s)', error);
+      toast.error("Error deleting user(s)", error.message);
+    }
   };
+  
 
   const handleEdit = () => {
     const selectedRow = rows.find(row => selected.includes(row.userID));
     if (selectedRow) {
-      navigate(`/editUsers${selectedRow.userID}`);
+      navigate(`/editUsers/${selectedRow.userID}`);
     }
   };
 
@@ -311,7 +361,7 @@ export default function UsersTable() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   );
 
   return (
@@ -319,6 +369,7 @@ export default function UsersTable() {
       sx={{ width: "100%" }}
       className="bg-white text-c1 rounded-2xl font-bold font-[Montserrat] p-2"
     >
+      <ToastContainer/>
       <div
         sx={{ width: "100%", mb: 2 }}
         className="bg-white text-c1 rounded-2xl font-bold font-[Montserrat] pb-5 px-2"
