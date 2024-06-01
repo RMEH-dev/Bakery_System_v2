@@ -346,10 +346,13 @@ export default function UsersTable() {
   const handleEdit = () => {
     const selectedRow = rows.find(row => selected.includes(row.userID));
     if (selectedRow) {
-      navigate(`/editUsers/${selectedRow.userID}`);
+      if (selectedRow.userType === 'Admin') {
+        toast.error('Admin users cannot be edited');
+      } else {
+        navigate(`/editUsers/${selectedRow.userID}`);
+      }
     }
   };
-
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
   const emptyRows =
