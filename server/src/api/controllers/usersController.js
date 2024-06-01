@@ -8,6 +8,7 @@ const {
 } = require("../models/usersModel");
 const { generateUserID } = require("../helpers/generateUserID");
 const db = require("../../config/databaseConnection");
+const bcrypt = require('bcrypt');
 
 exports.getUsers = (req, res) => {
   getUsers([], (error, results) => {
@@ -74,6 +75,7 @@ exports.addUser = async (req, res) => {
       branchName,
     } = req.body;
   
+    console.log(req.body);
     if (
       !firstName ||
       !lastName ||
@@ -84,6 +86,7 @@ exports.addUser = async (req, res) => {
       !userType ||
       !branchName
     ) {
+        console.log(req.body);
       return res.status(400).json({ error: "All fields are required" });
     }
   
@@ -103,13 +106,13 @@ exports.addUser = async (req, res) => {
   
       addUser(userData, userType, branchName, (err, results) => {
         if (err) {
-          console.error("Error inserting data into MySQL (user):", err);
+          console.error("Error inserting data", err);
           return res.status(500).json({ error: "Database error" });
         }
         res.status(200).json({
-          message: "User added successfully",
-          results,
+          message: "User added successfully", userID
         });
+        console.log(results);
       });
     } catch (error) {
       console.error("Error hashing password or adding user:", error);

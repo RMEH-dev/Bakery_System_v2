@@ -19,18 +19,11 @@ import axiosInstance from "../../utils/axios";
 function AddNewUser() {
   const { id } = useParams();
   const navigate = useNavigate();
-  //   const [selectedRawStockName, setSelectedRawStockName] = useState("");
-  //   const [selectedRawStockNames, setSelectedRawStockNames] = useState([]);
-  //   const [selectedRawStockID, setSelectedRawStockID] = useState("");
-  //   const [selectedRawStockIDs, setSelectedRawStockIDs] = useState([]);
-  //   const [selectedProStockName, setSelectedProStockName] = useState("");
-  //   const [selectedProStockNames, setSelectedProStockNames] = useState("");
-  //   const [selectedProStockID, setSelectedProStockID] = useState("");
-  //   const [selectedProStockIDs, setSelectedProStockIDs] = useState([]);
-  //   const [isDropdownOpen1, setIsDropdownOpen1] = useState("");
-  //   const [isDropdownOpen2, setIsDropdownOpen2] = useState("");
-  const [selectedBranchName, setSelectedBranchName] = useState([]);
+  const [selectedBranchName, setSelectedBranchName] = useState("");
   const [selectedUserType, setSelectedUserType] = useState("");
+
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [userTypeOptions, setUserTypeOptions] = useState([]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -64,34 +57,26 @@ function AddNewUser() {
   }, [id]);
 
   useEffect(() => {
-    if (selectedUserType) {
-      axiosInstance
-        .get(`/getUserTypes`, {
-          params: { userType: selectedUserType },
-        })
-        .then((response) => {
-          setSelectedBranchName(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching UserType:", error);
-        });
-    }
-  }, [selectedUserType]);
+    axiosInstance
+      .get(`/getUserTypes`)
+      .then((response) => {
+        const userTypes = response.data.map((type) => type.userType);
+        setUserTypeOptions(userTypes);
+      })
+      .catch((error) => {
+        console.error("Error fetching UserType:", error);
+      });
 
-  useEffect(() => {
-    if (selectedBranchName) {
-      axiosInstance
-        .get(`/getBranchName`, {
-          params: { branchName: selectedBranchName },
-        })
-        .then((response) => {
-          setSelectedBranchName(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching Branch names:", error);
-        });
-    }
-  }, [selectedBranchName]);
+    axiosInstance
+      .get(`/getBranchName`)
+      .then((response) => {
+        const branches = response.data.map((branch) => branch.branchName);
+        setBranchOptions(branches);
+      })
+      .catch((error) => {
+        console.error("Error fetching Branch names:", error);
+      });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -99,6 +84,10 @@ function AddNewUser() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Log the values to check their types
+    console.log("User Type:", selectedUserType);
+    console.log("Branch Name:", selectedBranchName);
 
     if (!selectedUserType || !selectedBranchName || !formData) {
       toast.error("Please fill out all the fields.");
@@ -111,21 +100,14 @@ function AddNewUser() {
       userType: selectedUserType,
     };
 
-    const dataToSend2 = {
-      ...formData,
-      branchName: selectedBranchName,
-      userType: selectedUserType,
-    };
     const request = id
-      ? axios.put(`/updateUser/${id}`, dataToSend2)
-      : axios.post("/addUser", dataToSend);
+      ? axiosInstance.put(`/updateUser/${id}`, dataToSend)
+      : axiosInstance.post("/addUser", dataToSend);
 
     request
       .then((response) => {
         toast.success(
-          id
-            ? "Raw Stock Usage updated successfully"
-            : "Raw Stock Usage added successfully"
+          id ? "User updated successfully" : "User added successfully"
         );
         setFormData({
           firstName: "",
@@ -137,9 +119,11 @@ function AddNewUser() {
         });
         setSelectedUserType(null);
         setSelectedBranchName(null);
+        navigate("/addUsers");
       })
       .catch((error) => {
         console.error("Error sending data to the backend:", error);
+        toast.error("Error sending data to the backend.");
       });
   };
 
@@ -279,6 +263,7 @@ function AddNewUser() {
                         selectedOption={selectedUserType}
                         setSelectedOption={setSelectedUserType}
                         label="Set User Type..."
+                        options={userTypeOptions}
                         disabled={!!id}
                       />
                       <div className="ml-20">
@@ -287,6 +272,7 @@ function AddNewUser() {
                           selectedOption={selectedBranchName}
                           setSelectedOption={setSelectedBranchName}
                           label="Set Branch"
+                          options={branchOptions}
                           disabled={!!id}
                         />
                       </div>
