@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import StaffDashboard from "./staffDashboard";
 import {
   Card,
@@ -7,7 +8,7 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ChevronDownIcon,
   CheckIcon,
@@ -16,53 +17,66 @@ import {
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CurrencyInput from "react-currency-input-field";
-import axios from "axios"; // Import Axios
+import axiosInstance from "../../utils/axios";
+import DropdownWithAdd from "../../components/dropdownwithadd";
+import BranchSelector from "../../components/branchSelector";
+import { jwtDecode } from "jwt-decode";
+import { storage } from "../../utils/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
 
-const categoryMap = {
-  "Breads & Buns": ["Bread", "Bun"],
-  Pastries: ["Puff Pastry", "Croissant"],
-  "Cakes & Cupcakes": ["Cake", "Gateau", "Cupcake"],
-  "Sweets & Desserts": ["Sweet", "Dessert"],
-  Platters: ["Savory Platter", "Sweet Platter"],
-  Beverages: ["Cold Beverage", "Hot Beverage"],
+const getDecodedToken = () => {
+  const token = localStorage.getItem("token"); // Or however you store your JWT
+  return jwtDecode(token);
 };
+
+// const storage = firebase.storage();
 
 function AddProInventoryStaff() {
   const { id } = useParams();
-  const [selectedOption1, setSelectedOption1] = useState(null);
-  const [isDropdownOpen1, setIsDropdownOpen1] = useState(false);
-  const [selectedOption2, setSelectedOption2] = useState(null);
-  const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+  // const [selectedOption1, setSelectedOption1] = useState(null);
+  const [selectedProStockName, setSelectedProStockName] = useState("");
+  const [selectedProStockCategory, setSelectedProStockCategory] = useState("");
+  const [selectedProStockSubCategory, setSelectedProStockSubCategory] =
+    useState("");
+  const [userRole, setUserRole] = useState("");
+  const [userBranch, setUserBranch] = useState();
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   const [formData, setFormData] = useState({
-    proStockName: "",
     manufactureDate: "",
     expirationDate: "",
     quantity: "",
+    thresholdQuantity: "",
     pricePerItem: "",
     availableFrom: "",
     availableTill: "",
+    branchID: "",
   });
 
   useEffect(() => {
+    const user = getDecodedToken(); // Decode JWT to get user data
+    setUserRole(user.userType);
+    setUserBranch(user.branchID);
+
     if (id) {
-      axios
-        .get(`http://localhost:5000/api/routes/getProStock/${id}`)
+      axiosInstance
+        .get(`/getProStock/${id}`)
         .then((response) => {
           const data = response.data;
           setFormData({
-            proStockName: data.proStockName,
-            manufactureDate: data.proManuDate,
-            expirationDate: data.proExpDate,
-            category: data.category,
-            subCategory: data.subCategory,
+            manufactureDate: data.manuDate,
+            expirationDate: data.expDate,
+            quantity: data.quantity,
+            pricePerItem: data.pricePerItem,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
-            pricePerItem: data.pricePerItem,
-            quantity: data.proStockQuantity,
           });
-          setSelectedOption1(data.category);
-          setSelectedOption2(data.subCategory);
+          setSelectedProStockName(data.proStockName);
+          setSelectedProStockCategory(data.category);
+          setSelectedProStockSubCategory(data.subCategory);
+          setSelectedBranch(data.branchID);
         })
         .catch((error) => {
           console.error("Error fetching pro stock data:", error);
@@ -77,63 +91,71 @@ function AddProInventoryStaff() {
     });
   };
 
-  const handleSelect1 = (option) => {
-    setSelectedOption1(option);
-    setIsDropdownOpen1(false);
+  const handlePriceChange = (value) => {
+    setFormData({ ...formData, pricePerItem: value });
   };
 
-  const handleSelect2 = (option) => {
-    setSelectedOption2(option);
-    setIsDropdownOpen2(false);
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData || !selectedOption1 || !selectedOption2) {
+    if (
+      !formData ||
+      !selectedProStockName ||
+      !selectedProStockCategory ||
+      !selectedProStockSubCategory
+    ) {
       toast.error("Please fill out all the fields.");
       return;
     }
 
+    try {
+      let imageUrl = null;
+      if (!id && imageFile) {
+        // Generate a unique name for the image
+        const uniqueImageName = `${imageFile.name}-${v4()}`;
+        const imageRef = ref(storage, `images/${uniqueImageName}`);
+        const snapshot = await uploadBytes(imageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+      if (id) {
+        updateData();
+      } else {
+        saveFromData(imageUrl);
+      }
+    } catch (error) {
+      if (error.code === "auth/network-request-failed") {
+        toast.error("Network error, please check your internet connection.");
+      } else {
+        console.error("Error uploading image to Firebase Storage", error);
+        toast.error("Error uploading image to Firebase Storage");
+      }
+    }
+  };
+
+  const saveFromData = (imageUrl) => {
     const dataToSend = {
       ...formData,
-      category: selectedOption1,
-      subCategory: selectedOption2,
+      proStockName: selectedProStockName,
+      category: selectedProStockCategory,
+      subCategory: selectedProStockSubCategory,
+      branchID: userBranch,
+      imageUrl: imageUrl,
     };
 
     console.log("Data to send:", dataToSend);
 
-    const request = id
-      ? axios.put(
-          `http://localhost:5000/api/routes/updateProStock/${id}`,
-          dataToSend
-        )
-      : axios.post("http://localhost:5000/api/routes/addProStock", dataToSend);
-
-    request
+    axiosInstance
+      .post("/addProStock", dataToSend)
       .then((response) => {
-        console.log(
-          id
-            ? "Produced stock updated successfully"
-            : "Produced Stock added successfully",
-          response.data
-        );
-        toast.success(
-          id
-            ? "Produced stock updated successfully"
-            : "Produced Stock added successfully"
-        );
-        setFormData({
-          proStockName: "",
-          manufactureDate: "",
-          expirationDate: "",
-          quantity: "",
-          pricePerItem: "",
-          availableFrom: "",
-          availableTill: "",
-        });
-        setSelectedOption1(null);
-        setSelectedOption2(null);
+        console.log("Produced Stock added successfully", response.data);
+        toast.success("Produced Stock added successfully");
+        resetForm();
       })
       .catch((error) => {
         console.error("Error sending data to the Server:", error);
@@ -141,10 +163,51 @@ function AddProInventoryStaff() {
       });
   };
 
+  const updateData = () => {
+    const dataToSend = {
+      ...formData,
+      proStockName: selectedProStockName,
+      category: selectedProStockCategory,
+      subCategory: selectedProStockSubCategory,
+      branchID: userBranch,
+    };
+
+    console.log("Data to send2:", dataToSend);
+    console.log(id);
+    axiosInstance
+      .put(`/updateProStock/${id}`, dataToSend)
+      .then((response) => {
+        console.log("Produced stock updated successfully", response.data);
+        toast.success("Produced stock updated successfully");
+        resetForm();
+      })
+      .catch((error) => {
+        console.error("Error sending data to the Server:", error);
+        toast.error("Error sending data to the Server");
+      });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      manufactureDate: "",
+      expirationDate: "",
+      quantity: "",
+      pricePerItem: "",
+      availableFrom: "",
+      availableTill: "",
+      branchID: "",
+    });
+    setSelectedProStockName(null);
+    setSelectedProStockCategory(null);
+    setSelectedProStockSubCategory(null);
+    setSelectedBranch("");
+    setImageFile(null);
+  };
+
   return (
     <StaffDashboard>
-      <div className="bg-c1 pb-20 h-[50px] 2xl:h-[150px]">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c1 pt-10 h-[100px] rounded-2xl text-c3 hover:text-c1">
+      <div className="bg-c1 pt-10 pb-10">
+        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 pr-10 bg-c2  h-[100px] rounded-2xl text-c3 hover:text-c1">
           <Card
             className="flex flex-col mb-6 justify-items-center h-[100px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
@@ -156,33 +219,27 @@ function AddProInventoryStaff() {
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 ml-10 h-[500px] mr-[50px] bg-white  rounded-2xl z-80"
+                className="flex flex-col mb-10 pr-5 ml-10 h-[900px]  bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px]  sm:w-96">
                   <div className="mb-1 flex flex-col gap-y-8">
                     <div className="grid grid-cols-3 gap-10 mb-6">
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Produced Stock Name
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Manufacture Date
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Expiration Date
                       </Typography>
-                      <Input
-                        type="text"
-                        size="md"
-                        placeholder="Raw Stock Name"
-                        name="proStockName"
-                        value={formData.proStockName}
-                        onChange={handleChange}
-                        className="w-[350px] 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c1 rounded-[30px]"
-                        labelProps={{
-                          className: "before:content-none after:content-none",
-                        }}
-                        required
+                      <DropdownWithAdd
+                        endpoint="getProStockNames"
+                        selectedOption={selectedProStockName}
+                        setSelectedOption={setSelectedProStockName}
+                        label="Pro Stock Name"
+                        // disabled={!!id}
                       />
                       <Input
                         type="date"
@@ -212,69 +269,29 @@ function AddProInventoryStaff() {
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-10">
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
-                        Produced Stock Category
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
+                        Category
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Sub Category
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Available From
                       </Typography>
-                      <Typography
-                        className="cursor-pointer pl-2 mt-1 items-center w-[200px] bg-deep-orange-800 py-2 justify-center rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                        onClick={() => setIsDropdownOpen1(!isDropdownOpen1)}
-                      >
-                        {selectedOption1 ? selectedOption1 : "Select Category"}
-                        {isDropdownOpen1 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {Object.keys(categoryMap).map((category) => (
-                              <li
-                                key={category}
-                                onClick={() => handleSelect1(category)}
-                                className={
-                                  selectedOption1 === category
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {category}
-                                {selectedOption1 === category && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </Typography>
-                      <Typography
-                        className="cursor-pointer pl-6 pt- mt-1 justify-center w-[250px] bg-deep-orange-800 py-2 rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
-                        onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
-                      >
-                        {selectedOption2
-                          ? selectedOption2
-                          : "Select Sub Category"}
-                        {isDropdownOpen2 && (
-                          <ul className="mt-5 mr-5 absolute z-10 cursor-pointer rounded-2xl text-c1 w-[250px] text-lg font-bold font-[Montserrat] bg-c5 max-h-64 overflow-y-auto shadow-lg">
-                            {categoryMap[selectedOption1].map((subCategory) => (
-                              <li
-                                key={subCategory}
-                                onClick={() => handleSelect2(subCategory)}
-                                className={
-                                  selectedOption2 === subCategory
-                                    ? "bg-deep-orange-800 text-c2 flex rounded-2xl justify-between items-center p-2"
-                                    : "flex justify-between items-center p-4"
-                                }
-                              >
-                                {subCategory}
-                                {selectedOption2 === subCategory && (
-                                  <CheckIcon className="w-5 h-5 text-green-500" />
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </Typography>
+                      <DropdownWithAdd
+                        endpoint="getProStockCategory"
+                        selectedOption={selectedProStockCategory}
+                        setSelectedOption={setSelectedProStockCategory}
+                        label="Category"
+                        // disabled={!!id}
+                      />
+                      <DropdownWithAdd
+                        endpoint="getProStockSubCategory"
+                        selectedOption={selectedProStockSubCategory}
+                        setSelectedOption={setSelectedProStockSubCategory}
+                        label="Sub Category"
+                        // disabled={!!id}
+                      />
                       <Input
                         type="time"
                         size="md"
@@ -291,13 +308,13 @@ function AddProInventoryStaff() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-10 mb-6">
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Available Till
                     </Typography>
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Price Per Item
                     </Typography>
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Quantity
                     </Typography>
                     <Input
@@ -335,7 +352,7 @@ function AddProInventoryStaff() {
                       min="1"
                       step="1"
                       onChange={handleChange}
-                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c1 rounded-[30px]"
+                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
                       labelProps={{
                         className: "before:content-none after:content-none",
                       }}
@@ -343,9 +360,42 @@ function AddProInventoryStaff() {
                       required
                     />
                   </div>
-                </form>
+                  <div className="w-[600px] grid grid-cols-2 gap-10 mb-6">
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
+                      Threshold Quantity
+                    </Typography>
+                    <Typography className="text-c1 w-[300px] ml-20 font-bold font-[Montserrat] mt-5 mb-2">
+                      Upload Image
+                    </Typography>
+                    <Input
+                      type="number"
+                      size="md"
+                      placeholder="Specify Threshold Quantity"
+                      name="quantity"
+                      value={formData.thresholdQuantity}
+                      min="1"
+                      step="1"
+                      onChange={handleChange}
+                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                      disabled={!!id}
 
-                <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
+                      required
+                    />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-[200px] pb-2 2xl:w-[300px] ml-20 text-c1 font-semibold font-[Montserrat] shadow-none outline-none border-none bg-c4 rounded-[30px]"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                    />
+                  </div>
+                </form>
+                <div className="flex justify-end w-[800px] 2xl:w-[1150px] mt-5 ml-5">
                   <Link to="/addProInventory">
                     <Button
                       onClick={handleSubmit}

@@ -32,9 +32,10 @@ function ProInventory() {
                 </Typography>
                 <Link to="/addProInventory">
                   <div className="flex pr-5 pt-2 justify-end">
-                    <Button className="mt-3 w-[260px] -pl-10 pr-10 hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
-                      Add Produced Item
-                      <PlusIcon className="text-c4 mr-4 justify-start bg-c2 rounded-2xl font-bold mt-6 absolute w-5 h-5" />
+                  <PlusIcon className="text-c4 mr-4 justify-start bg-c2 rounded-2xl font-bold mt-6 absolute w-5 h-5" />
+                    <Button className="mt-3 w-[280px] -pl-10 pr-10 hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
+                      Add Produced Item    
+                     
                     </Button>
                   </div>
                 </Link>

@@ -24,7 +24,7 @@ import DropdownWithAdd from "../components/dropdownwithadd";
 import BranchSelector from "../components/branchSelector";
 import { jwtDecode } from "jwt-decode";
 import { storage } from "../utils/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; 
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
 
 const getDecodedToken = () => {
@@ -50,6 +50,7 @@ function AddProInventory() {
     manufactureDate: "",
     expirationDate: "",
     quantity: "",
+    thresholdQuantity: "",
     pricePerItem: "",
     availableFrom: "",
     availableTill: "",
@@ -70,6 +71,7 @@ function AddProInventory() {
             manufactureDate: data.manuDate,
             expirationDate: data.expDate,
             quantity: data.quantity,
+            thresholdQuantity: data.thresholdQuantity,
             pricePerItem: data.pricePerItem,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
@@ -130,7 +132,7 @@ function AddProInventory() {
         saveFromData(imageUrl);
       }
     } catch (error) {
-      if (error.code === 'auth/network-request-failed') {
+      if (error.code === "auth/network-request-failed") {
         toast.error("Network error, please check your internet connection.");
       } else {
         console.error("Error uploading image to Firebase Storage", error);
@@ -193,6 +195,7 @@ function AddProInventory() {
       manufactureDate: "",
       expirationDate: "",
       quantity: "",
+      thresholdQuantity: "",
       pricePerItem: "",
       availableFrom: "",
       availableTill: "",
@@ -226,13 +229,13 @@ function AddProInventory() {
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px]  sm:w-96">
                   <div className="mb-1 flex flex-col gap-y-8">
                     <div className="grid grid-cols-3 gap-10 mb-6">
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Produced Stock Name
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Manufacture Date
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Expiration Date
                       </Typography>
                       <DropdownWithAdd
@@ -270,13 +273,13 @@ function AddProInventory() {
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-10">
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Category
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Sub Category
                       </Typography>
-                      <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
+                      <Typography className="text-c1 font-bold font-[Montserrat] mb-2">
                         Available From
                       </Typography>
                       <DropdownWithAdd
@@ -309,13 +312,13 @@ function AddProInventory() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-10 mb-6">
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Available Till
                     </Typography>
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Price Per Item
                     </Typography>
-                    <Typography className="text-c1 w-[300px] font-semibold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px] font-bold font-[Montserrat] mt-5 mb-2">
                       Quantity
                     </Typography>
                     <Input
@@ -361,20 +364,53 @@ function AddProInventory() {
                       required
                     />
                   </div>
-                  <Typography className="text-c1 w-[300px]  font-semibold font-[Montserrat] mt-5 mb-2">
-                    Upload Image
-                  </Typography>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="w-[200px] pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
-                    labelProps={{
-                      className: "before:content-none after:content-none",
-                    }}
-                  />
+                  <div className="grid grid-cols-3 gap-10 mb-6">
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
+                      Threshold Quantity
+                    </Typography>
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
+                      Upload Image
+                    </Typography>
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
+                      Select Branch
+                    </Typography>
+                    <Input
+                      type="number"
+                      size="md"
+                      placeholder="Specify Threshold Quantity"
+                      name="thresholdQuantity"
+                      value={formData.thresholdQuantity}
+                      min="1"
+                      step="1"
+                      onChange={handleChange}
+                      className="w-[300px] 2xl:w-[300px]  text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                      disabled={!!id}
+                      required
+                    />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-[200px] pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] shadow-none outline-none border-none bg-c4 rounded-[30px]"
+                      labelProps={{
+                        className: "before:content-none after:content-none",
+                      }}
+                      disabled={!!id}
+                    />
+                    <BranchSelector
+                      endpoint="branches"
+                      selectedOption={selectedBranch}
+                      setSelectedOption={setSelectedBranch}
+                      label="Branch"
+                      className="-mt-5"
+                      disabled={!!id}
+                    />
+                  </div>
                 </form>
-                <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
+                <div className="flex justify-end w-[800px] 2xl:w-[1150px] mt-5 ml-5">
                   <Link to="/addProInventory">
                     <Button
                       onClick={handleSubmit}

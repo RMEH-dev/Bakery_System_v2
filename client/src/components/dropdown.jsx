@@ -30,14 +30,14 @@ function Dropdown({ endpoint, selectedOption, setSelectedOption, label, disabled
   return (
     <div className="relative">
       <div
-        className="cursor-pointer pl-2 mt-2 pt-0.5 items-center w-[200px] bg-deep-orange-800 py-2 rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
+        className="cursor-pointer pl-2 mt-2 pt-0.5 items-center w-[300px] hover:bg-c3 bg-deep-orange-800 py-2 rounded-lg text-c2 font-semibold text-lg font-[Montserrat]"
         onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
       >
         {selectedOption || `${label}`}
-        <ChevronDownIcon className="ml-40 -mt-6 w-5 h-5" />
+        <ChevronDownIcon className=" flex absolute justify-end ml-[260px] mb-6 w-5 h-5" />
       </div>
       {isDropdownOpen && !disabled && (
-        <div className="mt-5 mr-5 absolute z-10 w-[250px] font-[Montserrat] bg-c5 rounded-2xl shadow-lg">
+        <div className="mt-5 mr-5 absolute z-10 w-[300px] font-[Montserrat] text-c1 font-semibold bg-c5 rounded-2xl shadow-lg">
           <input
             type="text"
             placeholder={`Search ${label}`}
@@ -58,7 +58,7 @@ function Dropdown({ endpoint, selectedOption, setSelectedOption, label, disabled
               >
                 {Object.values(item)[0]}
                 {selectedOption === Object.values(item)[0] && (
-                  <CheckIcon className="w-5 h-5 text-green-500" />
+                  <CheckIcon className="w-5 h-5 text-white" />
                 )}
               </li>
             ))}

@@ -125,7 +125,13 @@ const headCells = [
     label: "Quantity",
   },
   {
-    id: "alerts",
+    id: "thresholdQuantity",
+    numeric: true,
+    disablePadding: false,
+    label: "Threshold Quantity",
+  },
+  {
+    id: "alerts", 
     numeric: false,
     disablePadding: false,
     label: "Quantity Alerts",
@@ -345,6 +351,8 @@ export default function ProStockTable() {
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
+  const filteredRows = rows.filter((row) => row.quantity > 0);
+
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -385,10 +393,11 @@ export default function ProStockTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={filteredRows.length}
             />
             <TableBody className="bg-white text-c1 text-xl font-semibold font-[Montserrat]">
-              {visibleRows.map((row, index) => {
+            {stableSort(filteredRows, getComparator(order, orderBy))
+                .slice(page, page + rowsPerPage).map((row, index) => {
                 const isItemSelected = isSelected(row.proStockBatchID);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -491,16 +500,21 @@ export default function ProStockTable() {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
+                      <Typography variant="body2" fontWeight="regular">
+                        {row.thresholdQuantity}
+                      </Typography>
+                    </TableCell> 
+                    <TableCell align="right">
                       <Button
                         variant="contained"
                         style={{
                           backgroundColor:
-                            row.quantity > 5 ? "green" : "red",
+                            row.quantity > row.thresholdQuantity ? "green" : "red",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {row.quantity > 5 ? "Available" : "Low Stock"}
+                          {row.quantity > row.thresholdQuantity ? "Available" : "Low Stock"}
                         </Typography>
                       </Button>
                     </TableCell>
@@ -523,7 +537,7 @@ export default function ProStockTable() {
           className="bg-c2 text-c1 rounded-b-2xl font-bold font-[Montserrat]"
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={filteredRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

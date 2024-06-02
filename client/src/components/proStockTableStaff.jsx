@@ -26,6 +26,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../utils/axios";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -63,10 +64,16 @@ const headCells = [
     label: "Pro Stock Name",
   },
   {
-    id: "proBatchNo",
+    id: "proStockBatchID",
     numeric: false,
     disablePadding: false,
     label: "Batch No.",
+  },
+  {
+    id: "branchName",
+    numeric: false,
+    disablePadding: false,
+    label: "Branch Name",
   },
   { id: "category", numeric: false, disablePadding: false, label: "Category" },
   {
@@ -82,13 +89,13 @@ const headCells = [
     label: "PP Item (Rs.)",
   },
   {
-    id: "proManuDate",
+    id: "manuDate",
     numeric: false,
     disablePadding: false,
     label: "Manu Date",
   },
   {
-    id: "proExpDate",
+    id: "expDate",
     numeric: false,
     disablePadding: false,
     label: "Exp Date",
@@ -112,13 +119,19 @@ const headCells = [
     label: "Available Till",
   },
   {
-    id: "proStockQuantity",
+    id: "quantity",
     numeric: true,
     disablePadding: false,
     label: "Quantity",
   },
   {
-    id: "alerts",
+    id: "thresholdQuantity",
+    numeric: true,
+    disablePadding: false,
+    label: "Threshold Quantity",
+  },
+  {
+    id: "alerts", 
     numeric: false,
     disablePadding: false,
     label: "Quantity Alerts",
@@ -254,7 +267,7 @@ EnhancedTableToolbar.propTypes = {
   handleEdit: PropTypes.func.isRequired,
 };
 
-export default function ProStockTableStaff() {
+export default function ProStockTable() {
   const [rows, setRows] = useState([]); // State to hold fetched data
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("calories");
@@ -266,8 +279,8 @@ export default function ProStockTableStaff() {
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
-    axios
-      .get("http://localhost:5050/api/routes/proStock") // Assuming your backend endpoint is /api/stocks
+    axiosInstance
+      .get("/proStock/") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         setRows(response.data); // Update the state with fetched data
       })
@@ -324,19 +337,21 @@ export default function ProStockTableStaff() {
   };
 
   const handleDelete = () => {
-    const newRows = rows.filter((row) => !selected.includes(row.proStockName));
+    const newRows = rows.filter((row) => !selected.includes(row.proStockBatchID));
     setRows(newRows);
     setSelected([]);
   };
 
   const handleEdit = () => {
-    const selectedRow = rows.find((row) => selected.includes(row.proStockName));
+    const selectedRow = rows.find((row) => selected.includes(row.proStockBatchID));
     if (selectedRow) {
-      navigate(`/editProInventoryStaff/${selectedRow.proBatchNo}`);
+      navigate(`/editProInventoryStaff/${selectedRow.proStockBatchID}`);
     }
   };
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
+
+  const filteredRows = rows.filter((row) => row.quantity > 0);
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -347,7 +362,7 @@ export default function ProStockTableStaff() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   );
 
   return (
@@ -378,21 +393,22 @@ export default function ProStockTableStaff() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={filteredRows.length}
             />
             <TableBody className="bg-white text-c1 text-xl font-semibold font-[Montserrat]">
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.proStockName);
+            {stableSort(filteredRows, getComparator(order, orderBy))
+                .slice(page, page + rowsPerPage).map((row, index) => {
+                const isItemSelected = isSelected(row.proStockBatchID);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.proStockName)}
+                    onClick={(event) => handleClick(event, row.proStockBatchID)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.proStockName}
+                    key={row.proStockBatchID}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
@@ -417,7 +433,12 @@ export default function ProStockTableStaff() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proBatchNo}
+                        {row.proStockBatchID}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="regular">
+                        {row.branchName}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -437,12 +458,12 @@ export default function ProStockTableStaff() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proManuDate}
+                        {row.manuDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proExpDate}
+                        {row.expDate}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
@@ -450,14 +471,14 @@ export default function ProStockTableStaff() {
                         variant="contained"
                         style={{
                           backgroundColor:
-                            new Date(row.proExpDate) < new Date()
+                            new Date(row.expDate) < new Date()
                               ? "red"
                               : "green",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {new Date(row.proExpDate) < new Date()
+                          {new Date(row.expDate) < new Date()
                             ? "Expired"
                             : "Consumable"}
                         </Typography>
@@ -475,20 +496,25 @@ export default function ProStockTableStaff() {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="body2" fontWeight="regular">
-                        {row.proStockQuantity}
+                        {row.quantity}
                       </Typography>
                     </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="regular">
+                        {row.thresholdQuantity}
+                      </Typography>
+                    </TableCell> 
                     <TableCell align="right">
                       <Button
                         variant="contained"
                         style={{
                           backgroundColor:
-                            row.proStockQuantity > 5 ? "green" : "red",
+                            row.quantity > row.thresholdQuantity ? "green" : "red",
                           color: "white",
                         }}
                       >
                         <Typography variant="body2" fontWeight="bold">
-                          {row.proStockQuantity > 5 ? "Available" : "Low Stock"}
+                          {row.quantity > row.thresholdQuantity ? "Available" : "Low Stock"}
                         </Typography>
                       </Button>
                     </TableCell>
@@ -511,7 +537,7 @@ export default function ProStockTableStaff() {
           className="bg-c2 text-c1 rounded-b-2xl font-bold font-[Montserrat]"
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={filteredRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

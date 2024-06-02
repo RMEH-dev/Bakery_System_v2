@@ -118,12 +118,6 @@ const headCells = [
     disablePadding: false,
     label: "Unit",
   },
-  {
-    id: "thresholdAlerts",
-    numeric: false,
-    disablePadding: false,
-    label: "threshold Alerts",
-  },
 ];
 
 function EnhancedTableHead(props) {
@@ -482,19 +476,6 @@ export default function RawStockTable() {
                       <Typography variant="body2" fontWeight="bold">
                         {row.units}
                       </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Button
-                        variant="contained"
-                        style={{
-                          backgroundColor: row.quantity > 5 ? "green" : "red",
-                          color: "white",
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight="bold">
-                          {row.quantity > 5 ? "Available" : "Low Stock"}
-                        </Typography>
-                      </Button>
                     </TableCell>
                   </TableRow>
                 );

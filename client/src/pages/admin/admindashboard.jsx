@@ -35,12 +35,6 @@ function AdminDashboard({ children }) {
             </Button>
           </Link>
         </div>
-        <BranchSelector
-        endpoint="branches"
-        selectedOption={selectedBranch}
-        setSelectedOption={setSelectedBranch}
-        label="Select Branch"
-        />
         <div className="ml-20 mt-5 flex justify-right">
         </div>
       </div>
@@ -70,9 +64,9 @@ function AdminDashboard({ children }) {
                 system users
               </Button>
             </Link>
-            <Link to="/profileUser/Addresses">
+            <Link to="/trackOrders">
               <Button className="w-[200px] hover:transition-transform duration-500 ease-in-out hover:scale-105 justify-end hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]">
-                Staff
+                Track Orders
               </Button>
             </Link>
           </div>
