@@ -26,7 +26,7 @@ function ProInventory() {
             shadow={false}
           >
             <div className="mb-2 gap-5 flex flex-col">
-              <div className="gap-80 right-0 mr-10 w-[800px] flex-cols grid-cols-2 grid">
+              <div className="gap-80 right-0 mr-10 w-[1540px] flex-cols grid-cols-2 grid">
                 <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
                   Produced Inventory
                 </Typography>
@@ -40,7 +40,7 @@ function ProInventory() {
                   </div>
                 </Link>
               </div>
-              <div className="gap-20 mr-10 w-[850px] flex-cols">
+              <div className="gap-20 mr-10 w-[1540px] flex-cols">
                 <ProStockTable />
               </div>
             </div>

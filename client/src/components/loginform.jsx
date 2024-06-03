@@ -59,7 +59,7 @@ export function LogInForm() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred during Login");
+      toast.error("Invalid Credentials. Please use valid credentials");
     }
   };
 

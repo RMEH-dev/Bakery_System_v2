@@ -4,6 +4,8 @@ import {
   CardBody,
   Typography,
 } from "@material-tailwind/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
 import  getDecodedToken  from "../../services/jwtdecoder";
 import axiosInstance from "../../utils/axios";
@@ -22,34 +24,45 @@ export function ProductCard({ product }) {
         proStockBatchID: product.proStockBatchID,
       });
       console.log("Item added to cart:", response.data);
+      toast.success("Item added to cart!");
     } catch (error) {
       console.error("Error adding item to cart:", error.message);
+      toast.error("Error adding item to cart.");
     }
   };
 
   const handleAddToCart = () => {
     console.log("handleAddToCart called");
+    if (!isAvailable || isExpired) {
+      toast.error("Not Available at the moment");
+      return;
+    }
     addToCart(product);
     console.log("addToCart called");
   };
 
+  const isAvailable = product.quantity > 0;
+  const currentDate = new Date();
+  const expDate = new Date(product.expDate);
+  const isExpired = expDate <= currentDate;
+
   return (
-    <Card className="w-[250px] bg-white text-c3 hover:text-white hover:bg-deep-orange-900 hover:bg-opacity-80 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
+    <Card className="w-[250px] bg-white text-c3 hover:text-c1 hover:bg-opacity-90 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
       <CardHeader
         shadow={false}
         floated={false}
-        className="h-[150px] hover:text-c2"
+        className="h-[150px] hover:text-c1"
       >
         <img
           src={product.imageUrl}
           alt="card-image"
-          className="h-full w-full object-cover hover:text-c2"
+          className="h-full w-full object-cover hover:text-c1"
         />
       </CardHeader>
-      <div className="grid hover:text-c2 grid:cols-2">
-        <CardBody className="hover:text-c2">
+      <div className="grid hover:text-c1 grid:cols-2">
+        <CardBody className="hover:text-c1">
           <div className="mb-1  flex justify-between">
-            <Typography className="text-c1 hover:text-c2 font-bold font-[Montserrat] ">
+            <Typography className="text-c1 hover:text-c1 font-bold font-[Montserrat] ">
               {product.proStockName}
             </Typography>
             <Typography className="font-bold font-[Montserrat] text-c1 text-opacity-100 text-nowrap">
@@ -63,25 +76,21 @@ export function ProductCard({ product }) {
             From: {product.availableFrom}
             <br />
             Till: {product.availableTill}
+            
             <button
               onClick={handleAddToCart}
-              class="flex items-center ml-10 justify-center bg-c3 w-14 h-8 rounded-3xl text-white hover:bg-c1 hover:text-c2 duration-500"
+              disabled={!isAvailable || isExpired}
+              class="cursor-pointer flex items-center ml-6 mt-2 justify-center bg-c3 w-20 h-12 rounded-xl text-white hover:bg-deep-orange-900 hover:text-c2 duration-500"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                />
-              </svg>
+              Add to Cart
             </button>
+            {isExpired ? (
+              <span className="text-red-500">Expired</span>
+            ) : (
+              <span className={isAvailable ? "text-green-500 bold-[Montserrat] font-bold text-md" : "text-red-500"}>
+                {isAvailable ? "Available" : "Not Available"}
+              </span>
+            )}
           </Typography>
         </CardBody>
       </div>

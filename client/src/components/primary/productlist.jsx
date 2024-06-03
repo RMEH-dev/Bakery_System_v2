@@ -1,9 +1,12 @@
 import "../../index.css";
 import React, { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axios";
 import { ProductCard } from "./productcard";
 import { jwtDecode } from "jwt-decode";
+import ReactPaginate from "react-paginate";
 
 // Function to get the decoded token
 const getDecodedToken = () => {
@@ -12,7 +15,11 @@ const getDecodedToken = () => {
 };
 
 export const ProductList = () => {
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState([]);
+  const [page, setPage] = useState(1);
+  const limit = 8;
   const navigate = useNavigate();
 
   useEffect(() => {

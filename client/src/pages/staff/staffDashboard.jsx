@@ -9,11 +9,14 @@ import {
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import BranchSelector from "../../components/branchSelector";
+import useTokenValidation from "../../hooks/udeTokenValidation";
 
 function StaffDashboard({ children }) {
   const [selectedOption2, setSelectedOption2] = useState(null);
   const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
 
+ useTokenValidation();
+  
   const handleSelect2 = (option) => {
     setSelectedOption2(option);
     setIsDropdownOpen2(false);

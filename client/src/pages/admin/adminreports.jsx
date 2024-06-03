@@ -41,17 +41,17 @@ function AdminReports() {
 
   return (
     <AdminDashboard>
-      <div className="bg-c5 pb-5">
-        <div className="ml-5 mb-5 mr-5 bg-c5 pt-10 h-[650px] rounded-2xl text-c3 hover:text-c1">
+      <div className="bg-c5 pb-5  w-[1540px]">
+        <div className="ml-5 mb-5 mr-5  w-[1540px] bg-c5 pt-10 h-[650px] rounded-2xl text-c3 hover:text-c1">
           <Card
-            className="flex flex-col mb-6 justify-items-center h-[800px] sm:w-auto bg-white rounded-2xl"
+            className="flex flex-col mb-6  w-[1540px] justify-items-center h-[800px] sm:w-auto bg-white rounded-2xl"
             shadow={false}
           >
-            <div className="mb-2 gap-5 flex flex-col">
+            <div className="mb-2 gap-5 flex w-[1540px] flex-col">
               <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
                 Reports
               </Typography>
-              <div className="gap-20 mr-10 w-[800px] flex-cols grid-cols-2 grid">
+              <div className="gap-20 mr-10 w-[1540px] flex-cols grid-cols-2 grid">
                 <Card className="mx-10 mb-10 w-[600px] h-[300px]">
                   <div className="flex-col flex">
                     <Typography className="pl-5 bg-c5 w-[600px] pt-1 rounded-2xl text-black font-bold text-lg font-[Montserrat]">
@@ -405,7 +405,7 @@ function AdminReports() {
                   </div>
                 </Card>
               </div>
-              <div className="gap-20 mr-10 w-[800px] flex-cols grid-cols-2 grid">
+              <div className="gap-20 mr-10  w-[1540px] flex-cols grid-cols-2 grid">
                 <Card className="mx-10 mb-10 w-[600px] h-[300px]">
                   <div className="flex-col flex">
                     <Typography className="pl-5 bg-c5 w-[600px] pt-1 rounded-2xl text-black font-bold text-lg font-[Montserrat]">

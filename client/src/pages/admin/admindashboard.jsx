@@ -9,17 +9,16 @@ import {
   ArrowRightIcon,
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import BranchSelector from "../../components/branchSelector";
 import useTokenValidation from "../../hooks/udeTokenValidation";
 
 function AdminDashboard({ children }) {
   const [selectedBranch, setSelectedBranch] = useState("");
 
   useTokenValidation();
-  
+
   return (
     <PageLayout className="">
-      <div className="flex justify-between items-center bg-gradient-to-b from-c1 to-c3 text-white w-[800px] h-[100px]">
+      <div className="flex justify-between items-center w-[1540px] bg-gradient-to-b from-c1 to-c3 text-white h-[100px]">
         <Link to="/adminDashboard">
           <h1 className="ml-10 pt-5 pb-5 text-4xl font-bold font-[Montserrat]">
             Welcome Mr. Perera
@@ -51,7 +50,7 @@ function AdminDashboard({ children }) {
             <div className="mt-5 ml-10 justify-start bg-c3 w-[150px] h-2 rounded-2xl"></div>
             <ArrowRightEndOnRectangleIcon className="mt-1 ml-10 flex h-10 w-10 stroke-c3 bg-c5 rounded-2xl stroke border-[2px] border-c3 text-c3" />
           </div>
-          <div className="pt-5 pl-10 justify-end flex grid-cols-4 gap-5">
+          <div className="pt-5 pl-10  w-[1540px] justify-end flex grid-cols-4 gap-5">
             <Link to="/proInventory">
               <Button className="w-[250px] hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]">
                 Produced Inventory

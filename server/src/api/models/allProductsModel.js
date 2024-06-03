@@ -70,15 +70,15 @@ exports.getProductsByCategory = async (
   limit
 ) => {
   let sqlGetProductsByCategory = `
-    SELECT i.proStockBatchID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
+    SELECT i.proStockBatchID, i.quantity, i.expDate, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
     FROM prostock p
     JOIN prostockbatch i ON p.proStockID = i.proStockID
-    WHERE p.category =?`;
+    WHERE p.category = ? AND i.expDate > NOW()`;
 
   const params = [category];
 
   if (subCategory) {
-    sqlGetProductsByCategory += " AND p.subCategory = ?";
+    sqlGetProductsByCategory += "AND p.subCategory = ?";
     params.push(subCategory);
   }
 
@@ -100,8 +100,9 @@ exports.getProductsByCategory = async (
 exports.getTotalCountByCategory = async (category, subCategory) => {
   let sqlGetTotalCountByCategory = `
         SELECT COUNT(*) AS total
-        FROM prostock
-        WHERE category = ?
+        FROM prostock p
+        JOIN prostockbatch i ON p.proStockID = i.proStockID
+        WHERE p.category = ? AND i.expDate > NOW()
     `;
 
   const params = [category];
