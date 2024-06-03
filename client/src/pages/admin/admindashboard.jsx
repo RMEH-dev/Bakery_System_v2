@@ -10,10 +10,13 @@ import {
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import BranchSelector from "../../components/branchSelector";
+import useTokenValidation from "../../hooks/udeTokenValidation";
 
 function AdminDashboard({ children }) {
   const [selectedBranch, setSelectedBranch] = useState("");
 
+  useTokenValidation();
+  
   return (
     <PageLayout className="">
       <div className="flex justify-between items-center bg-gradient-to-b from-c1 to-c3 text-white w-[800px] h-[100px]">

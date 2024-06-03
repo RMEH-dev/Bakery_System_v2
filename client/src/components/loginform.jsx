@@ -11,7 +11,8 @@ import { useState, useEffect } from "react";
 import Axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
+import useTokenValidation from "../hooks/udeTokenValidation";
 
 export function LogInForm() {
   const [email, setEmail] = useState("");
@@ -38,12 +39,12 @@ export function LogInForm() {
 
       if (response.status === 200) {
         const { token } = response.data;
-        const { userType } = jwtDecode(token);
+        const { userType, exp } = jwtDecode(token);
         localStorage.setItem("token", token);
 
         setIsButtonClicked(true);
         toast.success(`${userType} Login Successful`);
-        
+
         setTimeout(() => {
           if (userType === "Admin") {
             navigate("/adminDashboard");
@@ -62,6 +63,11 @@ export function LogInForm() {
     }
   };
 
+  //token validation to set up the timeout and local storage token deletion
+  useTokenValidation();
+
+  
+
   useEffect(() => {
     let timer;
     if (isButtonClicked) {
@@ -73,7 +79,6 @@ export function LogInForm() {
     // Clear the timer when the component unmounts or when button is clicked again
     return () => clearTimeout(timer);
   }, [isButtonClicked, navigate]); // Include history in dependencies array
-
 
   return (
     <div className="inset-0 flex justify-center items-center bg-gradient-to-br from-c3 to-c2 backdrop-blur-sm">
@@ -89,7 +94,10 @@ export function LogInForm() {
             To taste the flavors of freshness!
           </Typography>
           <Typography className=" mt-3 w-[475px] h-2 rounded-r-2xl bg-c3"></Typography>
-          <form onSubmit={handleLogin} className="ml-[50px] mt-5 mb-2 w-80 h-150 max-w-screen-lg sm:w-96">
+          <form
+            onSubmit={handleLogin}
+            className="ml-[50px] mt-5 mb-2 w-80 h-150 max-w-screen-lg sm:w-96"
+          >
             <div className="mb-1 flex flex-col gap-6">
               <Typography className="-mb-3 text-black font-semibold font-[Montserrat]">
                 Email
@@ -139,7 +147,7 @@ export function LogInForm() {
             <Button
               type="submit"
               className="w-[300px] ml-20 mt-5 hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-xl font-[Montserrat]"
-           >
+            >
               log in
             </Button>
             <Typography
