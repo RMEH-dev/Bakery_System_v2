@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import StaffDashboard from "./staffDashboard";
 import {
   Card,
   Input,
@@ -24,6 +23,7 @@ import { jwtDecode } from "jwt-decode";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
+import StaffDashboard from "./staffDashboard";
 
 const getDecodedToken = () => {
   const token = localStorage.getItem("token"); // Or however you store your JWT
@@ -69,6 +69,7 @@ function AddProInventoryStaff() {
             manufactureDate: data.manuDate,
             expirationDate: data.expDate,
             quantity: data.quantity,
+            thresholdQuantity: data.thresholdQuantity,
             pricePerItem: data.pricePerItem,
             availableFrom: data.availableFrom,
             availableTill: data.availableTill,
@@ -192,6 +193,7 @@ function AddProInventoryStaff() {
       manufactureDate: "",
       expirationDate: "",
       quantity: "",
+      thresholdQuantity: "",
       pricePerItem: "",
       availableFrom: "",
       availableTill: "",
@@ -360,18 +362,21 @@ function AddProInventoryStaff() {
                       required
                     />
                   </div>
-                  <div className="w-[600px] grid grid-cols-2 gap-10 mb-6">
+                  <div className="grid grid-cols-3 gap-10 mb-6">
                     <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
                       Threshold Quantity
                     </Typography>
-                    <Typography className="text-c1 w-[300px] ml-20 font-bold font-[Montserrat] mt-5 mb-2">
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
                       Upload Image
+                    </Typography>
+                    <Typography className="text-c1 w-[300px]  font-bold font-[Montserrat] mt-5 mb-2">
+                      Select Branch
                     </Typography>
                     <Input
                       type="number"
                       size="md"
                       placeholder="Specify Threshold Quantity"
-                      name="quantity"
+                      name="thresholdQuantity"
                       value={formData.thresholdQuantity}
                       min="1"
                       step="1"
@@ -381,17 +386,25 @@ function AddProInventoryStaff() {
                         className: "before:content-none after:content-none",
                       }}
                       disabled={!!id}
-
                       required
                     />
                     <Input
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
-                      className="w-[200px] pb-2 2xl:w-[300px] ml-20 text-c1 font-semibold font-[Montserrat] shadow-none outline-none border-none bg-c4 rounded-[30px]"
+                      className="w-[200px] pb-2 2xl:w-[300px] text-c1 font-semibold font-[Montserrat] shadow-none outline-none border-none bg-c4 rounded-[30px]"
                       labelProps={{
                         className: "before:content-none after:content-none",
                       }}
+                      disabled={!!id}
+                    />
+                    <BranchSelector
+                      endpoint="branches"
+                      selectedOption={selectedBranch}
+                      setSelectedOption={setSelectedBranch}
+                      label="Branch"
+                      className="-mt-5"
+                      disabled={!!id}
                     />
                   </div>
                 </form>

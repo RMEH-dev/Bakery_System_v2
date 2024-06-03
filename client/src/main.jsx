@@ -36,6 +36,8 @@ import AddRawStockUsageStaff from "./pages/staff/addRawStockUsageStaff.jsx";
 import InventoryLogs from "./pages/admin/inventoryLogs.jsx";
 import UsersSystem from "./pages/admin/usersSystem.jsx";
 import AddNewUser from "./pages/admin/addUserSystem.jsx";
+import TrackOrders from "./pages/admin/trackOrders.jsx";
+import TrackOrdersStaff from "./pages/staff/staffTracKOrders.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -60,8 +62,10 @@ const router = createBrowserRouter([
   { path: "/proInventoryStaff", element: <ProtectedRoute component={ProInventoryStaff} allowedRoles={['Staff', 'Admin']}/>},
   { path: "/addProInventoryStaff", element: <ProtectedRoute component={AddProInventoryStaff} allowedRoles={['Staff', 'Admin']} />},
   { path: "/editProInventoryStaff/:id", element: <ProtectedRoute component={AddProInventoryStaff} allowedRoles={['Staff', 'Admin']} />},
+  { path: "/trackOrdersAdmin", element: <ProtectedRoute component={TrackOrders} allowedRoles={['Admin']} />},
+  { path: "/trackOrdersStaff", element: <ProtectedRoute component={TrackOrdersStaff} allowedRoles={['Admin']} />},
   { path: "/users", element: <ProtectedRoute component={UsersSystem} allowedRoles={['Admin']}/>},
-  { path: "/addUsers", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},
+  { path: "/addUsers", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Staff']}/>},
   { path: "/editUsers/:id", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},
   { path: "/signUp", element: <SignUp /> },
   { path: "/logIn", element: <LogIn /> },

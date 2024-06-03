@@ -10,6 +10,7 @@ const usersRoutes = require("./src/api/routes/usersRoutes");
 const productsRoutes = require('./src/api/routes/productsRoutes');
 const branchesRoutes = require('./src/api/routes/branchesRoutes');
 const cartRoutes = require('./src/api/routes/cartRoutes');
+const orderRoutes = require('./src/api/routes/orderRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -32,7 +33,7 @@ app.use("/api/routes", usersRoutes);
 app.use("/api/routes", productsRoutes);
 app.use("/api/routes", branchesRoutes);
 app.use("/api/routes", cartRoutes);
-
+app.use("/api/routes", orderRoutes);
 
 
 //port assign to the backend server for successful connection requests

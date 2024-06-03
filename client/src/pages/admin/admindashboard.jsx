@@ -64,7 +64,7 @@ function AdminDashboard({ children }) {
                 system users
               </Button>
             </Link>
-            <Link to="/trackOrders">
+            <Link to="/trackOrdersAdmin">
               <Button className="w-[200px] hover:transition-transform duration-500 ease-in-out hover:scale-105 justify-end hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-md font-[Montserrat]">
                 Track Orders
               </Button>
