@@ -222,8 +222,6 @@ function NavList({ itemCount }) {
             params: { q: debouncedSearchTerm },
           });
           setSearchResults(response.data.searchResults);
-          console.log(searchResults);
-          console.log(response.data);
         } catch (error) {
           console.error("Error fetching search results: ", error);
         }
@@ -291,23 +289,25 @@ function NavList({ itemCount }) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search products..."
-          className="p-2 pl-3 border text-black border-c3 rounded-2xl"
+          className="p-2 pl-3 border text-black border-c3 rounded-2xl  z-50"
         />
-        {Array.isArray(searchResults) && searchResults.map((result, index) => (
-          <div
-            key={index}
-            className="p-2 hover:bg-gray-100 text-c1 font-[Montserrat] font-medium  cursor-pointer"
-            onClick={() => {
-              setSearchTerm(result.subCategory);
-              setSearchResults([]);
-              navigate(
-                `/products/${result.category.toLowerCase()}/${result.subCategory.toLowerCase()}`
-              );
-            }}
-          >
-            {result.subCategory}
+         {searchResults.length > 0 && (
+          <div className="max-h-40 overflow-y-auto absolute left-0 right-0 mt-2 rounded-2xl bg-white shadow-lg">
+            {searchResults.map((result, index) => (
+              <div
+                key={index}
+                className="p-2 hover:bg-c2 text-c1 font-[Montserrat] font-medium cursor-pointer"
+                onClick={() => {
+                  setSearchTerm(result.proStockName);
+                  setSearchResults([]);
+                  navigate(`/productsById/${result.proStockBatchID}`);
+                }}
+              >
+                {result.proStockName}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
       {isLoggedIn ? (
         <Typography

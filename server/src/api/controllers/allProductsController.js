@@ -17,6 +17,7 @@ const getProducts = async (req, res) => {
     res.status(500).json({ error: "Internal Server error" });
   }
 };
+
 const getProductById = async (req, res) => {
   const { id } = req.params;
 
@@ -49,17 +50,15 @@ const getCategories = async (req, res) => {
 };
 
 const searchProducts = async (req, res) => {
-  const { searchTerm, page = 1, limit = 8 } = req.query;
-  const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+  const { q } = req.query;
+
+  if (!q) {
+    return res.status(400).json({ error: "Search query is required" });
+  }
 
   try {
-    const searchResults = await allProductsModel.searchProducts(
-      searchTerm,
-      offset,
-      parseInt(limit)
-    );
-    const total = await allProductsModel.getTotalCountBySearch(searchTerm); // Fetch total count for pagination
-    res.json({ searchResults, total });
+    const products = await allProductsModel.searchProducts(q);
+    res.json({ searchResults: products });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server error" });

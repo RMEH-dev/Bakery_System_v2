@@ -12,10 +12,10 @@ export default function Home() {
     <Fragment>
     <div>
 
-      <MegaMenuWithHover className="fixed top-0 left-0 z-20" />{" "}
+      <MegaMenuWithHover className="fixed top-0 left-0 z-50" />{" "}
       {/* Set z-index to 2 */}
-      <CarouselCustomNavigation className="z-2" />
-      <FooterWithSocialLinks className="z-10"/> {/* Implicit z-index of 0 or default */}
+      <CarouselCustomNavigation className="z-10" />
+      <FooterWithSocialLinks className="z-30"/> {/* Implicit z-index of 0 or default */}
     </div>,
       {/* <SignUpForm isVisible={showSignUp} onClose={() => setShowSignUp(false)} /> */}
       </Fragment>

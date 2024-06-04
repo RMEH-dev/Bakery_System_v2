@@ -88,16 +88,17 @@ exports.getProductById = async (id) => {
     })
 }
 
-exports.searchProducts = async (searchTerm, offset, limit) => {
-  let sqlSearchProducts = `
-    SELECT i.proStockBatchID, p.category, p.subCategory, i.quantity, i.expDate, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
-    FROM prostock p
-    JOIN prostockbatch i ON p.proStockID = i.proStockID
-    WHERE p.proStockName LIKE ? AND i.expDate > NOW()
-    LIMIT ?, ?`;
+exports.searchProducts = async (searchTerm) => {
+  const sqlSearchProducts = `
+      SELECT i.proStockBatchID, p.proStockName
+      FROM prostock p
+      JOIN prostockbatch i ON p.proStockID = i.proStockID
+      WHERE p.proStockName LIKE ?
+      AND i.expDate > NOW();
+  `;
 
   return new Promise((resolve, reject) => {
-    db.query(sqlSearchProducts, [`%${searchTerm}%`, offset, limit], (err, rows) => {
+    db.query(sqlSearchProducts, [`%${searchTerm}%`], (err, rows) => {
       if (err) {
         return reject(new Error("Error searching products: " + err.message));
       }

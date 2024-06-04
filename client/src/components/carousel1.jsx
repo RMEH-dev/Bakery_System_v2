@@ -6,7 +6,7 @@ import "../index.css";
 export function CarouselCustomNavigation() {
   return (
     <Carousel
-      className="pt-[0px] h-[725px] z-1"
+      className="pt-[0px] h-[725px] z-10"
       navigation={({ setActiveIndex, activeIndex, length }) => (
         <div className="absolute bottom-6 left-2/4 z-50 flex -translate-x-2/4 gap-2">
           {new Array(length).fill("").map((_, i) => (
