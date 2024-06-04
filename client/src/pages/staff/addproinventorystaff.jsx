@@ -209,9 +209,9 @@ function AddProInventoryStaff() {
   return (
     <StaffDashboard>
       <div className="bg-c1 pt-10 pb-10">
-        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 pr-10 bg-c2  h-[100px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-150 ml-5  mb-5 mr-5 pt- pb-10 pr-10 bg-c2  h-[800px] rounded-2xl text-c3 hover:text-c1">
           <Card
-            className="flex flex-col mb-6 justify-items-center h-[100px] sm:w-auto bg-c2 rounded-2xl z-80"
+            className="flex flex-col mb-6 justify-items-center h-[800px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
           >
             <div className="mb-2 gap-5 flex flex-col">
@@ -221,7 +221,7 @@ function AddProInventoryStaff() {
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 pr-5 ml-10 h-[900px]  bg-white  rounded-2xl z-80"
+                className="flex flex-col mb-10 pr-5 ml-10 mr-10 h-[900px]  bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px]  sm:w-96">

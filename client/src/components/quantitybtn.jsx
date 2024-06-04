@@ -2,12 +2,12 @@ import { Typography } from "@material-tailwind/react";
 import React, { useState, useEffect } from "react";
 
 export default function QuantityBtn({ minValue = 1, maxValue = 100, onChange }) {
-  const [quantity, setQuantity] = useState(count || minValue);
+  const [quantity, setQuantity] = useState(minValue);
 
 
   useEffect(() => {
-    setQuantity(count);
-  }, [count]);
+    setQuantity(minValue);
+  }, [minValue]);
 
   //function to handle increment
   const handleIncrementCounter = () => {

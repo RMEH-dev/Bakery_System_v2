@@ -68,6 +68,64 @@ exports.getCategories = async () => {
   });
 };
 
+exports.getProductById = async (id) => {
+  const sqlGetProductById = `
+        SELECT i.proStockBatchID, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl, i.quantity
+        FROM prostock p
+        JOIN prostockbatch i ON p.proStockID = i.proStockID
+        WHERE i.proStockBatchID =?;
+    `;
+
+    return new Promise((resolve, reject) => {
+      db.query(sqlGetProductById, [id], (err, rows) => {
+        if (err) {
+          return reject(
+            new Error("Error fetching product by id: " + err.message)
+          );
+        }
+        resolve(rows);
+      });
+    })
+}
+
+exports.searchProducts = async (searchTerm, offset, limit) => {
+  let sqlSearchProducts = `
+    SELECT i.proStockBatchID, p.category, p.subCategory, i.quantity, i.expDate, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
+    FROM prostock p
+    JOIN prostockbatch i ON p.proStockID = i.proStockID
+    WHERE p.proStockName LIKE ? AND i.expDate > NOW()
+    LIMIT ?, ?`;
+
+  return new Promise((resolve, reject) => {
+    db.query(sqlSearchProducts, [`%${searchTerm}%`, offset, limit], (err, rows) => {
+      if (err) {
+        return reject(new Error("Error searching products: " + err.message));
+      }
+      resolve(rows);
+    });
+  });
+};
+
+exports.getTotalCountBySearch = async (searchTerm) => {
+  const sqlGetTotalCountBySearch = `
+        SELECT COUNT(*) AS total
+        FROM prostock p
+        JOIN prostockbatch i ON p.proStockID = i.proStockID
+        WHERE p.proStockName LIKE ? AND i.expDate > NOW()
+    `;
+
+  return new Promise((resolve, reject) => {
+    db.query(sqlGetTotalCountBySearch, [`%${searchTerm}%`], (err, results) => {
+      if (err) {
+        return reject(
+          new Error("Error fetching total count by search term: " + err.message)
+        );
+      }
+      resolve(results[0].total);
+    });
+  });
+};
+
 exports.getProductsByCategory = async (
   category,
   subCategory,

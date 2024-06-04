@@ -17,11 +17,49 @@ const getProducts = async (req, res) => {
     res.status(500).json({ error: "Internal Server error" });
   }
 };
+const getProductById = async (req, res) => {
+  const { id } = req.params;
+
+
+  console.log(id);
+  if (!id) {
+    return res.status(400).json({ error: "Product ID is required" });
+  }
+
+  try {
+    const product = await allProductsModel.getProductById(id);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    res.json(product);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server error" });
+  }
+};
 
 const getCategories = async (req, res) => {
   try {
     const categories = await allProductsModel.getCategories();
     res.json(categories);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server error" });
+  }
+};
+
+const searchProducts = async (req, res) => {
+  const { searchTerm, page = 1, limit = 8 } = req.query;
+  const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+  try {
+    const searchResults = await allProductsModel.searchProducts(
+      searchTerm,
+      offset,
+      parseInt(limit)
+    );
+    const total = await allProductsModel.getTotalCountBySearch(searchTerm); // Fetch total count for pagination
+    res.json({ searchResults, total });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server error" });
@@ -45,7 +83,7 @@ const getProductsByCategory = async (req, res) => {
     );
     const total = await allProductsModel.getTotalCountByCategory(
       category,
-      subCategory,
+      subCategory,           
       branchName
     ); // Fetch total count for pagination
     res.json({ products, total });
@@ -55,4 +93,4 @@ const getProductsByCategory = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getCategories, getProductsByCategory };
+module.exports = { getProducts, getProductById, getCategories, searchProducts, getProductsByCategory };

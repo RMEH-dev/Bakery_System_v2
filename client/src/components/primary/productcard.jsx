@@ -4,6 +4,7 @@ import {
   CardBody,
   Typography,
 } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
@@ -57,7 +58,8 @@ export function ProductCard({ product, selectedBranch }) {
   const isExpired = expDate <= currentDate;
 
   return (
-    <Card className="w-[250px] bg-white text-c3 hover:text-c1 hover:bg-opacity-90 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[300px]">
+    <Card className="w-[250px] bg-white text-c3 hover:text-c1 hover:bg-opacity-90 hover:duration-200 hover:transition-transform hover:translate-y-2 duration-500 ease-in-out hover:scale-105  cursor-pointer shadow-md shadow-c3 h-[350px]">
+     <Link to={`/productsById/${product.proStockBatchID}`}>
       <CardHeader
         shadow={false}
         floated={false}
@@ -69,6 +71,7 @@ export function ProductCard({ product, selectedBranch }) {
           className="h-full w-full object-cover hover:text-c1"
         />
       </CardHeader>
+      </Link>
       <div className="grid hover:text-c1 grid:cols-2">
         <CardBody className="hover:text-c1">
           <div className="mb-1  flex justify-between">

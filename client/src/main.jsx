@@ -38,10 +38,12 @@ import UsersSystem from "./pages/admin/usersSystem.jsx";
 import AddNewUser from "./pages/admin/addUserSystem.jsx";
 import TrackOrders from "./pages/admin/trackOrders.jsx";
 import TrackOrdersStaff from "./pages/staff/staffTracKOrders.jsx";
+import ProductsById from "./pages/customer/productsbyid.jsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/products", element: <Products />},
+  { path: "/productsById/:id", element: <ProductsById />},
   { path: "/products/:category", element: <Products /> },
   { path: "/products/:category/:subCategory", element: <Products /> },
   { path: "/adminDashboard", element:<ProtectedRoute component={AdminReports} allowedRoles={['Admin']} />},
@@ -65,7 +67,7 @@ const router = createBrowserRouter([
   { path: "/trackOrdersAdmin", element: <ProtectedRoute component={TrackOrders} allowedRoles={['Admin']} />},
   { path: "/trackOrdersStaff", element: <ProtectedRoute component={TrackOrdersStaff} allowedRoles={['Admin']} />},
   { path: "/users", element: <ProtectedRoute component={UsersSystem} allowedRoles={['Admin']}/>},
-  { path: "/addUsers", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Staff']}/>},
+  { path: "/addUsers", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},
   { path: "/editUsers/:id", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},
   { path: "/signUp", element: <SignUp /> },
   { path: "/logIn", element: <LogIn /> },

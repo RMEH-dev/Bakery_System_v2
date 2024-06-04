@@ -193,6 +193,53 @@ const getDecodedToken = () => {
 };
 
 function NavList({ itemCount }) {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      const fetchSearchResults = async () => {
+        try {
+          const response = await axiosInstance.get(`/searchProducts`, {
+            params: { q: debouncedSearchTerm },
+          });
+          setSearchResults(response.data.searchResults);
+          console.log(searchResults);
+          console.log(response.data);
+        } catch (error) {
+          console.error("Error fetching search results: ", error);
+        }
+      };
+      fetchSearchResults();
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedSearchTerm]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
   return (
     <List className="flex text-nowrap md:px-0 mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <Typography
@@ -214,7 +261,7 @@ function NavList({ itemCount }) {
           className="font-bold font-[Montserrat] text-c2"
         >
           <ListItem className="flex items-center gap-2 py-2 pr-4">
-            About
+            Our Story
           </ListItem>
         </Typography>
       </Link>
@@ -238,51 +285,54 @@ function NavList({ itemCount }) {
           </ListItem>
         </Typography>
       </Link>
-      <Typography
-        as="a"
-        href="#"
-        variant="medium"
-        color="black"
-        className="font-bold font-[Montserrat] pl-10  text-c2"
-      >
-        <div class="pl-5 flex items-center min-h-8 w-[280px] bg-white text-c1 rounded-2xl">
-          <input
-            class="w-35 justify-left border-none bg-transparent py-1 placeholder:text-c1 text-c1 outline-none focus:outline-none "
-            type="search"
-            name="search"
-            placeholder="Search..."
-          />
-          <button
-            type="submit"
-            class="m-1 rounded-3xl bg-c1-100 px-2 py-2 text-c2"
+      <div className="relative">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search products..."
+          className="p-2 pl-3 border text-black border-c3 rounded-2xl"
+        />
+        {Array.isArray(searchResults) && searchResults.map((result, index) => (
+          <div
+            key={index}
+            className="p-2 hover:bg-gray-100 text-c1 font-[Montserrat] font-medium  cursor-pointer"
+            onClick={() => {
+              setSearchTerm(result.subCategory);
+              setSearchResults([]);
+              navigate(
+                `/products/${result.category.toLowerCase()}/${result.subCategory.toLowerCase()}`
+              );
+            }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-4 h-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
-          </button>
-        </div>
-      </Typography>
-      <Typography
-        variant="medium"
-        className="font-bold font-[Montserrat] text-c2 md:pl-2 "
-      >
-        <Link to="/logIn">
-          <ListItem className="flex items-center gap-2 py-2 lg:pl-4 pr-2">
-            Login
+            {result.subCategory}
+          </div>
+        ))}
+      </div>
+      {isLoggedIn ? (
+        <Typography
+          variant="medium"
+          className="font-bold font-[Montserrat] text-c2 md:pl-2"
+        >
+          <ListItem
+            className="flex items-center gap-2 py-2 lg:pl-4 pr-2"
+            onClick={handleLogout}
+          >
+            Logout
           </ListItem>
-        </Link>
-      </Typography>
+        </Typography>
+      ) : (
+        <Typography
+          variant="medium"
+          className="font-bold font-[Montserrat] text-c2 md:pl-2"
+        >
+          <Link to="/login">
+            <ListItem className="flex items-center gap-2 py-2 lg:pl-4 pr-2">
+              Login
+            </ListItem>
+          </Link>
+        </Typography>
+      )}
       <Typography color="black" className="font-bold font-[Montserrat]">
         <div className="flex items-center h-9 pl-1 text-c2">|</div>
       </Typography>
@@ -301,8 +351,8 @@ function NavList({ itemCount }) {
         </Link>
       </Typography>
       <Typography as="a" href="#" className="relative ml-4">
-          <Link to="/shoppingCart">
-            <button className="relative flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
+        <Link to="/shoppingCart">
+          <button className="relative flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -316,15 +366,15 @@ function NavList({ itemCount }) {
                 strokeLinejoin="round"
                 d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
               />
-            </svg>            
-            </button>
-            {itemCount > 0 && (
+            </svg>
+          </button>
+          {itemCount > 0 && (
             <span className="absolute -top-2 -right-2 h-5 w-5 text-c2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-red-900 rounded-full">
-                  {itemCount}             
-                </span>
-            )}
-          </Link>
-        </Typography>
+              {itemCount}
+            </span>
+          )}
+        </Link>
+      </Typography>
 
       <Typography as="a" href="#" className="pl-2">
         <Link to="/profileUser">
@@ -374,9 +424,9 @@ export function MegaMenuWithHover() {
       }
       const response = await axiosInstance.get(`/cart/itemCount/${userId}`);
       console.log("Cart items fetched: ", response.data);
-      if (response.data.length > 0) { 
-      setItemCount(response.data[0].itemCount || 0);
-      console.log(itemCount);
+      if (response.data.length > 0) {
+        setItemCount(response.data[0].itemCount || 0);
+        console.log(itemCount);
       }
     } catch (error) {
       console.error("Error fetching cart items: ", error.message);
@@ -437,10 +487,9 @@ export function MegaMenuWithHover() {
             <Bars3Icon className="h-6 w-6 text-c2" strokeWidth={2} />
           )}
         </IconButton>
-        
       </div>
       <Collapse open={openNav}>
-      <NavList />
+        <NavList />
       </Collapse>
     </Navbar>
   );

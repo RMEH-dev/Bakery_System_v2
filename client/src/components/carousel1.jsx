@@ -3,7 +3,6 @@ import React from "react";
 import "../index.css";
 
 
-
 export function CarouselCustomNavigation() {
   return (
     <Carousel
@@ -23,7 +22,7 @@ export function CarouselCustomNavigation() {
       )}
       autoplay={true}
       autoplayInterval={2000} // 2 seconds interval
-      autoplayReverse={true} // Reverse direction when reaching the end
+      autoplayReverse={true} 
       infinite={true} // Infinite loop
     >
       <div className="relative h-full w-full">
@@ -46,7 +45,7 @@ export function CarouselCustomNavigation() {
               color="white"
               className="mb-12 opacity-80"
             >
-              We  make delicious bakery product using fresh, high-quality ingredients. Order the product of your choice and taste the flavors of Asia at our bakery.   
+              We make delicious bakery product using fresh, high-quality ingredients. Order the product of your choice and taste the flavors of Asia at our bakery.   
             </Typography>
           </div>
         </div>
@@ -79,7 +78,7 @@ export function CarouselCustomNavigation() {
       <div className="relative h-full w-full">
         <img
           src="./src/assets/images/i3.jpg"
-          alt="image 2"
+          alt="image 3"
           className="h-[725px] w-screen object-image"
         />
         <div className="absolute inset-0 grid h-full w-full items-center bg-black/75">
