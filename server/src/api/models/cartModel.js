@@ -40,11 +40,15 @@ const CartModel = {
     );
   },
 
-   getCartItemsByUserID: (values, callback) => {
+  getCartItemsByUserID: (values, callback) => {
     const sqlGetItemsByUserID = `SELECT ci.cartItemID, c.cartID, pb.proStockBatchID, ci.quantity, p.proStockID, p.proStockName, p.pricePerItem, p.imageUrl FROM cartitem ci JOIN cart c ON ci.cartID = c.cartID JOIN proStockBatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN proStock p ON p.proStockID = pb.proStockID WHERE c.userID = ?`;
     db.query(sqlGetItemsByUserID, values, callback);
-},
- 
+  },
+
+  getCartItemCountByUserID: (values, callback) => {
+    const sqlGetItemCountByUserID = `SELECT COUNT(*) AS itemCount FROM cartitem ci JOIN cart c ON ci.cartID = c.cartID WHERE c.userID = ?`;
+    db.query(sqlGetItemCountByUserID, values, callback);
+  },
 };
 
 module.exports = CartModel;

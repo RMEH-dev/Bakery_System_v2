@@ -32,8 +32,7 @@ import {
 } from "@heroicons/react/24/solid";
 import axiosInstance from "../utils/axios";
 import ShoppingCartTable2 from "./primary/tablecart2";
-import {jwtDecode} from "jwt-decode"; // Corrected import
-
+import { jwtDecode } from "jwt-decode"; // Corrected import
 
 function NavListMenu() {
   const location = useLocation();
@@ -193,7 +192,7 @@ const getDecodedToken = () => {
   }
 };
 
-function NavList() {
+function NavList({ itemCount }) {
   return (
     <List className="flex text-nowrap md:px-0 mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <Typography
@@ -301,9 +300,9 @@ function NavList() {
           </ListItem>
         </Link>
       </Typography>
-      <Typography as="a" href="#">
-        <Link to="/shoppingCart">
-          <button class="flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
+      <Typography as="a" href="#" className="relative ml-4">
+          <Link to="/shoppingCart">
+            <button className="relative flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -317,10 +316,15 @@ function NavList() {
                 strokeLinejoin="round"
                 d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
               />
-            </svg>
-          </button>
-        </Link>
-      </Typography>
+            </svg>            
+            </button>
+            {itemCount > 0 && (
+            <span className="absolute -top-2 -right-2 h-5 w-5 text-c2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none bg-red-900 rounded-full">
+                  {itemCount}             
+                </span>
+            )}
+          </Link>
+        </Typography>
 
       <Typography as="a" href="#" className="pl-2">
         <Link to="/profileUser">
@@ -351,6 +355,7 @@ export function MegaMenuWithHover() {
   const [logoSrc, setLogoSrc] = React.useState(""); // State to hold logo source
   const decodedToken = getDecodedToken();
   const [userId, setUserId] = useState(decodedToken?.id);
+  const [itemCount, setItemCount] = useState(0); // State to hold item count
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -360,15 +365,19 @@ export function MegaMenuWithHover() {
   }, [decodedToken?.id]);
 
   // Memoize fetchCartItems to prevent re-creation on each render
-  const fetchCartItems = useCallback(async () => {
+  const fetchCartItemCount = useCallback(async () => {
     console.log("Fetching cart items for userId:", userId);
     try {
       if (!userId) {
         console.error("No user ID provided");
         return;
       }
-      const response = await axiosInstance.get(`/cart/${userId}`);
+      const response = await axiosInstance.get(`/cart/itemCount/${userId}`);
       console.log("Cart items fetched: ", response.data);
+      if (response.data.length > 0) { 
+      setItemCount(response.data[0].itemCount || 0);
+      console.log(itemCount);
+      }
     } catch (error) {
       console.error("Error fetching cart items: ", error.message);
     }
@@ -376,9 +385,9 @@ export function MegaMenuWithHover() {
 
   useEffect(() => {
     if (userId) {
-      fetchCartItems();
+      fetchCartItemCount();
     }
-  }, [fetchCartItems, userId]);
+  }, [fetchCartItemCount, userId]);
 
   React.useEffect(() => {
     // Dynamically import the logo image
@@ -414,7 +423,7 @@ export function MegaMenuWithHover() {
           PERERA BAKERS
         </Typography>
         <div className="hidden lg:block text-c2">
-          <NavList className="text-c2" />
+          <NavList itemCount={itemCount} className="text-c2" />
         </div>
         <IconButton
           variant="text"
@@ -428,9 +437,10 @@ export function MegaMenuWithHover() {
             <Bars3Icon className="h-6 w-6 text-c2" strokeWidth={2} />
           )}
         </IconButton>
+        
       </div>
       <Collapse open={openNav}>
-        <NavList />
+      <NavList />
       </Collapse>
     </Navbar>
   );

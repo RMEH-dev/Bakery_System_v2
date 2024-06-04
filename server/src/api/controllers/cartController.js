@@ -69,6 +69,23 @@ const CartController = {
       // console.log(results)
     });
   },
+
+  getCartItemCount: (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "UserID is required" });
+    }
+  
+    CartModel.getCartItemCountByUserID([id], (err, results) => {
+      if (err) {
+        console.error("Error fetching cart item count:", err);
+        return res.status(500).send(err);
+      }
+      res.status(200).json(results);
+    });
+  },
 };
+
+
 
 module.exports =  CartController ;
