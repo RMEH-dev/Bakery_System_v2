@@ -10,18 +10,24 @@ import React, { useState, useEffect } from "react";
 import  getDecodedToken  from "../../services/jwtdecoder";
 import axiosInstance from "../../utils/axios";
 
-export function ProductCard({ product }) {
+export function ProductCard({ product, selectedBranch }) {
   // console.log("ProductCard received addToCart:", addToCart);
 
   const addToCart = async (product) => {
+
     console.log("addToCart called with product:", product);
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("User not authenticated.");
+        return;
+      }
       const decodedToken = getDecodedToken(token);
       const userID = decodedToken.id;
       const response = await axiosInstance.post("/cart", {
         userID,
-        proStockBatchID: product.proStockBatchID,
+        proStockBatchID: product.proStockBatchID, 
+        branchName: selectedBranch,
       });
       console.log("Item added to cart:", response.data);
       toast.success("Item added to cart!");
@@ -33,6 +39,10 @@ export function ProductCard({ product }) {
 
   const handleAddToCart = () => {
     console.log("handleAddToCart called");
+    if (!selectedBranch) {
+      toast.error("Please select a branch first.");
+      return;
+    }
     if (!isAvailable || isExpired) {
       toast.error("Not Available at the moment");
       return;

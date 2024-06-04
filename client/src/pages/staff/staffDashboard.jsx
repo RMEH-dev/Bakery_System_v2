@@ -24,7 +24,7 @@ function StaffDashboard({ children }) {
 
   return (
     <PageLayout className="">
-      <div className="flex justify-between items-center bg-gradient-to-b from-c1 to-c3 text-c2 w-[800px] h-[100px]">
+      <div className="flex justify-between items-center w-[1540px] bg-gradient-to-b from-c1 to-c3 text-c2 h-[100px]">
         <Link to="/staffDashboard">
           <h1 className="ml-10 pt-5 pb-5 text-4xl font-bold font-[Montserrat]">
             Welcome Staff Member

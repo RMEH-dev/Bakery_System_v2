@@ -368,7 +368,7 @@ export default function ProStockTable() {
   return (
     <Box
       sx={{ width: "100%" }}
-      className="bg-white text-c1 rounded-2xl font-bold font-[Montserrat] p-5"
+      className="bg-white ml-5 text-c1 rounded-2xl font-bold font-[Montserrat] p-5"
     >
       <div
         sx={{ width: "100%", mb: 2 }}

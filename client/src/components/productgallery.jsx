@@ -28,6 +28,7 @@ export function ProductGallery() {
             limit: productsPerPage,
             category,
             subCategory,
+            branchName: selectedBranch
           },
         });
         setProducts(response.data.products);
@@ -37,7 +38,7 @@ export function ProductGallery() {
       }
     };
     fetchProducts();
-  }, [currentPage, category, subCategory]);
+  }, [currentPage, category, subCategory, selectedBranch]);
 
   const handleCategoryClick = (category, subCategory = null) => {
     setCurrentPage(1);
@@ -85,6 +86,7 @@ export function ProductGallery() {
                   className="mx-auto transform  hover:text-c2 transition-transform hover:scale-105"
                   key={product.proStockID}
                   product={product}
+                  selectedBranch={selectedBranch}
                 />
               ))}
             </div>

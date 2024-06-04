@@ -41,31 +41,37 @@ exports.getCategories = async () => {
 
   return new Promise((resolve, reject) => {
     db.query(sqlGetCategories, (err, rows) => {
-        if (err) {
-            return reject(new Error("Error fetching categories: " + err.message));
-          }
-    
-          const categories = {};
-          rows.forEach(row => {
-            if (!categories[row.category]) {
-              categories[row.category] = [];
-            }
-            if (row.subCategory && !categories[row.category].includes(row.subCategory)) {
-              categories[row.category].push(row.subCategory);
-            }
-          });
-    
-          resolve(Object.keys(categories).map(category => ({
-            category,
-            subCategories: categories[category]
-          })));
-        });
+      if (err) {
+        return reject(new Error("Error fetching categories: " + err.message));
+      }
+
+      const categories = {};
+      rows.forEach((row) => {
+        if (!categories[row.category]) {
+          categories[row.category] = [];
+        }
+        if (
+          row.subCategory &&
+          !categories[row.category].includes(row.subCategory)
+        ) {
+          categories[row.category].push(row.subCategory);
+        }
       });
-    };
+
+      resolve(
+        Object.keys(categories).map((category) => ({
+          category,
+          subCategories: categories[category],
+        }))
+      );
+    });
+  });
+};
 
 exports.getProductsByCategory = async (
   category,
   subCategory,
+  branchName,
   offset,
   limit
 ) => {
@@ -73,13 +79,19 @@ exports.getProductsByCategory = async (
     SELECT i.proStockBatchID, i.quantity, i.expDate, p.proStockName, p.availableFrom, p.availableTill, p.pricePerItem, p.imageUrl
     FROM prostock p
     JOIN prostockbatch i ON p.proStockID = i.proStockID
+    JOIN branch b ON i.branchID = b.branchID
     WHERE p.category = ? AND i.expDate > NOW()`;
 
   const params = [category];
 
   if (subCategory) {
-    sqlGetProductsByCategory += "AND p.subCategory = ?";
+    sqlGetProductsByCategory += " AND p.subCategory = ?";
     params.push(subCategory);
+  }
+
+  if (branchName) {
+    sqlGetProductsByCategory += " AND b.branchName = ?";
+    params.push(branchName);
   }
 
   sqlGetProductsByCategory += " LIMIT ?, ?";
@@ -97,11 +109,12 @@ exports.getProductsByCategory = async (
   });
 };
 
-exports.getTotalCountByCategory = async (category, subCategory) => {
+exports.getTotalCountByCategory = async (category, subCategory, branchName) => {
   let sqlGetTotalCountByCategory = `
         SELECT COUNT(*) AS total
         FROM prostock p
         JOIN prostockbatch i ON p.proStockID = i.proStockID
+        JOIN branch b ON i.branchID = b.branchID
         WHERE p.category = ? AND i.expDate > NOW()
     `;
 
@@ -111,7 +124,12 @@ exports.getTotalCountByCategory = async (category, subCategory) => {
     sqlGetTotalCountByCategory += " AND subCategory = ?";
     params.push(subCategory);
   }
-//   const params = subCategory ? [category, subCategory] : [category];
+  //   const params = subCategory ? [category, subCategory] : [category];
+
+  if (branchName) {
+    sqlGetTotalCountByCategory += " AND b.branchName = ?";
+    params.push(branchName);
+  }
 
   return new Promise((resolve, reject) => {
     db.query(sqlGetTotalCountByCategory, params, (err, results) => {

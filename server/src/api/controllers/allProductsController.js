@@ -1,4 +1,5 @@
 const allProductsModel = require("../models/allProductsModel");
+const db = require("../../config/databaseConnection");
 
 const getProducts = async (req, res) => {
   const { page = 1, limit = 8 } = req.query;
@@ -28,19 +29,24 @@ const getCategories = async (req, res) => {
 };
 
 const getProductsByCategory = async (req, res) => {
-  const { category, subCategory, page = 1, limit = 8 } = req.query;
+  const { category, subCategory, branchName,  page = 1, limit = 8 } = req.query;
   const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
+  console.log('Received branchName:', branchName); // Log the branchName
+
   try {
+
     const products = await allProductsModel.getProductsByCategory(
       category,
       subCategory,
+      branchName,
       parseInt(offset),
       parseInt(limit)
     );
     const total = await allProductsModel.getTotalCountByCategory(
       category,
-      subCategory
+      subCategory,
+      branchName
     ); // Fetch total count for pagination
     res.json({ products, total });
   } catch (err) {

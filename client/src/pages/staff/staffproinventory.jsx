@@ -25,14 +25,14 @@ function ProInventoryStaff() {
             shadow={false}
           >
             <div className="mb-2 gap-5 flex flex-col">
-              <div className="gap-80 right-0 mr-10 w-[800px] flex-cols grid-cols-2 grid">
+              <div className="gap-80 right-0 mr-10 w-[1440px] flex-cols grid-cols-2 grid">
                 <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
                   Produced Inventory
                 </Typography>
                 <Link to="/addProInventoryStaff">
                 <div className="flex pr-5 pt-2 justify-end">
                   <PlusIcon className="text-c4 mr-4 justify-start bg-c2 rounded-2xl font-bold mt-6 absolute w-5 h-5" />
-                  <Button className="mt-3 w-[260px] pr-10 hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
+                  <Button className="mt-3 w-[300px] pr-10 hover:bg-deep-orange-900 bg-c3 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
                     Add Produced Item
                   </Button>
                   </div>

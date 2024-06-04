@@ -51,7 +51,7 @@ function StaffReports() {
               <Typography className="text-2xl mt-5 ml-10 text-black font-bold font-[Montserrat]">
                 Reports
               </Typography>
-              <div className="gap-20 mr-10 w-[800px] flex-cols grid-cols-2 grid">
+              <div className="gap-20 mr-10 w-[1440px] flex-cols grid-cols-2 grid">
                 <Card className="mx-10 mb-10 w-[600px] h-[300px]">
                   <div className="flex-col flex">
                     <Typography className="pl-5 bg-c2 w-[600px] pt-1 rounded-2xl text-black font-bold text-lg font-[Montserrat]">
