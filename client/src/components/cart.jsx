@@ -44,7 +44,7 @@ export function Cart({children}) {
               1. Shopping Cart &nbsp; {">"}
               {">"}{" "}
             </Link>
-            <Link to="/checkout">
+            <Link to="/checkout/:id">
               &nbsp; 2. Checkout&nbsp; {">"}
               {">"}{" "}
             </Link>

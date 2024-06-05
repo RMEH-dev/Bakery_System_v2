@@ -15,7 +15,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT
-
+const cronJobs = require("./src/api/helpers/cronJobs");
 
 
 app.use(cors());
@@ -35,6 +35,7 @@ app.use("/api/routes", branchesRoutes);
 app.use("/api/routes", cartRoutes);
 app.use("/api/routes", orderRoutes);
 
+cronJobs.start();
 
 //port assign to the backend server for successful connection requests
 app.listen(PORT, () => {

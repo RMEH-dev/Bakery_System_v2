@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../utils/axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,22 +24,39 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   }, [userId, setCartItems]);
 
   const handleQuantityChange = (itemId, amount) => {
-    setCartItems((prevCartItems) =>
-      prevCartItems.map((item) =>
-        item.cartItemID === itemId
-          ? {
-              ...item,
-              quantity: item.quantity + amount > 0 ? item.quantity + amount : 1,
-            }
-          : item
-      )
-    );
+    const updatedCartItems = cartItems.map((item) => {
+      if (item.cartItemID === itemId) {
+        const originalQuantity = item.quantity;
+        const newQuantity = item.quantity + amount > 0 ? item.quantity + amount : 1;
+        axiosInstance.post("/cart/updateQuantity", { cartItemID: itemId, newQuantity, proStockBatchID: item.proStockBatchID, originalQuantity })
+          .then(() => {
+            toast.success("Quantity updated.");
+          })
+          .catch((error) => {
+            console.error("Error updating quantity:", error);
+            toast.error("Error updating quantity.");
+          });
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    });
+    setCartItems(updatedCartItems);
+  };;
+
+  const handleRemoveItem = (itemId, proStockBatchID, quantity) => {
+    axiosInstance.post("/cart/remove", { cartItemID: itemId, proStockBatchID, quantity })
+      .then(() => {
+        setCartItems(cartItems.filter(item => item.cartItemID !== itemId));
+        toast.success("Item removed from cart.");
+      })
+      .catch((error) => {
+        console.error("Error removing item:", error);
+        toast.error("Error removing item.");
+      });
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.pricePerItem * item.quantity, 0);
-  const taxes = subtotal * 0.1; // Assume 10% tax rate
-  const shipping = 300; // Assume flat shipping rate
-  const total = subtotal + taxes + shipping;
+  const total = subtotal;
 
   const handleCheckout = () => {
     // Implement checkout functionality here
@@ -61,6 +78,7 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
                     <th className="text-left font-semibold">Price</th>
                     <th className="text-left font-semibold">Quantity</th>
                     <th className="text-left font-semibold">Total</th>
+                    <th className="text-left font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -98,6 +116,14 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
                       <td className="py-4 font-bold">
                         Rs. {(item.pricePerItem * item.quantity).toFixed(2)}
                       </td>
+                      <td className="py-4">
+                        <button
+                          className="border rounded-md py-2 px-4 ml-2 bg-red-500 text-white"
+                          onClick={() => handleRemoveItem(item.cartItemID, item.proStockBatchID, item.quantity)}
+                        >
+                          Remove
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -111,25 +137,19 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
                 <span>Subtotal</span>
                 <span>Rs. {subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between mb-2">
-                <span>Taxes</span>
-                <span>Rs. {taxes.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Shipping</span>
-                <span>Rs. {shipping.toFixed(2)}</span>
-              </div>
               <hr className="my-2" />
               <div className="flex justify-between mb-2">
                 <span className="font-semibold">Total</span>
                 <span className="font-semibold">Rs. {total.toFixed(2)}</span>
               </div>
+              <Link to={`/checkout/${userId}`}>
               <button 
                 className="bg-c3 font-[Montserrat] font-bold text-white py-2 px-4 rounded-lg mt-4 w-full"
                 onClick={handleCheckout}
               >
                 Proceed to Checkout
               </button>
+              </Link>
             </div>
           </div>
         </div>
