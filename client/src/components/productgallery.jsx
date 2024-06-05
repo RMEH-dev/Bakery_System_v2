@@ -80,7 +80,7 @@ export function ProductGallery() {
             <ProductList onCategoryClick={handleCategoryClick} />
           </div>
           <div className="col-span-2 ">
-            <div className="grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-10 p-10 rounded-2xl justify-center items-center bg-gradient-to-tl from-c3 to-c5 w-[600px] md:w-[800px] lg:w-[1000px] xl:w-[1200px] max-w-screen-xl  transition-all duration-1000 ease-in-out">
+            <div className="grid grid-cols-1  sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-10 p-10 rounded-2xl justify-center items-center bg-gradient-to-r from-c2 to-c5 w-[600px] md:w-[800px] lg:w-[1000px] xl:w-[1200px] max-w-screen-xl  transition-all duration-1000 ease-in-out">
               {products.map((product) => (
                 <ProductCard
                   className="mx-auto transform  hover:text-c2 transition-transform hover:scale-105"

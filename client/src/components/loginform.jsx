@@ -47,9 +47,9 @@ export function LogInForm() {
 
         setTimeout(() => {
           if (userType === "Admin") {
-            navigate("/adminDashboard");
+            navigate("/adminDashboard/:id");
           } else if (userType === "Staff") {
-            navigate("/staffDashboard");
+            navigate("/staffDashboard/:id");
           } else {
             navigate("/");
           }

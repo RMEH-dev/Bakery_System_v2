@@ -44,7 +44,7 @@ export function ProductCard({ product, selectedBranch }) {
       toast.error("Please select a branch first.");
       return;
     }
-    if (!isAvailable || isExpired) {
+    if (!isAvailable) {
       toast.error("Not Available at the moment");
       return;
     }

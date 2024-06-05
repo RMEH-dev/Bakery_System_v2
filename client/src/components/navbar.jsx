@@ -186,6 +186,7 @@ const getDecodedToken = () => {
   if (!token) return null;
   try {
     return jwtDecode(token);
+    const user = data
   } catch (error) {
     console.error("Failed to decode token:", error);
     return null;
@@ -194,16 +195,47 @@ const getDecodedToken = () => {
 
 function NavList({ itemCount }) {
   const navigate = useNavigate();
+  const decodedToken = getDecodedToken();
+  const [userId, setUserId] = useState(decodedToken?.id);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
+
+  useEffect(() => {
+    if (decodedToken?.id) {
+      setUserId(decodedToken.id); // Ensure userId is set only once
+    }
+  }, [decodedToken?.id]);
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
   }, []);
 
+    // Function to handle clicking on the cart icon
+    const handleCartIconClick = () => {
+      if (userId) {
+        // Navigate to the user's cart
+        navigate(`/shoppingCart/${userId}`);
+      } else {
+        // If userId is not available, handle accordingly
+        console.error("User ID not available");
+      }
+    };
+
+    const handleProfileIconClick = () => {
+      if (userId) {
+        // Navigate to the user's profile
+        navigate(`/profile/${userId}`);
+      } else {
+        // If userId is not available, handle accordingly
+        console.error("User ID not available");
+      }
+    }
+
+  console.log(userId);
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
@@ -251,7 +283,7 @@ function NavList({ itemCount }) {
         </Link>
       </Typography>
       <NavListMenu />
-      <Link to="/staffDashboard">
+      <Link to="/staffDashboard/:id">
         <Typography
           as="a"
           href="#"
@@ -263,7 +295,7 @@ function NavList({ itemCount }) {
           </ListItem>
         </Typography>
       </Link>
-      <Link to="/adminDashboard">
+      <Link to="/adminDashboard/:id">
         <Typography
           variant="medium"
           className="font-bold font-[Montserrat]  text-c2"
@@ -351,7 +383,7 @@ function NavList({ itemCount }) {
         </Link>
       </Typography>
       <Typography as="a" href="#" className="relative ml-4">
-        <Link to="/shoppingCart">
+        <Link to={`/shoppingCart/${userId}`}>
           <button className="relative flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -377,7 +409,7 @@ function NavList({ itemCount }) {
       </Typography>
 
       <Typography as="a" href="#" className="pl-2">
-        <Link to="/profileUser">
+        <Link to={`/profileUser/${userId}`}>
           <button class="flex items-center justify-center bg-c1 w-20 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"

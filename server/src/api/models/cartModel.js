@@ -41,7 +41,7 @@ const CartModel = {
   },
 
   getCartItemsByUserID: (values, callback) => {
-    const sqlGetItemsByUserID = `SELECT ci.cartItemID, c.cartID, pb.proStockBatchID, ci.quantity, p.proStockID, p.proStockName, p.pricePerItem, p.imageUrl FROM cartitem ci JOIN cart c ON ci.cartID = c.cartID JOIN proStockBatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN proStock p ON p.proStockID = pb.proStockID WHERE c.userID = ?`;
+    const sqlGetItemsByUserID = `SELECT ci.cartItemID, c.cartID, pb.proStockBatchID, ci.quantity, pb.quantity AS availableQuantity, p.proStockID, p.proStockName, p.pricePerItem, p.imageUrl FROM cartitem ci JOIN cart c ON ci.cartID = c.cartID JOIN proStockBatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN proStock p ON p.proStockID = pb.proStockID WHERE c.userID = ?`;
     db.query(sqlGetItemsByUserID, values, callback);
   },
 

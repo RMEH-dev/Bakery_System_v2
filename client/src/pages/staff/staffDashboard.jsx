@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import PageLayout from "../../components/pagelayout";
@@ -10,13 +10,60 @@ import {
 } from "@heroicons/react/24/outline";
 import BranchSelector from "../../components/branchSelector";
 import useTokenValidation from "../../hooks/udeTokenValidation";
+import { jwtDecode } from 'jwt-decode';
+import axiosInstance from "../../utils/axios";
+
+
+const getDecodedToken = () => {
+  const token = localStorage.getItem("token"); // Or however you store your JWT
+  if (!token) return null;
+  try {
+    return jwtDecode(token);
+    const user = data
+  } catch (error) {
+    console.error("Failed to decode token:", error);
+    return null;
+  }
+};
 
 function StaffDashboard({ children }) {
-  const [selectedOption2, setSelectedOption2] = useState(null);
-  const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
+  const decodedToken = getDecodedToken();
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [userId, setUserId] = useState(decodedToken?.id);
+  const [name, setName] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
- useTokenValidation();
+  useEffect(() => {
+    if (decodedToken?.id) {
+      setUserId(decodedToken.id); // Ensure userId is set only once
+    }
+  }, [decodedToken?.id]);
   
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchUser(userId);
+    }
+  }, [userId]);
+
+  const fetchUser = async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/getCurrentUser/${userId}`);
+      const data = response.data;
+      console.log(data);
+      console.log(data.firstName);
+      setName(data.firstName);
+    } catch (error) {
+      console.error("Error fetching user:", error.message);
+    }
+  };
+
+  useTokenValidation();
+
   const handleSelect2 = (option) => {
     setSelectedOption2(option);
     setIsDropdownOpen2(false);
@@ -24,14 +71,14 @@ function StaffDashboard({ children }) {
 
   return (
     <PageLayout className="">
-      <div className="flex justify-between items-center w-[1540px] bg-gradient-to-b from-c1 to-c3 text-c2 h-[100px]">
-        <Link to="/staffDashboard">
-          <h1 className="ml-10 pt-5 pb-5 text-4xl font-bold font-[Montserrat]">
-            Welcome Staff Member
+      <div className="flex justify-between items-center w-[1540px] bg-gradient-to-t from-c2 to-white text-black h-[100px]">
+        <Link to="/staffDashboard/:id">
+          <h1 className="ml-10 pt-5 pb-5 text-3xl font-bold font-[Montserrat]">
+            {`Welcome Mr. ${name}`}
           </h1>
         </Link>
-        <Link to="/staffDashboard">
-          <Button className="w-[200px] h-[20px] justify-end text-c1 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 hover:text-white bg-white rounded-xl text-md font-[Montserrat]">
+        <Link to="/staffDashboard/:id">
+          <Button className="w-[200px] h-[20px] justify-end text-c1 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 hover:text-white bg-c5 rounded-xl text-md font-[Montserrat]">
             View Reports
           </Button>
         </Link>

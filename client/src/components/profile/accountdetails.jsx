@@ -7,8 +7,19 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 
 function AccountDetails() {
+  const [userId, setUserId] = useState(null); // Initialize userId as null
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const decodedToken = getDecodedToken();
+    if (decodedToken && decodedToken.id) {
+      setUserId(decodedToken.id);
+    }
+  }, []);
+
   return (
     <CustomerProfile>
       <div className="z-100 -mt-[300px] ml-[350px] h-[750px] w-[600px] md:w-[400px] lg:w-[300px] xl:w-[650px] 2xl:w-[1150px] mb-6 rounded-2xl bg-c4 text-c3 hover:text-c1 flex flex-col space-y-1">

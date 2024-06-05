@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import React, { Component, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import PageLayout from "../../components/pagelayout";
 import { Typography } from "@material-tailwind/react";
 import { ProductList } from "../../components/primary/productlist";
@@ -8,18 +8,14 @@ import Address from "../../components/profile/address.jsx";
 import LogOut from "../../components/profile/logout.jsx";
 import LostPassword from "../../components/profile/lostpassword.jsx";
 import MyOrders from "../../components/profile/myorders.jsx";
+import getDecodedToken from "../../services/jwtdecoder.js";
 
-// const AccountDetails = React.lazy(() => import('../../components/profile/accountdetails.jsx'));
-// const MyOrders = React.lazy(() => import('../../components/profile/myorders.jsx'));
-// const Addresses = React.lazy(() => import('../../components/profile/address.jsx'));
-// const LostPassword = React.lazy(() => import('../../components/profile/lostpassword.jsx'));
-// const LogOut = React.lazy(() => import('../../components/profile/logout.jsx'));
-// import profile component files as needed
+
 
 const ProfileToggles = [
   {
     title: "Account Details",
-    path: "/profileUser/AccountDetails",
+    path: `/profileUser/AccountDetails`,
     component: AccountDetails
   },
   {
@@ -46,6 +42,15 @@ const ProfileToggles = [
 
 export default function CustomerProfile(props) {
   const children = props.children;
+  const [userId, setUserId] = useState(null); // Initialize userId as null
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const decodedToken = getDecodedToken();
+    if (decodedToken && decodedToken.id) {
+      setUserId(decodedToken.id);
+    }
+  }, []);
 
   const logoSrc = "./../assets/logos/logo.jpg"
 
@@ -54,7 +59,7 @@ export default function CustomerProfile(props) {
       <div className="bg-white bg-opacity-30">
         <Typography>
           <div className="flex font-bold font-[Montserrat] text-2xl pl-10 pt-10 mb-6">
-            <Link to="/products">My Profile / </Link>
+            <Link to={`/profileUser/${userId}`}>My Profile / </Link>
           </div>
         </Typography>
         <ul className="pl-6 pt-5 pb-5 w-[300px] md:w-[300px] lg:w-[300px] xl:w-[320px] 2xl:w-[330px] my-5 mb-6 rounded-r-2xl bg-gradient-to-r from-c2 to-c4 text-c3 flex flex-col space-y-1">

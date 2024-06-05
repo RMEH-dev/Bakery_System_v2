@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const {
   getUserByEmail,
   getNextUserId,
+  getCurrentUser,
   createUser,
   createUserRole,
   findUserByEmailOrContact,
@@ -134,15 +135,15 @@ exports.login = (req, res) => {
 
 
 exports.getCurrentUser =(req, res) => {
-  const { userID } = req.params;
-  getCurrentUser(userID, (error, results) => {
+  const { userId } = req.params;
+  getCurrentUser(userId, (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Database query error" });
     }
     if (results.length === 0) {
-      return res.status(404).json({ error: "Produced Stock Not Found" });
+      return res.status(404).json({ error: "User not Found" });
     }
     res.json(results[0]);
+    console.log(results);
   });
-  // res.json(rawStock);
 };

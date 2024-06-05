@@ -7,31 +7,31 @@ import ShoppingCartTable1 from "./primary/tablecart";
 
 
 export function ShoppingCart() {
-  const { user_id } = useParams();
+  const { id } = useParams();
   const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        console.log(`Fetching cart items for user ID: ${user_id}`);
-        const response = await axiosInstance.get(`/cart/${user_id}`);
+        console.log(`Fetching cart items for user ID: ${id}`);
+        const response = await axiosInstance.get(`/cart/${id}`);
         setCartItems(response.data);
         console.log(`Cart items fetched: `, response.data);
       } catch (error) {
         console.error("Error fetching cart items:", error.message);
       }
     };
-    if (user_id) {
+    if (id) {
       fetchCartItems();
     }
-  }, [user_id]);
+  }, [id]);
 
   return (
     <div>
       <Cart>
         <div className=" bg-c2 w-[600px] h-[1000px] pb-36 lg:w-auto md:w-auto sm:w-auto sm:h-auto sm:text-wrap sm:text-md">
           <ShoppingCartTable1
-           cartItems={cartItems} />
+           cartItems={cartItems} setCartItems={setCartItems} />
         </div>
       </Cart>
       <div className="flex flex-wrap justify-center gap-4 mt-10"></div>

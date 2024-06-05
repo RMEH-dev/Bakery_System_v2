@@ -52,13 +52,13 @@ const CartController = {
 
   getCartItems: (req, res) => {
     // console.log("Request params:", req.params);
-    const { id } = req.params;
+    const { userId } = req.params;
     // console.log("UserID from request params:", id);
-    if (!id) {
+    if (!userId) {
       return res.status(400).json({ error: "UserID is required" });
     }
   
-    CartModel.getCartItemsByUserID([id], (err, results) => {
+    CartModel.getCartItemsByUserID([userId], (err, results) => {
       if (err) {
 
         console.error("Error fetching cart items:", err);

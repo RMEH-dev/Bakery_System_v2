@@ -53,28 +53,23 @@ const getUserByEmail = (email, callback) => {
   db.query(sql, [email], callback);
 };
 
-// const getNextUserId = (callback) => {
-//   const sql = `
-//     SET @nextUserID = 'P0';
-//     CALL GetNextUserId(@nextUserID);
-//     SELECT @nextUserID AS nextID;
-//   `;
 
-//   db.query(sql, (err, results) => {
-//     if (err) return callback(err);
+const getCurrentUser = (userId, callback) => {
+ const dqlGetCurrentUser = `
+ SELECT u.firstName, u.lastName, u.userName, u.email, u.contact, ur.userTypeID, ut.userType, ur.branchID
+ FROM user u
+ JOIN userroles ur ON u.userID = ur.userID
+ JOIN usertypes ut ON ur.userTypeID = ut.userTypeID
+ WHERE u.userID =?
+ `;
+ db.query(dqlGetCurrentUser, [userId], callback);
+}
 
-//     const rows = results[2]; // The result set with the SELECT @nextUserID AS nextID
-//     if (rows && rows.length > 0) {
-//       callback(null, rows[0].nextID);
-//     } else {
-//       callback(new Error('No user ID returned from stored procedure'));
-//     }
-//   });
-// };
 
 module.exports = {
   getUserByEmail,
   findUserByEmailOrContact,
   createUser,
   createUserRole,
+  getCurrentUser
 };

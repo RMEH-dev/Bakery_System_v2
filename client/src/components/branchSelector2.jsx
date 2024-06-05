@@ -29,7 +29,7 @@ function BranchSelector2({ endpoint, selectedOption, setSelectedOption, label, d
   return (
     <div className="relative">
       <div
-        className="cursor-pointer pl-3 mt-2  items-center w-[250px] hover:bg-c3 bg-deep-orange-800 py-2 rounded-2xl text-c2 font-semibold text-lg font-[Montserrat]"
+        className="cursor-pointer pl-3 mt-2  items-center w-[250px] hover:bg-c1 bg-c3 py-2 rounded-2xl text-c2 font-semibold text-lg font-[Montserrat]"
         onClick={() => !disabled && setIsDropdownOpen(!isDropdownOpen)}
       >
         {selectedOption || `${label}`}

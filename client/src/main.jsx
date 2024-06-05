@@ -20,6 +20,7 @@ import ShippingAddress from "./components/profile/shippingaddress.jsx";
 import { Cart } from "./components/cart.jsx";
 import { ShoppingCart } from "./components/shoppingcart.jsx";
 import { Checkout } from "./components/checkout.jsx";
+import { CartProvider } from "./hooks/cartContext.jsx";
 import OrderSuccess from "./components/ordersuccess.jsx";
 import AdminReports from "./pages/admin/adminreports.jsx";
 import RawInventory from "./pages/admin/rawInventory.jsx";
@@ -46,9 +47,9 @@ const router = createBrowserRouter([
   { path: "/productsById/:id", element: <ProductsById />},
   { path: "/products/:category", element: <Products /> },
   { path: "/products/:category/:subCategory", element: <Products /> },
-  { path: "/adminDashboard", element:<ProtectedRoute component={AdminReports} allowedRoles={['Admin']} />},
+  { path: "/adminDashboard/:id", element:<ProtectedRoute component={AdminReports} allowedRoles={['Admin']} />},
   { path: "/inventoryLogs", element:<ProtectedRoute component={InventoryLogs} allowedRoles={['Admin']} />},
-  { path: "/staffDashboard", element: <ProtectedRoute component={StaffReports} allowedRoles={['Staff', 'Admin']} />},
+  { path: "/staffDashboard/:id", element: <ProtectedRoute component={StaffReports} allowedRoles={['Staff', 'Admin']} />},
   { path: "/rawInventory", element: <ProtectedRoute component={RawInventory} allowedRoles={['Admin']} />},
   { path: "/addRawInventory", element: <ProtectedRoute component={AddRawInventory} allowedRoles={['Admin']} />},
   { path: "/editRawInventory/:id", element: <ProtectedRoute component={AddRawInventory} allowedRoles={['Admin']} />},
@@ -76,21 +77,23 @@ const router = createBrowserRouter([
   { path: "/shoppingCart/:id", element: <ProtectedRoute component={ShoppingCart} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/checkout", element: <ProtectedRoute component={Checkout} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "/orderSuccess", element: <ProtectedRoute component={OrderSuccess} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser", element: <ProtectedRoute component={CustomerProfile} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/AccountDetails", element: <ProtectedRoute component={AccountDetails} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/Addresses", element: <ProtectedRoute component={Address} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/Addresses/BillingAddress", element: <ProtectedRoute component={BillingAddress} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/Addresses/ShippingAddress", element: <ProtectedRoute component={ShippingAddress } allowedRoles={['Admin', 'Staff', 'Customer']}/> },
-  { path: "/profileUser/MyOrders", element: <ProtectedRoute component={MyOrders} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/LogOut", element: <ProtectedRoute component={LogOut} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
-  { path: "/profileUser/LostPassword", element: <ProtectedRoute component={LostPassword} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/:id", element: <ProtectedRoute component={CustomerProfile} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/AccountDetails/:id", element: <ProtectedRoute component={AccountDetails} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/Addresses/:id", element: <ProtectedRoute component={Address} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/Addresses/BillingAddress/:id", element: <ProtectedRoute component={BillingAddress} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/Addresses/ShippingAddress/:id", element: <ProtectedRoute component={ShippingAddress } allowedRoles={['Admin', 'Staff', 'Customer']}/> },
+  { path: "/profileUser/MyOrders/:id", element: <ProtectedRoute component={MyOrders} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/LogOut/:id", element: <ProtectedRoute component={LogOut} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
+  { path: "/profileUser/LostPassword/:id", element: <ProtectedRoute component={LostPassword} allowedRoles={['Admin', 'Staff', 'Customer']} /> },
   { path: "*", element: <h3>Error 404: Page Not Available</h3> },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider>
+      <CartProvider>
       <RouterProvider router={router} />
+      </CartProvider>
     </ThemeProvider>
   </React.StrictMode>
 );
