@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Cart } from "./cart";
 import {
   Card,
@@ -8,7 +8,10 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import axiosInstance from "../utils/axios";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function Checkout() {
   const [isChecked, setIsChecked] = useState(false);
@@ -184,7 +187,7 @@ export function Checkout() {
               </div>
               <div className="mt-3 grid flex grid-cols-2 gap-5">
                 <Typography className="mb-3 pl-2 w-[520px] bg-c5 rounded-2xl text-black font-semibold text-lg font-[Montserrat]">
-                  Sub Total
+                  Cart Total
                 </Typography>
                 <Typography className="mb-3  text-black font-semibold text-lg font-[Montserrat]">
                   Rs. 1500.00
@@ -192,11 +195,11 @@ export function Checkout() {
               </div>
               <div className="-mt-2 grid inline-block flex grid-cols-2 gap-5">
                 <Typography
-                  className={`mb-3 cursor-pointer pl-2 w-[520px] bg-c5 rounded-2xl text-black font-semibold text-lg font-[Montserrat] `}
+                  className={`mb-3 cursor-pointer pl-2 w-[350px] bg-c5 rounded-2xl text-black font-semibold text-lg font-[Montserrat] `}
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
-                  Pickup Outlet
-                  <ChevronDownIcon className="ml-36 -mt-6 w-5 h-5" />
+                  Delivery or Pickup
+                  <ChevronDownIcon className=" flex ml-[180px] justify-end -mt-6 w-5 h-5" />
                   {isDropdownOpen && (
                     <ul className="mt-3 mb-3 cursor-pointer rounded-2xl text-c3 w-[300px] text-lg font-bold font-[Montserrat] bg-c2">
                       <li

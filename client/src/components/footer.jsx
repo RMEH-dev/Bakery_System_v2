@@ -35,7 +35,7 @@ export function FooterWithSocialLinks() {
   }, []);
 
   return (
-    <footer className="relative w-full h-full pt-[50px] bg-c2">
+    <footer className="w-full h-full pt-[50px] bg-c2">
       <div className="mx-auto w-full max-w-7xl px-8">
         <div className="grid grid-cols-2 justify-between gap-5 md:grid-cols-1">
           <img src={logoSrc} class="w-20 h-20" alt="logo" />

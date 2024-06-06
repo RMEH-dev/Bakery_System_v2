@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode"; // Assuming jwtDecode is imported correc
 const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   const {userId } = useParams();
   const { updateQuantity, proceedToCheckout } = useCart();
+  const [countdown, setCountdown] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,11 +18,36 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
       .get(`/cart/${userId}`) // Replace with your actual endpoint
       .then((response) => {
         setCartItems(response.data);
+        calculateCountdown(response.data);
       })
       .catch((error) => {
         console.error("Error fetching cart items:", error);
       });
   }, [userId, setCartItems]);
+
+  useEffect(() => {
+    if (countdown !== null) {
+      const interval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = countdown - now;
+
+        if (distance < 0) {
+          clearInterval(interval);
+          setCountdown(null);
+        } else {
+          setCountdown(distance);
+        }
+      }, 60 * 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [countdown]);
+
+  const calculateCountdown = (cartItems) => {
+    const heldUntilTimes = cartItems.map((item) => new Date(item.heldUntil).getTime());
+    const maxHeldUntilTime = Math.max(...heldUntilTimes);
+    setCountdown(maxHeldUntilTime);
+  };
 
   const handleQuantityChange = (itemId, amount) => {
     const updatedCartItems = cartItems.map((item) => {
@@ -55,8 +81,17 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
       });
   };
 
+  const formatTime = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
   const subtotal = cartItems.reduce((sum, item) => sum + item.pricePerItem * item.quantity, 0);
   const total = subtotal;
+
 
   const handleCheckout = () => {
     // Implement checkout functionality here
@@ -66,11 +101,20 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
 
   return (
     <div className="bg-white mt-10 h-screen py-8 overflow-y-auto relative">
+      <ToastContainer/>
       <div className="container mx-auto px-4">
+     
         <h1 className="text-2xl font-bold font-[Montserrat] mb-4">Shopping Cart</h1>
-        <div className="flex flex-col md:flex-row gap-4">
+        {countdown !== null && countdown > 0 && (
+                <div className="flex justify-between mb-2">
+                  <span className="font-semibold">Cart Expires In:</span>
+                  <span className="font-semibold">{formatTime(countdown)}</span>
+                </div>
+              )}
+              <div className="flex flex-col md:flex-row gap-4">
           <div className="md:w-3/4">
             <div className="bg-c2 mt-5 font-[Montserrat] text-lg text-c1 rounded-lg shadow-md p-6 mb-4">
+            
               <table className="w-full">
                 <thead >
                   <tr>
@@ -141,7 +185,7 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
               <div className="flex justify-between mb-2">
                 <span className="font-semibold">Total</span>
                 <span className="font-semibold">Rs. {total.toFixed(2)}</span>
-              </div>
+              </div>           
               <Link to={`/checkout/${userId}`}>
               <button 
                 className="bg-c3 font-[Montserrat] font-bold text-white py-2 px-4 rounded-lg mt-4 w-full"

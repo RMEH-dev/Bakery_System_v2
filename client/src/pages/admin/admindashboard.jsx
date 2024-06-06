@@ -73,7 +73,7 @@ function AdminDashboard({ children }) {
           </h1>
         </Link>
         <div className="ml-20 flex flex-cols-3 justify-end right-0">
-          <Link to="/adminDashboard">
+          <Link to="/adminDashboard/:id">
             <Button className="w-[200px] justify-end h-[20px] hover:transition-transform duration-500 ease-in-out hover:scale-105 text-c1 hover:bg-deep-orange-900 hover:text-white bg-c5 rounded-xl text-md font-[Montserrat]">
               View Reports
             </Button>

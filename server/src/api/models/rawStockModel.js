@@ -105,6 +105,8 @@ const rawStock = (values, callback) => {
   DATE_FORMAT(r.manuDate, '%Y-%m-%d') AS manuDate, 
   DATE_FORMAT(r.expDate, '%Y-%m-%d') AS expDate, 
   rb.quantity, 
+  rb.price,
+  rb.status,
   s.supplierName, 
   r.category, 
   r.units, 
@@ -124,7 +126,16 @@ JOIN
 };
 
 const getEditRawStock = (id, callback) => {
-  const sqlGetRawStockDetails = `SELECT p.proStockName, p.proStockID, r.rawStockName, DATE_FORMAT(r.manuDate, '%Y-%m-%d') AS manuDate , DATE_FORMAT(r.expDate, '%Y-%m-%d') AS expDate, r.category, i.quantity, s.supplierName, r.units FROM rawstock r JOIN rawstockbatch i ON r.rawStockID = i.rawStockID JOIN supplier s ON r.supplierID = s.supplierID JOIN prostock p ON r.proStockID = p.proStockID WHERE i.rawStockBatchID = ?`;
+  const sqlGetRawStockDetails = `
+  SELECT p.proStockName, p.proStockID, r.rawStockName, 
+  DATE_FORMAT(r.manuDate, '%Y-%m-%d') AS manuDate, 
+  DATE_FORMAT(r.expDate, '%Y-%m-%d') AS expDate, 
+  r.category, i.quantity, s.supplierName, r.units, i.price, i.status
+  FROM rawstock r 
+  JOIN rawstockbatch i ON r.rawStockID = i.rawStockID 
+  JOIN supplier s ON r.supplierID = s.supplierID 
+  JOIN prostock p ON r.proStockID = p.proStockID 
+  WHERE i.rawStockBatchID = ?`;
   db.query(sqlGetRawStockDetails, [id], callback);
 };
 
@@ -144,7 +155,9 @@ const updateRawStock = (updatedData, callback) => {
   s.supplierName = ?,
   r.category = ?,
   r.units = ?,
-  r.branchID = ?
+  r.branchID = ?,
+  rb.price = ?,
+  rb.status = ?
   WHERE rb.rawStockBatchID = ?`;
 
   db.query(sqlUpdateRawStock, updatedData, (error, results) => {

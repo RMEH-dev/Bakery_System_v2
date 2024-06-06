@@ -74,6 +74,8 @@ exports.addRawStock = async (req, res) => {
     rawStockName,
     supplierName,
     units,
+    price,
+    status,
   } = req.body;
 
   try {
@@ -120,6 +122,8 @@ exports.addRawStock = async (req, res) => {
       newRawStockID,
       quantity,
       branchID,
+      price,
+      status,
     ];
     await insertRawStockBatchAsync(valuesRawStockBatch);
 
@@ -155,7 +159,7 @@ exports.getRawStock = (req, res) => {
 
 //Updating the raw stock using rawStockID
 exports.updateRawStock = (req, res) => {
-  const { id }  = req.params;
+  const { id } = req.params;
   const {
     proStockName,
     proStockID,
@@ -166,7 +170,9 @@ exports.updateRawStock = (req, res) => {
     supplierName,
     category,
     units,
-    branchID
+    branchID,
+    price,
+    status,
   } = req.body;
 
   if (
@@ -179,7 +185,9 @@ exports.updateRawStock = (req, res) => {
     !supplierName ||
     !category ||
     !units ||
-    !branchID
+    !branchID ||
+    !price ||
+    !status
   ) {
     return res.status(400).json({ error: "All fields are required" });
   }
@@ -195,20 +203,21 @@ exports.updateRawStock = (req, res) => {
     category,
     units,
     branchID,
-    id
-   ] ;
+    price,
+    status,
+    id,
+  ];
 
-  
   console.log("Update Data:", updatedData);
   console.log(id);
 
-    updateRawStock(updatedData, (error, results) => {
-      if (error) {
-        return res.status(500).json({error: "Database query error"});
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: "Raw Stock Not Found" });
-      }
-      res.json({ message: "Raw stock data updated successfully." });
+  updateRawStock(updatedData, (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Database query error" });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Raw Stock Not Found" });
+    }
+    res.json({ message: "Raw stock data updated successfully." });
   });
 };

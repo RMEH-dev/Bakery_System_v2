@@ -15,27 +15,27 @@ import getDecodedToken from "../../services/jwtdecoder.js";
 const ProfileToggles = [
   {
     title: "Account Details",
-    path: `/profileUser/AccountDetails`,
+    path: `/profileUser/AccountDetails/:id`,
     component: AccountDetails
   },
   {
     title: "Orders",
-    path: "/profileUser/MyOrders",
+    path: "/profileUser/MyOrders/:id",
     component: MyOrders
   },
   {
     title: "Addresses",
-    path: "/profileUser/Addresses",
+    path: "/profileUser/Addresses/:id",
     component: Address
   },
   {
     title: "Lost Password",
-    path: "/profileUser/LostPassword",
+    path: "/profileUser/LostPassword/:id",
     component:LostPassword
   },
   {
     title: "Log Out",
-    path: "/profileUser/LogOut",
+    path: "/profileUser/LogOut/:id",
     component:LogOut
   },
 ];

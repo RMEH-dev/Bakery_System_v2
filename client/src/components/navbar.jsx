@@ -18,6 +18,7 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import {
   Bars4Icon,
@@ -186,7 +187,7 @@ const getDecodedToken = () => {
   if (!token) return null;
   try {
     return jwtDecode(token);
-    const user = data
+    const user = data;
   } catch (error) {
     console.error("Failed to decode token:", error);
     return null;
@@ -197,43 +198,43 @@ function NavList({ itemCount }) {
   const navigate = useNavigate();
   const decodedToken = getDecodedToken();
   const [userId, setUserId] = useState(decodedToken?.id);
+  const [userType, setUserType] = useState(decodedToken?.userType);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
 
   useEffect(() => {
     if (decodedToken?.id) {
       setUserId(decodedToken.id); // Ensure userId is set only once
     }
   }, [decodedToken?.id]);
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
   }, []);
 
-    // Function to handle clicking on the cart icon
-    const handleCartIconClick = () => {
-      if (userId) {
-        // Navigate to the user's cart
-        navigate(`/shoppingCart/${userId}`);
-      } else {
-        // If userId is not available, handle accordingly
-        console.error("User ID not available");
-      }
-    };
-
-    const handleProfileIconClick = () => {
-      if (userId) {
-        // Navigate to the user's profile
-        navigate(`/profile/${userId}`);
-      } else {
-        // If userId is not available, handle accordingly
-        console.error("User ID not available");
-      }
+  // Function to handle clicking on the cart icon
+  const handleCartIconClick = () => {
+    if (userId) {
+      // Navigate to the user's cart
+      navigate(`/shoppingCart/${userId}`);
+    } else {
+      // If userId is not available, handle accordingly
+      console.error("User ID not available");
     }
+  };
+
+  const handleProfileIconClick = () => {
+    if (userId) {
+      // Navigate to the user's profile
+      navigate(`/profile/${userId}`);
+    } else {
+      // If userId is not available, handle accordingly
+      console.error("User ID not available");
+    }
+  };
 
   console.log(userId);
   useEffect(() => {
@@ -283,7 +284,7 @@ function NavList({ itemCount }) {
         </Link>
       </Typography>
       <NavListMenu />
-      <Link to="/staffDashboard/:id">
+      <Link to="/ourStory">
         <Typography
           as="a"
           href="#"
@@ -295,7 +296,7 @@ function NavList({ itemCount }) {
           </ListItem>
         </Typography>
       </Link>
-      <Link to="/adminDashboard/:id">
+      <Link to="/contactUs">
         <Typography
           variant="medium"
           className="font-bold font-[Montserrat]  text-c2"
@@ -323,8 +324,8 @@ function NavList({ itemCount }) {
           placeholder="Search products..."
           className="p-2 pl-3 border text-black border-c3 rounded-2xl  z-50"
         />
-         {searchResults.length > 0 && (
-          <div className="max-h-40 overflow-y-auto absolute left-0 right-0 mt-2 rounded-2xl bg-white shadow-lg">
+        {searchResults.length > 0 && (
+          <div className="max-h-40 overflow-y-auto left-0 right-0 mt-2 rounded-2xl bg-white shadow-lg z-50 relative">
             {searchResults.map((result, index) => (
               <div
                 key={index}
@@ -382,9 +383,20 @@ function NavList({ itemCount }) {
           </ListItem>
         </Link>
       </Typography>
+      {userType === "Admin" || userType === "Staff" ? (
+        <Link
+          to={
+            userType === "Admin" ? "/adminDashboard/:id" : "/staffDashboard/:id"
+          }
+        >
+          <button className="-mt-2 bg-c2 border-c3 border-4 px-3 rounded-2xl font-[Montserrat] font-bold text-[18px] text-c3 py-2 items-center">
+            <DashboardIcon />
+          </button>
+        </Link>
+      ) : null}
       <Typography as="a" href="#" className="relative ml-4">
         <Link to={`/shoppingCart/${userId}`}>
-          <button className="relative flex items-center justify-center bg-c2 w-20 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
+          <button className="relative flex items-center justify-center bg-c2 w-10 h-8 rounded-3xl text-c1 hover:bg-white duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -410,7 +422,7 @@ function NavList({ itemCount }) {
 
       <Typography as="a" href="#" className="pl-2">
         <Link to={`/profileUser/${userId}`}>
-          <button class="flex items-center justify-center bg-c1 w-20 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
+          <button class="flex items-center justify-center bg-c1 w-10 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

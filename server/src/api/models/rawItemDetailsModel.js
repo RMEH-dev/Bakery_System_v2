@@ -2,8 +2,8 @@ const db = require("../../config/databaseConnection");
 
 const insertRawStockBatchAsync = (values) => {
   const sqlInsertRawStockBatch = `
-    INSERT INTO rawstockbatch (rawStockBatchID, rawStockID, quantity, branchID)
-    VALUES (?, ?, ?, ?)`;
+    INSERT INTO rawstockbatch (rawStockBatchID, rawStockID, quantity, branchID, price, status)
+    VALUES (?, ?, ?, ?, ?, ?)`;
   return new Promise((resolve, reject) => {
     db.query(sqlInsertRawStockBatch, values, (err, result) => {
       if (err) {

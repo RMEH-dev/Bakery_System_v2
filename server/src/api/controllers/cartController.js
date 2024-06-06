@@ -2,6 +2,18 @@ const CartModel = require("../models/cartModel");
 const db = require("../../config/databaseConnection");
 
 const CartController = {
+  getCart: (req, res) => {
+    const { userId } = req.params;
+    const sqlGetCartItems = `SELECT * FROM cartItem WHERE userID = ?`;
+    db.query(sqlGetCartItems, [userId], (err, results) => {
+      if (err) {
+        console.error("Error fetching cart items:", err);
+        return res.status(500).send("Error fetching cart items.");
+      }
+      res.status(200).send(results);
+    });
+  },
+  
   addToCart: (req, res) => {
     const { userID, proStockBatchID, branchName } = req.body;
 

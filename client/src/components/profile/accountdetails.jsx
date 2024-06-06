@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CustomerProfile from "../../pages/customer/profile";
 import {
   Card,
@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
+import getDecodedToken from "../../services/jwtdecoder";
 
 function AccountDetails() {
   const [userId, setUserId] = useState(null); // Initialize userId as null

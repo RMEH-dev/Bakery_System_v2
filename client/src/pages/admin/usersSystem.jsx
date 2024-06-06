@@ -21,7 +21,7 @@ function UsersSystem() {
       <div className="bg-deep-orange-900 pt-10 pb-5">
         <div className="z-10 ml-5 mb-5 mr-5 px-2 bg-c5 pt-10 h-[800px] rounded-2xl text-c3 hover:text-c1">
           <Card
-            className="flex flex-col mb-6 justify-items-center h-[800px] sm:w-auto bg-c2 rounded-2xl z-80"
+            className="flex flex-col mb-6 justify-items-center h-[700px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={false}
           >
             <div className="mb-2 gap-5 flex flex-col">

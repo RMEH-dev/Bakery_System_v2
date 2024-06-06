@@ -21,6 +21,8 @@ import Dropdown from "../../components/dropdown";
 import DropdownWithAdd from "../../components/dropdownwithadd";
 import axiosInstance from "../../utils/axios";
 import { jwtDecode } from "jwt-decode";
+import CurrencyInput from "react-currency-input-field";
+import Dropdown3 from "../../components/dropdown3";
 
 const getDecodedToken = () => {
   const token = localStorage.getItem("token"); // Or however you store your JWT
@@ -39,6 +41,7 @@ function AddRawInventory() {
   const [selectedUnits, setSelectedUnits] = useState("");
   const [userRole, setUserRole] = useState("");
   const [userBranch, setUserBranch] = useState();
+  const [selectedOption, setSelectedOption] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
   const [isDropdownOpen2, setIsDropdownOpen2] = useState("");
@@ -52,6 +55,7 @@ function AddRawInventory() {
     expirationDate: "",
     quantity: "",
     branchID: "",
+    price: "",
   });
 
   useEffect(() => {
@@ -69,6 +73,7 @@ function AddRawInventory() {
             manufactureDate: data.manuDate,
             expirationDate: data.expDate,
             quantity: data.quantity,
+            price: data.price,
           });
           setSelectedProStockName(data.proStockName);
           setSelectedProStockID(data.proStockID);
@@ -77,6 +82,7 @@ function AddRawInventory() {
           setSelectedSupplier(data.supplierName);
           setSelectedUnits(data.units);
           setSelectedBranch(data.branchID);
+          setSelectedOption(data.status);
         })
         .catch((error) => {
           console.error("Error fetching raw stock data:", error);
@@ -128,7 +134,8 @@ function AddRawInventory() {
       !selectedRawStockName ||
       !selectedRawStockCategory ||
       !selectedSupplier ||
-      !selectedUnits
+      !selectedUnits ||
+      !selectedOption
     ) {
       toast.error("Please fill out all the fields.");
       return;
@@ -144,6 +151,7 @@ function AddRawInventory() {
       supplierName: selectedSupplier,
       units: selectedUnits,
       branchID: userBranch,
+      status: selectedOption
     };
 
     console.log("Data to send to the backend:", dataToSend);
@@ -168,6 +176,8 @@ function AddRawInventory() {
           manufactureDate: "",
           expirationDate: "",
           quantity: "",
+          price: "",
+          status: "",
         });
         setSelectedProStockName(null);
         setSelectedProStockID(null);
@@ -176,6 +186,7 @@ function AddRawInventory() {
         setSelectedSupplier(null);
         setSelectedBranch(null);
         setSelectedUnits(null);
+        setSelectedOption(null);
       })
       .catch((error) => {
         console.error("Error sending data to the backend:", error);
@@ -186,9 +197,9 @@ function AddRawInventory() {
   return (
     <AdminDashboard>
       <div className="bg-c5 pb-5">
-        <div className="z-150 ml-5 mb-5 mr-5 bg-c5 pt-10 h-[800px] rounded-2xl text-c3 hover:text-c1">
+        <div className="z-150 ml-5 mb-5 mr-5 bg-c5 pt-10 h-[1000px] rounded-2xl text-c3 hover:text-c1">
           <Card
-            className="flex flex-col mb-6 justify-items-center h-[800px] sm:w-auto bg-c2 rounded-2xl z-80"
+            className="flex flex-col mb-6 justify-items-center h-[950px] sm:w-auto bg-c2 rounded-2xl z-80"
             shadow={true}
           >
             <div className="mb-2 gap-5 flex flex-col">
@@ -198,7 +209,7 @@ function AddRawInventory() {
                 </Typography>
               </div>
               <Card
-                className="flex flex-col mb-10 ml-10 mr-10 h-[900px] bg-white  rounded-2xl z-80"
+                className="flex flex-col mb-10 ml-10 mr-10 pb-5 h-[880px] bg-white  rounded-2xl z-80"
                 shadow={false}
               >
                 <form className="ml-20 mt-12 mb-2 w-[800px] 2xl:w-[1150px] sm:w-96">
@@ -254,7 +265,7 @@ function AddRawInventory() {
                       Selected Product ID is: {selectedProStockID}
                     </Typography>
 
-                    <div className="mt-5 grid grid-cols-3 gap-10 mb-6">
+                    <div className="mt-10 grid grid-cols-3 mb-10 gap-y-10">
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Raw Stock Name
                       </Typography>
@@ -296,7 +307,7 @@ function AddRawInventory() {
                         required
                       />
                     </div>
-                    <div className="grid grid-cols-3 gap-10">
+                    <div className="grid grid-cols-3 mb-10 gap-y-10">
                       <Typography className="text-c1 font-semibold font-[Montserrat] mb-2">
                         Raw Stock Category
                       </Typography>
@@ -336,20 +347,48 @@ function AddRawInventory() {
                         // disabled={!!id}
                       />
                     </div>
+                    <div className="grid grid-cols-3 mb-10 gap-y-10">
+                      <Typography className="text-c1  mb-2 right-0 justify-end font-semibold font-[Montserrat]">
+                        Units of Quantity
+                      </Typography>
+                      <Typography className="text-c1  mb-2 right-0 justify-end font-semibold font-[Montserrat]">
+                        Set the Price
+                      </Typography>
+                      <Typography className="text-c1  mb-2 right-0 justify-end font-semibold font-[Montserrat]">
+                        Set Status
+                      </Typography>
+                      <DropdownWithAdd
+                        endpoint="getUnits"
+                        selectedOption={selectedUnits}
+                        setSelectedOption={setSelectedUnits}
+                        label="Units"
+                        // disabled={!!id}
+                      />
+                      <CurrencyInput
+                        size="md"
+                        placeholder=" Price of Raw Stock"
+                        decimalScale={2}
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        className="w-[300px] mt-2 2xl:w-[300px] pl-5 h-10 font-semibold font-[Montserrat] bg-c2 border-deep-orange-800 focus:!border-deep-orange-900 outline-2 outline-orange-400 rounded-md"
+                        labelProps={{
+                          className: "before:content-none after:content-none",
+                        }}
+                        disabled={!!id}
+                        required
+                      />
+                      <Dropdown3
+                        selectedOption={selectedOption}
+                        setSelectedOption={setSelectedOption}
+                        label="Select Status"
+                        disabled={false}                        
+                      />                     
+                    </div>
+                    <div className="font-[Montserrat] font-bold">Selected Option: {selectedOption}</div>
                   </div>
                 </form>
-                <Typography className="text-c1 ml-20 mt-5 mb-2 right-0 justify-end font-semibold font-[Montserrat]">
-                  Units of Quantity
-                </Typography>
-                <div className="ml-20">
-                  <DropdownWithAdd
-                    endpoint="getUnits"
-                    selectedOption={selectedUnits}
-                    setSelectedOption={setSelectedUnits}
-                    label="Units"
-                    // disabled={!!id}
-                  />
-                </div>
+
                 <div className="flex justify-end w-[800px] 2xl:w-[1150px]">
                   <Link to="/addRawInventory">
                     <Button

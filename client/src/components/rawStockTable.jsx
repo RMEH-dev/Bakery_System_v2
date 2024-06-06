@@ -1,4 +1,4 @@
- import * as React from "react";
+import * as React from "react";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import axios from "axios"; // Import Axios
@@ -117,6 +117,18 @@ const headCells = [
     numeric: true,
     disablePadding: false,
     label: "Unit",
+  },
+  {
+    id: "price",
+    numeric: true,
+    disablePadding: false,
+    label: "Price ",
+  },
+  {
+    id: "status",
+    numeric: true,
+    disablePadding: false,
+    label: "Status",
   },
 ];
 
@@ -321,13 +333,17 @@ export default function RawStockTable() {
   };
 
   const handleDelete = () => {
-    const newRows = rows.filter((row) => !selected.includes(row.rawStockBatchID));
+    const newRows = rows.filter(
+      (row) => !selected.includes(row.rawStockBatchID)
+    );
     setRows(newRows);
     setSelected([]);
   };
 
   const handleEdit = () => {
-    const selectedRow = rows.find((row) => selected.includes(row.rawStockBatchID));
+    const selectedRow = rows.find((row) =>
+      selected.includes(row.rawStockBatchID)
+    );
     if (selectedRow) {
       navigate(`/editRawInventory/${selectedRow.rawStockBatchID}`);
     }
@@ -346,6 +362,20 @@ export default function RawStockTable() {
       ),
     [order, orderBy, page, rowsPerPage, rows]
   );
+
+  // Function to determine button color based on status
+  const getButtonColor = (status) => {
+    switch (status) {
+      case "In Use":
+        return "#008000"; // Green
+      case "All Used":
+        return "#FF0000"; // Red
+      case "Remaining":
+        return "#FFA500"; // Orange
+      default:
+        return "#672C0B"; // Yellow for "To Be Used" or any other status
+    }
+  };
 
   return (
     <Box
@@ -476,6 +506,27 @@ export default function RawStockTable() {
                       <Typography variant="body2" fontWeight="bold">
                         {row.units}
                       </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" fontWeight="bold">
+                        {row.price}
+                      </Typography>
+                    </TableCell>
+                    {/* <TableCell align="right">
+                      <Typography variant="body2" fontWeight="bold">
+                        {row.status}
+                      </Typography>
+                    </TableCell> */}
+                    <TableCell align="right">
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: getButtonColor(row.status),
+                          color: "white",
+                        }}
+                      >
+                        {row.status}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
