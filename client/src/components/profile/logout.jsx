@@ -19,7 +19,7 @@ function LogOut() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         toast.success('Logged out successfully');
-        navigate('/login', { replace: true });
+        navigate('/', { replace: true });
     };
 
   return (
@@ -41,28 +41,26 @@ function LogOut() {
               <Typography className="-mb-3 text-black font-bold font-[Montserrat]">
                 Are you sure you want to log out?  
               </Typography>
-              <Link to="/">
-              <Typography className="text-c2 px-4 rounded-xl bg-deep-orange-800 hover:bg-c5 hover:text-c1 h-10 items-center mt-2 pt-2 w-[200px] font-bold font-[Montserrat]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105">
+              <Typography onClick={handleLogout} className="text-c2 px-4 rounded-xl bg-deep-orange-800 hover:bg-c5 hover:text-c1 h-10 items-center mt-2 pt-2 w-[200px] font-bold font-[Montserrat]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105">
                 Confirm & Log Out  
-              </Typography>
-              </Link>
+              </Typography>       
               </div>
               <div className="flex grid-cols-3 gap-10">
-              <Link to="/profileUser/AccountDetails">
+              <Link to="/profileUser/AccountDetails/:id">
               <Button
                 className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >
                 Account Details
               </Button>
               </Link>
-              <Link to="/profileUser/MyOrders">
+              <Link to="/profileUser/MyOrders/:id">
               <Button
                 className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >
                 Orders
               </Button>
               </Link>
-              <Link to="/profileUser/Addresses">
+              <Link to="/profileUser/Addresses/:id">
               <Button
                 className="mt-5 w-[250px]  hover:duration-400 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 bg-c3 rounded-xl text-white text-md font-[Montserrat]"
               >

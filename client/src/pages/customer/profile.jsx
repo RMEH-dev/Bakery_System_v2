@@ -11,35 +11,6 @@ import MyOrders from "../../components/profile/myorders.jsx";
 import getDecodedToken from "../../services/jwtdecoder.js";
 
 
-
-const ProfileToggles = [
-  {
-    title: "Account Details",
-    path: `/profileUser/AccountDetails/:id`,
-    component: AccountDetails
-  },
-  {
-    title: "Orders",
-    path: "/profileUser/MyOrders/:id",
-    component: MyOrders
-  },
-  {
-    title: "Addresses",
-    path: "/profileUser/Addresses/:id",
-    component: Address
-  },
-  {
-    title: "Lost Password",
-    path: "/profileUser/LostPassword/:id",
-    component:LostPassword
-  },
-  {
-    title: "Log Out",
-    path: "/profileUser/LogOut/:id",
-    component:LogOut
-  },
-];
-
 export default function CustomerProfile(props) {
   const children = props.children;
   const [userId, setUserId] = useState(null); // Initialize userId as null
@@ -49,10 +20,39 @@ export default function CustomerProfile(props) {
     const decodedToken = getDecodedToken();
     if (decodedToken && decodedToken.id) {
       setUserId(decodedToken.id);
+      console.log(userId);
     }
   }, []);
 
-  const logoSrc = "./../assets/logos/logo.jpg"
+  const logoSrc = "./../assets/logos/logo.jpg";
+
+  const ProfileToggles = [
+    {
+      title: "Account Details",
+      path: `/profileUser/AccountDetails/${userId}`,
+      component: AccountDetails,
+    },
+    {
+      title: "Orders",
+      path: `/profileUser/MyOrders/${userId}`,
+      component: MyOrders,
+    },
+    {
+      title: "Addresses",
+      path: `/profileUser/Addresses/${userId}`,
+      component: Address,
+    },
+    {
+      title: "Lost Password",
+      path: `/profileUser/LostPassword/${userId}`,
+      component: LostPassword,
+    },
+    {
+      title: "Log Out",
+      path: `/profileUser/LogOut/${userId}`,
+      component: LogOut,
+    },
+  ];
 
   return (
     <PageLayout logoSrc={logoSrc}>

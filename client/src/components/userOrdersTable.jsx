@@ -32,6 +32,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Dialog } from "@material-tailwind/react";
 import { DialogActions, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
+import getDecodedToken from "../services/jwtdecoder";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -64,12 +65,6 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: "firstName",
-    numeric: false,
-    disablePadding: false,
-    label: "Customer Name",
-  },
-  {
     id: "orderID",
     numeric: false,
     disablePadding: false,
@@ -86,12 +81,6 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: "Order Date",
-  },
-  {
-    id: "orderStatus",
-    numeric: false,
-    disablePadding: false,
-    label: "Order Status",
   },
   {
     id: "totalAmount",
@@ -117,24 +106,6 @@ const headCells = [
     disablePadding: false,
     label: "Delivery Type",
   },
-  {
-    id: "contact",
-    numeric: false,
-    disablePadding: false,
-    label: "Customer Contact No.",
-  },
-  {
-    id: "street",
-    numeric: false,
-    disablePadding: false,
-    label: "Street Address",
-  },
-  {
-    id: "city",
-    numeric: false,
-    disablePadding: false,
-    label: "Delivery City",
-  },
 ];
 
 function EnhancedTableHead(props) {
@@ -154,16 +125,7 @@ function EnhancedTableHead(props) {
   return (
     <TableHead className="bg-c2">
       <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all desserts",
-            }}
-          />
-        </TableCell>
+        
 
         {headCells.map((headCell) => (
           <TableCell
@@ -202,74 +164,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-function EnhancedTableToolbar(props) {
-  const { numSelected, handleDelete, handleEdit } = props;
-
-  return (
-    <Toolbar
-      className="bg-c5 text-c1 text-xl rounded-2xl font-semibold font-[Montserrat]"
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
-            ),
-        }),
-      }}
-    >
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          variant="subtitle1"
-          fontWeight="bold"
-          className="font-black text-c1 font-[Montserrat] text-xl"
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          id="tableTitle"
-          variant="h6"
-          fontWeight="bold"
-          className="font-black text-c2 font-[Montserrat] text-xl"
-        ></Typography>
-      )}
-
-      {numSelected > 0 ? (
-        <div className="flex grid-cols gap-5">
-          <Tooltip title="Edit">
-            <IconButton onClick={handleEdit}>
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton onClick={handleDelete}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </div>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-}
-
-EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-  handleDelete: PropTypes.func.isRequired,
-  handleEdit: PropTypes.func.isRequired,
-};
-
-export default function TrackOrdersTable() {
+export default function UserOrdersTable() {
   const [rows, setRows] = useState([]); // State to hold fetched data
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("calories");
@@ -284,12 +179,16 @@ export default function TrackOrdersTable() {
   const [orderStatus, setOrderStatus] = useState(""); // State to manage order status
   const [paymentStatus, setPaymentStatus] = useState(""); // State to manage payment status
   const navigate = useNavigate(); // Initialize useNavigate
+  const decodedToken = getDecodedToken();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const userId = decodedToken?.id;
 
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
     axiosInstance
-      .get("/userOrders") // Assuming your backend endpoint is /api/stocks
+      .get(`/userOrders?userId=${userId}`) // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         console.log(response.data);
         setRows(response.data); // Update the state with fetched data
@@ -297,7 +196,7 @@ export default function TrackOrdersTable() {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []); // Run only once after component is mounted
+  }, [userId]); // Run only once after component is mounted
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -305,31 +204,6 @@ export default function TrackOrdersTable() {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rows.map((n) => n.orderID);
-      setSelected(newSelected);
-      setSelectedOrderDetails(rows);
-      return;
-    }
-    setSelected([]);;
-  };
-
-  const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-      } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-      }
-      setSelected(newSelected);
-    };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -338,65 +212,6 @@ export default function TrackOrdersTable() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleDelete = () => {
-    if (selected.length > 0) {
-      setIsModalOpen(true);
-    }
-  };
-
-
-  const handleChangeDense = (event) => {
-    setDense(event.target.checked);
-  };
-
-  const handleEdit = () => {
-    if (selected.length === 1) {
-      const orderDetails = rows.find((row) => row.orderID === selected[0]);
-      setSelectedOrderDetails(orderDetails);
-      setOrderStatus(orderDetails.orderStatus);
-      setPaymentStatus(orderDetails.paymentStatus);
-      setIsUpdateDialogOpen(true);
-    } else {
-      toast.error("Please select exactly one order to edit.");
-    }
-  };
-
-  const handleDeleteConfirmation = () => {
-    selected.forEach((id) => {
-      axiosInstance
-        .delete(`/orders/${id}`)
-        .then((response) => {
-          setRows((prevRows) => prevRows.filter((row) => row.orderID !== id));
-          setSelected([]);
-          setIsModalOpen(false);
-          toast.success("Order deleted successfully.");
-        })
-        .catch((error) => {
-          console.error("Error deleting order:", error);
-          toast.error("Failed to delete order. Please try again.");
-        });
-    });
-  };
-
-  const handleUpdateOrder = () => {
-    const updatedOrder = { ...selectedOrderDetails, orderStatus, paymentStatus };
-    axiosInstance
-      .put(`/updateOrder&PaymentStatus/${selectedOrderDetails.orderID}`, updatedOrder)
-      .then((response) => {
-        setRows((prevRows) => prevRows.map((row) => (row.orderID === selectedOrderDetails.orderID ? updatedOrder : row)));
-        setIsUpdateDialogOpen(false);
-        toast.success("Order updated successfully.");
-      })
-      .catch((error) => {
-        console.error("Error updating order:", error);
-        toast.error("Failed to update order. Please try again.");
-      });
-  };
-
-  const handleUpdateDialogClose = () => {
-    setIsUpdateDialogOpen(false);
   };
 
   const handleModalClose = () => {
@@ -443,15 +258,9 @@ export default function TrackOrdersTable() {
       <ToastContainer />
       <div
         sx={{ width: "100%", mb: 2 }}
-        className="bg-c5 text-c1 rounded-2xl font-bold font-[Montserrat] pb-5 px-2"
+        className="bg-c5 text-c1 rounded-2xl pt-3 font-bold font-[Montserrat] pb-5 px-2"
       >
-        <EnhancedTableToolbar
-          className="text-c1 font-bold font-[Montserrat]"
-          numSelected={selected.length}
-          //   handleDelete={handleDelete}
-          handleEdit={handleEdit}
-        />
-        <TableContainer className="rounded-t-2xl bg-deep-orange-900 text-c1 font-bold font-[Montserrat]">
+        <TableContainer className="rounded-t-2xl  bg-deep-orange-900 text-c1 font-bold font-[Montserrat]">
           <Table
             className="text-c1  bg-deep-orange-900 rounded-2xl font-bold font-[Montserrat]"
             sx={{ minWidth: 750 }}
@@ -462,7 +271,6 @@ export default function TrackOrdersTable() {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
@@ -484,25 +292,7 @@ export default function TrackOrdersTable() {
                       selected={isItemSelected}
                       sx={{ cursor: "pointer" }}
                     >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            "aria-labelledby": labelId,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
-                        <Typography variant="body1" fontWeight="bold">
-                          {row.firstName}
-                        </Typography>
-                      </TableCell>
+                                  
                       <TableCell align="right">
                         <Button
                           onClick={(event) => {
@@ -525,11 +315,6 @@ export default function TrackOrdersTable() {
                       </TableCell>
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight="medium">
-                          {row.orderStatus}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight="medium">
                           {row.totalAmount}
                         </Typography>
                       </TableCell>
@@ -546,21 +331,6 @@ export default function TrackOrdersTable() {
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight="medium">
                           {row.deliveryType}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight="medium">
-                          {row.contact}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight="medium">
-                          {row.street}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2" fontWeight="medium">
-                          {row.city}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -589,62 +359,6 @@ export default function TrackOrdersTable() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </div>
-      <Dialog open={isModalOpen} onClose={handleModalClose}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete the selected order(s)?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteConfirmation} color="secondary">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={isUpdateDialogOpen} onClose={handleUpdateDialogClose}>
-        <DialogTitle>Edit Order</DialogTitle>
-        <ToastContainer />
-        <DialogContent>
-          <Select
-            value={orderStatus}
-            onChange={(e) => setOrderStatus(e.target.value)}
-            fullWidth
-            variant="outlined"
-            margin="dense"
-            className="z-10"
-            MenuProps={{
-                disablePortal: true,
-              }}
-          >
-            <MenuItem value="Not Complete">Not Complete</MenuItem>
-            <MenuItem value="Completed">Completed</MenuItem>
-          </Select>
-          <Select
-            value={paymentStatus}
-            onChange={(e) => setPaymentStatus(e.target.value)}
-            fullWidth
-            variant="outlined"
-            margin="dense"
-            MenuProps={{
-                disablePortal: true,
-              }}
-          >
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="Paid">Paid</MenuItem>
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleUpdateDialogClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleUpdateOrder} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
       <Dialog
         className="bg-c2 font-[Montserrat] rounded-2xl"
         open={isModalOpen}
