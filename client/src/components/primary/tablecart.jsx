@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useCart } from "../../hooks/cartContext";
 import { jwtDecode } from "jwt-decode"; // Assuming jwtDecode is imported correctly
+import getDecodedToken from "../../services/jwtdecoder";
 
 const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   const {userId } = useParams();
@@ -12,18 +13,30 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   const [countdown, setCountdown] = useState(null);
   const navigate = useNavigate();
 
+  // const postCartTotal = async (total) => {
+  //   try {
+  //     await axiosInstance.post("/cart/updateTotal", { userId, total });
+  //     console.log("Cart total updated successfully.");
+  //   } catch (error) {
+  //     console.error("Error updating cart total:", error);
+  //     toast.error("Error updating cart total.");
+  //   }
+  // };
+
   useEffect(() => {
-    // Fetch cart items from the backend
-    axiosInstance
-      .get(`/cart/${userId}`) // Replace with your actual endpoint
-      .then((response) => {
+    const fetchCartItems = async () => {
+      try {
+        const response = await axiosInstance.get(`/cart/${userId}`);
         setCartItems(response.data);
         calculateCountdown(response.data);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching cart items:", error);
-      });
+      }
+    };
+
+    fetchCartItems();
   }, [userId, setCartItems]);
+
 
   useEffect(() => {
     if (countdown !== null) {
@@ -92,11 +105,23 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   const subtotal = cartItems.reduce((sum, item) => sum + item.pricePerItem * item.quantity, 0);
   const total = subtotal;
 
-
   const handleCheckout = () => {
-    // Implement checkout functionality here
-    console.log("Proceeding to checkout...");
-    toast.success("Proceeding to checkout...");
+    const decodedToken = getDecodedToken();
+    const userId = decodedToken?.id;
+    const subtotal = cartItems.reduce((sum, item) => sum + item.pricePerItem * item.quantity, 0);
+  
+    console.log("Updating cart total with:", { userId, cartTotal: subtotal });
+    
+
+    axiosInstance.post(`/cart/updateTotal`, {  userId, cartTotal: subtotal })
+      .then(() => {
+        toast.success("Cart total updated. Proceeding to checkout...");
+        navigate(`/checkout/${userId}`);
+      })
+      .catch((error) => {
+        console.error("Error updating cart total:", error);
+        toast.error("Error updating cart total.");
+      });
   };
 
   return (
@@ -185,15 +210,18 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
               <div className="flex justify-between mb-2">
                 <span className="font-semibold">Total</span>
                 <span className="font-semibold">Rs. {total.toFixed(2)}</span>
-              </div>           
-              <Link to={`/checkout/${userId}`}>
+              </div>                      
               <button 
                 className="bg-c3 font-[Montserrat] font-bold text-white py-2 px-4 rounded-lg mt-4 w-full"
                 onClick={handleCheckout}
               >
                 Proceed to Checkout
               </button>
-              </Link>
+              <div className="text-center mt-2">
+                <Link to="/" className="text-c1">
+                  Continue Shopping
+                </Link>
+              </div>
             </div>
           </div>
         </div>

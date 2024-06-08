@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 
 router.get('/cart/:userId', checkoutController.getCart);
+router.get('/getAddress/:userId', checkoutController.getAddress);
 
 
 

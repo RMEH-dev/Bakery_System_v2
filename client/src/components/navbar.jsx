@@ -421,7 +421,7 @@ function NavList({ itemCount }) {
       </Typography>
 
       <Typography as="a" href="#" className="pl-2">
-        <Link to={`/profileUser/${userId}`}>
+        <Link to={`/profileUser/AccountDetails/UYE2${userId}`}>
           <button class="flex items-center justify-center bg-c1 w-10 h-8 rounded-3xl text-c2 hover:bg-white hover:text-c1 duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"

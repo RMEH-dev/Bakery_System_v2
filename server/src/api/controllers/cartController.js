@@ -2,9 +2,11 @@ const CartModel = require("../models/cartModel");
 const db = require("../../config/databaseConnection");
 
 const CartController = {
+
   getCart: (req, res) => {
     const { userId } = req.params;
-    const sqlGetCartItems = `SELECT * FROM cartItem WHERE userID = ?`;
+    const sqlGetCartItems = `SELECT * FROM cartitem WHERE userID = ?`;
+
     db.query(sqlGetCartItems, [userId], (err, results) => {
       if (err) {
         console.error("Error fetching cart items:", err);
@@ -15,7 +17,7 @@ const CartController = {
   },
   
   addToCart: (req, res) => {
-    const { userID, proStockBatchID, branchName } = req.body;
+    const { userID, proStockBatchID } = req.body;
 
     console.log(userID, proStockBatchID);
 
@@ -67,20 +69,43 @@ const CartController = {
                     });
                   }
 
-                  db.commit((commitErr) => {
-                    if (commitErr) {
-                      console.error("Error committing transaction:", commitErr);
-                      return db.rollback(() => {
-                        res.status(500).send("Transaction commit error.");
-                      });
+                 // Calculate total from items in the cart
+                 db.query(
+                  "SELECT SUM(p.pricePerItem * ci.quantity) AS total FROM cartitem ci INNER JOIN prostockbatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN prostock p ON p.proStockID = pb.proStockID WHERE ci.cartID = ?",
+                  [cartID],
+                  (totalErr, totalResult) => {
+                    if (totalErr) {
+                      console.error("Error calculating cart total:", totalErr);
+                      return res.status(500).send("Error calculating cart total.");
                     }
-
-                    console.log("Item added to cart:", addItemResult);
-                    res.status(200).send("Item added to cart");
-                  });
-                }
-              );
-            };
+                    
+                    const cartTotal = totalResult[0].total;
+                    
+                    // Update cart total in the database
+                    db.query(
+                      "UPDATE cart SET cartTotal = ? WHERE cartID = ?",
+                      [cartTotal, cartID],
+                      (updateTotalErr, updateTotalResult) => {
+                        if (updateTotalErr) {
+                          console.error("Error updating cart total:", updateTotalErr);
+                          return res.status(500).send("Error updating cart total.");
+                        }
+                        db.commit((commitErr) => {
+                          if (commitErr) {
+                            console.error("Error committing transaction:", commitErr);
+                            return db.rollback(() => {
+                              res.status(500).send("Transaction commit error.");
+                            });
+                          }
+                          res.status(200).send("Item added to cart and cart total updated.");
+                        });
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          };
 
             if (results.length > 0) {
               cartID = results[0].cartID;
@@ -169,20 +194,50 @@ const CartController = {
             });
           }
 
-          db.commit((commitErr) => {
-            if (commitErr) {
-              console.error("Error committing transaction:", commitErr);
+         // Calculate total from items in the cart
+         db.query(
+          "SELECT SUM(p.pricePerItem * ci.quantity) AS total FROM cartitem ci INNER JOIN prostockbatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN prostock p ON p.proStockID = pb.proStockID WHERE ci.cartID = (SELECT cartID FROM cartitem WHERE cartItemID = ?)",
+          [cartItemID],
+          (totalErr, totalResult) => {
+            if (totalErr) {
+              console.error("Error calculating cart total:", totalErr);
               return db.rollback(() => {
-                res.status(500).send("Transaction commit error.");
+                res.status(500).send("Error calculating cart total.");
               });
             }
 
-            res.status(200).send("Item removed from cart and stock updated.");
-          });
-        });
+            const cartTotal = totalResult[0].total;
+
+            // Update cart total in the database
+            db.query(
+              "UPDATE cart SET cartTotal = ? WHERE cartID = (SELECT cartID FROM cartitem WHERE cartItemID = ?)",
+              [cartTotal, cartItemID],
+              (updateTotalErr, updateTotalResult) => {
+                if (updateTotalErr) {
+                  console.error("Error updating cart total:", updateTotalErr);
+                  return db.rollback(() => {
+                    res.status(500).send("Error updating cart total.");
+                  });
+                }
+
+                db.commit((commitErr) => {
+                  if (commitErr) {
+                    console.error("Error committing transaction:", commitErr);
+                    return db.rollback(() => {
+                      res.status(500).send("Transaction commit error.");
+                    });
+                  }
+
+                  res.status(200).send("Item removed from cart and stock updated.");
+                });
+              }
+            );
+          }
+        );
       });
     });
-  },
+  });
+},
 
   updateCartItemQuantity: (req, res) => {
     const { cartItemID, newQuantity, proStockBatchID, originalQuantity } =
@@ -214,21 +269,88 @@ const CartController = {
               });
             }
 
-            db.commit((commitErr) => {
-              if (commitErr) {
-                console.error("Error committing transaction:", commitErr);
+            // Calculate total from items in the cart
+          db.query(
+            "SELECT SUM(p.pricePerItem * ci.quantity) AS total FROM cartitem ci INNER JOIN prostockbatch pb ON ci.proStockBatchID = pb.proStockBatchID JOIN prostock p ON p.proStockID = pb.proStockID WHERE ci.cartID = (SELECT cartID FROM cartitem WHERE cartItemID = ?)",
+            [cartItemID],
+            (totalErr, totalResult) => {
+              if (totalErr) {
+                console.error("Error calculating cart total:", totalErr);
                 return db.rollback(() => {
-                  res.status(500).send("Transaction commit error.");
+                  res.status(500).send("Error calculating cart total.");
                 });
               }
 
-              res.status(200).send("Item quantity updated and stock adjusted.");
-            });
-          }
-        );
+              const cartTotal = totalResult[0].total;
+
+              // Update cart total in the database
+              db.query(
+                "UPDATE cart SET cartTotal = ? WHERE cartID = (SELECT cartID FROM cartitem WHERE cartItemID = ?)",
+                [cartTotal, cartItemID],
+                (updateTotalErr, updateTotalResult) => {
+                  if (updateTotalErr) {
+                    console.error("Error updating cart total:", updateTotalErr);
+                    return db.rollback(() => {
+                      res.status(500).send("Error updating cart total.");
+                    });
+                  }
+
+                  db.commit((commitErr) => {
+                    if (commitErr) {
+                      console.error("Error committing transaction:", commitErr);
+                      return db.rollback(() => {
+                        res.status(500).send("Transaction commit error.");
+                      });
+                    }
+
+                    res.status(200).send("Item quantity updated and stock adjusted.");
+                  });
+                }
+              );
+            }
+          );
+        });
       });
     });
   },
+
+  updateCartTotal: (req, res) => {
+    const { userId, cartTotal } = req.body;
+
+    if (!userId || cartTotal === undefined) {
+      console.error("User ID and cart total are required.", { userId, cartTotal });
+      return res.status(400).send("User ID and cart total are required.");
+    }
+  
+    const query = `
+      UPDATE cart 
+      SET cartTotal = ? 
+      WHERE userID = ? 
+      AND cartID = (
+        SELECT cartID 
+        FROM cart 
+        WHERE userID = ? 
+        ORDER BY createdDate DESC 
+        LIMIT 1
+      )
+    `;
+  
+    db.query(query, [cartTotal, userId, userId], (err, result) => {
+      if (err) {
+        console.error("Error updating cart total:", err);
+        return res.status(500).send("Error updating cart total.");
+      }
+  
+      if (result.affectedRows === 0) {
+        console.error("No cart found for the user to update.");
+        return res.status(404).send("No cart found for the user to update.");
+      }
+  
+      res.status(200).send("Cart total updated successfully.");
+    });
+  }
+  
 };
+
 
 module.exports = CartController;

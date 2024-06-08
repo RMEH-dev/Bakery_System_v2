@@ -44,11 +44,11 @@ export function Cart({children}) {
               1. Shopping Cart &nbsp; {">"}
               {">"}{" "}
             </Link>
-            <Link to="/checkout/:id">
+            <Link to={`/checkout/${userId}`}>
               &nbsp; 2. Checkout&nbsp; {">"}
               {">"}{" "}
             </Link>
-            <Link to="/orderSuccess">&nbsp; 3. Order Complete &nbsp;</Link>
+            <Link to={`/orderSuccess/${userId}`}>&nbsp; 3. Order Complete &nbsp;</Link>
           </div>
         </Typography>
         {children}

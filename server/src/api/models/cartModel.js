@@ -1,6 +1,7 @@
 const db = require("../../config/databaseConnection");
 
 const CartModel = {
+  
   getCartByUserID: (userID, callback) => {
     db.query(
       "SELECT cartID FROM cart WHERE userID = ?",

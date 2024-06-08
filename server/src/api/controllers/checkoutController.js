@@ -1,6 +1,24 @@
 const CheckoutModel = require("../models/checkoutModel");
 const db = require("../../config/databaseConnection");
 
+exports.getAddress = (req,res) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+  }
+
+  console.log(userId);
+  CheckoutModel.getAddress(userId, (error, results) => {
+    if (error) {
+      console.error("Error fetching order details from the database:", error);
+      return res.status(500).json({ error: "Database query error" });
+    }
+    res.json(results);
+    console.log(results);
+  });
+};
+
 exports.getCart = async (req, res) => {
   try {
     const { userId } = req.params;
