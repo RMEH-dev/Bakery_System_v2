@@ -61,9 +61,9 @@ const CheckoutModel = {
     });
   },
 
-  generateOrderID: (callback) => {
-    db.query("SELECT MAX(orderID) + 1 AS newOrderID FROM orders", callback);
-  },
+  // generateOrderID: (callback) => {
+  //   db.query("SELECT MAX(orderID) + 1 AS newOrderID FROM orders", callback);
+  // },
 
   createOrder: (orderData, callback) => {
     db.query("INSERT INTO orders SET ?", orderData, (error, results) => {

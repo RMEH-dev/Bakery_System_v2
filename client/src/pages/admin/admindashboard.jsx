@@ -78,12 +78,12 @@ function AdminDashboard({ children }) {
               View Reports
             </Button>
           </Link>
-          <div className="bg-gradient-to-b from-c2 to-c5 h-12 w-3 ml-5 mr-5  rounded-2xl z-10"></div>
-          <Link to="/inventoryLogs">
+          {/* <div className="bg-gradient-to-b from-c2 to-c5 h-12 w-3 ml-5 mr-5  rounded-2xl z-10"></div> */}
+          {/* <Link to="/inventoryLogs">
             <Button className="w-[200px] h-[20px] text-c1 hover:transition-transform duration-500 ease-in-out hover:scale-105 hover:bg-deep-orange-900 hover:text-white bg-c5 rounded-xl text-md font-[Montserrat]">
               View Logs
             </Button>
-          </Link>
+          </Link> */}
         </div>
         <div className="ml-20 mt-5 flex justify-right">
         </div>

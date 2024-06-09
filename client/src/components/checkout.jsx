@@ -187,13 +187,13 @@ export function Checkout() {
     if (!paymentID) {
       throw new Error("Payment ID not returned from createPayment endpoint");
     }
-    // Generate new order ID
-    const orderIDResponse = await axiosInstance.get('/generateOrderID');
-    const newOrderID = orderIDResponse.data.newOrderID;
+
+    // // Generate new order ID
+    // const orderIDResponse = await axiosInstance.get('/generateOrderID');
+    // const newOrderID = orderIDResponse.data.newOrderID;
 
 
     const orderData = {
-      orderID: newOrderID,
       userID: userId,
       orderDate: new Date(), 
       totalAmount: paymentAmount,
@@ -204,11 +204,14 @@ export function Checkout() {
       addressID: addressData.addressID,
     };
     console.log('Sending order data:', orderData); // Log order data
-    await axiosInstance.post('/createOrder', orderData);
+      const orderResponse = await axiosInstance.post("/createOrder", orderData);
+      const orderID = orderResponse.data.orderID;
+      console.log(orderResponse.data.orderID);
+
 
     // Insert into orderdetails table
     const orderDetailsData = cartItems.map((item) => ({
-      orderID: newOrderID,
+      orderID,
       proStockBatchID: item.proStockBatchID,
       quantity: item.quantity,
     }));

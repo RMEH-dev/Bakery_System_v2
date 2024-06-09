@@ -84,26 +84,25 @@ exports.createPayment = (req, res) => {
   });
 };
 
-exports.generateOrderID = (req, res) => {
-  CheckoutModel.generateOrderID((error, results) => {
-    if (error) {
-      console.error("Error generating order ID:", error);
-      return res.status(500).json({ error: "Database query error" });
-    }
-    res.json({ newOrderID: results[0].newOrderID });
-  });
-};
+// exports.generateOrderID = (req, res) => {
+//   CheckoutModel.generateOrderID((error, results) => {
+//     if (error) {
+//       console.error("Error generating order ID:", error);
+//       return res.status(500).json({ error: "Database query error" });
+//     }
+//     res.json({ newOrderID: results[0].newOrderID });
+//   });
+// };
 
 exports.createOrder = (req, res) => {
-  const { orderID, userID, orderDate, totalAmount, paymentID, orderType, orderStatus, deliveryID, addressID } = req.body;
+  const { userID, orderDate, totalAmount, paymentID, orderType, orderStatus, deliveryID, addressID } = req.body;
 
   console.log(req.body)
-  if (!orderID || !userID || !orderDate || !totalAmount || !paymentID || !orderType || !orderStatus  || !deliveryID || !addressID) {
+  if ( !userID || !orderDate || !totalAmount || !paymentID || !orderType || !orderStatus  || !deliveryID || !addressID) {
     return res.status(400).json({ error: "All order details are required" });
   }
 
   const orderData = {
-    orderID,
     userID,
     orderDate,
     totalAmount,
@@ -119,7 +118,8 @@ exports.createOrder = (req, res) => {
       console.error("Error creating order in the database:", error);
       return res.status(500).json({ error: "Database query error" });
     }
-    res.json({ message: "Order created successfully" });
+    // res.json({ message: "Order created successfully" });
+    res.json({ orderID: results.insertId });
   });
 };
 

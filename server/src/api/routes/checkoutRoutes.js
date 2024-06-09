@@ -9,7 +9,6 @@ router.get('/getAddress/:userId', checkoutController.getAddress);
 router.post('/createOrder', checkoutController.createOrder);
 router.get('/deliveryCharge/:option', checkoutController.getDeliveryCharge);
 router.post('/createPayment', checkoutController.createPayment);
-router.get('/generateOrderID', checkoutController.generateOrderID);
 router.post('/createOrderDetails', checkoutController.createOrderDetails);
 router.delete('/clearCart/:cartId', checkoutController.clearCart);
 
