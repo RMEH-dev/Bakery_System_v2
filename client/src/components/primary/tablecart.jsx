@@ -108,6 +108,7 @@ const ShoppingCartTable1 = ({ cartItems, setCartItems }) => {
   const handleCheckout = () => {
     const decodedToken = getDecodedToken();
     const userId = decodedToken?.id;
+    
     const subtotal = cartItems.reduce((sum, item) => sum + item.pricePerItem * item.quantity, 0);
   
     console.log("Updating cart total with:", { userId, cartTotal: subtotal });

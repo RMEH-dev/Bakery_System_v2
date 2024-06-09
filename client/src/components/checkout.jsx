@@ -25,25 +25,23 @@ export function Checkout() {
     contact: "",
     email: "",
   });
-
-  const [error, setError] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption2, setSelectedOption2] = useState(null);
   const [isDropdownOpen2, setIsDropdownOpen2] = useState(false);
-  const [selectedOption3, setSelectedOption3] = useState(null);
-  const [isDropdownOpen3, setIsDropdownOpen3] = useState(false);
-  const [couponCode, setCouponCode] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
-  const [discount, setDiscount] = useState(0);
   const [userId, setUserId] = useState(decodedToken?.id);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [deliveryType, setDeliveryType] = useState(null);
+  const [isDeliveryTypeDropdownOpen, setIsDeliveryTypeDropdownOpen] =
+    useState(false);
+  const [cartId, setCartId] = useState([]);
+  const [deliveryId, setDeliveryId] = useState(null);
+
   const navigate = useNavigate();
-
-
 
   useEffect(() => {
     if (decodedToken?.id) {
@@ -65,16 +63,17 @@ export function Checkout() {
           const response = await axiosInstance.get(`/getAddress/${userId}`);
           console.log(response.data);
           const address = response.data[0];
-            setAddressData({
-              firstName: address?.firstName || "",
-              lastName: address?.lastName || "",
-              street: address?.street || "",
-              city: address?.city || "",
-              postCode: address?.postCode || "",
-              contact: address?.contact || "",
-              email: address?.email || "",
-            });
-            console.log("Updated addressData state:", addressData); 
+          setAddressData({
+            firstName: address?.firstName || "",
+            lastName: address?.lastName || "",
+            street: address?.street || "",
+            city: address?.city || "",
+            postCode: address?.postCode || "",
+            contact: address?.contact || "",
+            email: address?.email || "",
+            addressID: address?.addressID || "",
+          });
+          console.log("Updated addressData state:", addressData);
         } catch (error) {
           console.error("Error fetching address:", error);
         }
@@ -87,6 +86,10 @@ export function Checkout() {
         try {
           const response = await axiosInstance.get(`/cart/${userId}`);
           setCartItems(response.data);
+          console.log(response.data);
+          const cartID = response.data[0].cartID;
+          setCartId(cartID);
+          console.log("Cart ID:", cartID);
           const subtotal = response.data.reduce(
             (acc, item) => acc + item.pricePerItem * item.quantity,
             0
@@ -98,10 +101,10 @@ export function Checkout() {
       }
     };
 
-    if (userId) {
+
       fetchAddress();
       fetchCart();
-    }
+
   }, [userId]);
 
   const handleChange = (e) => {
@@ -122,47 +125,111 @@ export function Checkout() {
     setIsDropdownOpen2(false);
   };
 
-  const handleSelect3 = (option) => {
-    setSelectedOption3(option);
-    setIsDropdownOpen3(false);
-  };
-
   const handleCheckboxChange = (e) => {
     setIsChecked(e.target.checked);
   };
 
-  const handleCouponChange = (e) => {
-    setCouponCode(e.target.value);
+  // const handleCouponChange = (e) => {
+  //   setCouponCode(e.target.value);
+  // };
+
+  const handleDeliveryTypeSelect = async (option) => {
+    setDeliveryType(option);
+    setIsDeliveryTypeDropdownOpen(false);
+
+    // Fetch the delivery charge based on the selected option
+    try {
+      const response = await axiosInstance.get(`/deliveryCharge/${option}`);
+      setDeliveryCharge(response.data.deliveryCharge);
+      console.log(response.data);
+      await setDeliveryId(response.data.deliveryID)
+      console.log(deliveryId)
+    } catch (error) {
+      console.error("Error fetching delivery charge:", error);
+      toast.error("Error fetching delivery charge.");
+    }
+  };
+
+  const calculateTotal = () => {
+    return total + deliveryCharge;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+        console.log(cartId)
 
-    if (!address.street || !address.city || !address.postCode) {
+    if (!addressData.street || !addressData.city || !addressData.postCode) {
       toast.error("Please input your address details.");
       return;
     }
 
-    const orderDetails = {
-      userID: userId,
-      deliveryID: selectedOption,
-      paymentType: selectedOption2,
-      couponCode: couponCode,
-      orderType: selectedOption ? "Delivery" : "Pickup",
-      addressID: address.addressID,
-    };
+    if (selectedOption === "Delivery" && !deliveryType) {
+      toast.error("Please select a delivery type.");
+      return;
+    }
 
     try {
-      const response = await axiosInstance.post("/createOrder", orderDetails);
-      if (response.data.orderID) {
-        toast.success("Order placed successfully!");
-        navigate(`/orderSuccess/${userId}`);
-      }
-    } catch (error) {
-      toast.error("Error placing order.");
-      console.error("Error placing order:", error);
+          // Insert into payment table
+    const paymentAmount = calculateTotal();
+    const paymentStatus = selectedOption2 === "Credit Card" ? "Paid" : "Pending";
+    const paymentData = {
+      cartID: cartId, 
+      paymentAmount,
+      paymentType: selectedOption2,
+      paymentDate: new Date(),
+      paymentStatus
+    };
+    
+    console.log('Sending payment data:', paymentData); // Log payment data
+    const paymentResponse = await axiosInstance.post('/createPayment', paymentData);
+    const paymentID = paymentResponse.data.paymentID;
+    console.log(paymentResponse.data.paymentID);
+    if (!paymentID) {
+      throw new Error("Payment ID not returned from createPayment endpoint");
     }
-  };
+    // Generate new order ID
+    const orderIDResponse = await axiosInstance.get('/generateOrderID');
+    const newOrderID = orderIDResponse.data.newOrderID;
+
+
+    const orderData = {
+      orderID: newOrderID,
+      userID: userId,
+      orderDate: new Date(), 
+      totalAmount: paymentAmount,
+      paymentID,
+      orderType: selectedOption,
+      orderStatus: 'Not Complete',
+      deliveryID: deliveryId,
+      addressID: addressData.addressID,
+    };
+    console.log('Sending order data:', orderData); // Log order data
+    await axiosInstance.post('/createOrder', orderData);
+
+    // Insert into orderdetails table
+    const orderDetailsData = cartItems.map((item) => ({
+      orderID: newOrderID,
+      proStockBatchID: item.proStockBatchID,
+      quantity: item.quantity,
+    }));
+
+    console.log('Sending order details:', orderDetailsData); // Log order details data
+    await axiosInstance.post('/createOrderDetails', { orderDetails: orderDetailsData });
+
+    // Clear cart and show success message
+    const clearCartResponse = await axiosInstance.delete(`/clearCart/${cartId}`);
+    console.log(clearCartResponse.data.message);
+    toast.success("Order placed successfully!");
+
+    setTimeout(() => {
+    navigate(`/orderSuccess/${userId}`);
+  }, 3000);
+  } catch (error) {
+    toast.error("Error placing order.");
+    console.error("Error placing order:", error);
+  }
+};
+
 
   return (
     <Cart>
@@ -261,7 +328,7 @@ export function Checkout() {
                 name="contact"
                 value={addressData.contact}
                 onChange={handleChange}
-                className=" text-c1 font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 rounded-[30px]"
+                className=" text-c1 w-[895px] 2xl:w-[745px] font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 rounded-[30px]"
                 labelProps={{
                   className: "before:content-none after:content-none",
                 }}
@@ -275,7 +342,10 @@ export function Checkout() {
                 name="email"
                 value={addressData.email}
                 onChange={handleChange}
-                className="-mb-3 w-[895px] 2xl:w-[745px] text-black font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 bg-c4 rounded-[30px]"
+                className="-mb-3 w-[895px] 2xl:w-[745px] text-black font-semibold font-[Montserrat] border-deep-orange-200 focus:!border-deep-orange-900 rounded-[30px]"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
               />
               <Checkbox
                 className="bg-c1 w-6 h-6"
@@ -297,7 +367,10 @@ export function Checkout() {
           className="flex flex-col justify-items-center h-[820px] sm:w-auto bg-gradient-to-tr from-c4 to-c2 rounded-2xl z-80"
           shadow={false}
         >
-          <form className="ml-[25px] mt-5 mb-2 w-[300px] 2xl:w-[800px] h-150 max-w-screen-lg sm:w-96">
+          <form
+            onSubmit={handleSubmit}
+            className="ml-[25px] mt-5 mb-2 w-[300px] 2xl:w-[800px] h-150 max-w-screen-lg sm:w-96"
+          >
             <div className="relative w-[500px]">
               <Typography className="text-c1 font-semibold font-[Montserrat]">
                 Delivery or Pickup
@@ -306,96 +379,129 @@ export function Checkout() {
                 type="button"
                 className="mt-2 inline-flex w-full justify-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium font-[Montserrat] text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:ring-offset-2 focus:ring-offset-gray-100"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
               >
                 {selectedOption || "Select an option"}
                 <ChevronDownIcon className="-mr-1 h-5 w-5" aria-hidden="true" />
               </button>
               {isDropdownOpen && (
-                <div className="mt-2 absolute z-10 w-full font-[Montserrat] rounded-md bg-white shadow-lg">
+                <div className="mt-2 absolute z-10 w-[500px] font-[Montserrat] rounded-md bg-white shadow-lg">
                   <ul
                     className="py-1"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="options-menu"
                   >
-                    <li>
-                      <button
-                        type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
-                        onClick={() => handleSelect("Pickup")}
-                      >
-                        Pickup
-                      </button>
+                    <li
+                      onClick={() => handleSelect("Delivery")}
+                      className="cursor-pointer hover:bg-gray-200 px-4 py-2"
+                    >
+                      Delivery
                     </li>
-                    <li>
-                      <button
-                        type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
-                        onClick={() => handleSelect("Delivery")}
-                      >
-                        Delivery
-                      </button>
+                    <li
+                      onClick={() => handleSelect("Pickup")}
+                      className="cursor-pointer hover:bg-gray-200 px-4 py-2"
+                    >
+                      {" "}
+                      Pickup
                     </li>
                   </ul>
                 </div>
               )}
             </div>
+            {selectedOption === "Delivery" && (
+              <div className="flex items-center gap-2 mt-5">
+                <Typography className="text-c1 font-semibold font-[Montserrat]">
+                  Select Delivery Type
+                </Typography>
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    className="flex items-center text-c1 bg-white font-semibold font-[Montserrat] border-deep-orange-200"
+                    onClick={() =>
+                      setIsDeliveryTypeDropdownOpen(!isDeliveryTypeDropdownOpen)
+                    }
+                    labelProps={{
+                      className: "before:content-none after:content-none",
+                    }}
+                  >
+                    {deliveryType || "Select Delivery Type"}
+                    <ChevronDownIcon className="ml-2 h-4 w-4" />
+                  </Button>
+                  {isDeliveryTypeDropdownOpen && (
+                    <ul className="absolute z-10 mt-2 bg-white border rounded-md shadow-lg">
+                      <li
+                          onClick={() => handleDeliveryTypeSelect("Standard")}
+                          className="cursor-pointer hover:bg-gray-200 px-4 py-2"
+                        >
+                          Standard
+                        </li>
+                        <li
+                          onClick={() => handleDeliveryTypeSelect("Express")}
+                          className="cursor-pointer hover:bg-gray-200 px-4 py-2"
+                        >
+                          Express
+                        </li>
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
             <div className="relative w-[500px]">
               <Typography className="text-c1 mt-10 font-semibold font-[Montserrat]">
-                Payment Options
+                Select Payment Option
               </Typography>
               <button
                 type="button"
-                className="mt-2 inline-flex w-full justify-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium font-[Montserrat] text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:ring-offset-2 focus:ring-offset-gray-100"
+                className="mt-2 inline-flex w-[500px] text-c1 font-bold justify-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm  font-[Montserrat] shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:ring-offset-2 focus:ring-offset-gray-100"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
                 onClick={() => setIsDropdownOpen2(!isDropdownOpen2)}
               >
-                {selectedOption2 || "Select an option"}
+                {selectedOption2 || "Select Payment Method"}
                 <ChevronDownIcon className="-mr-1 h-5 w-5" aria-hidden="true" />
               </button>
               {isDropdownOpen2 && (
-                <div className="mt-2 absolute z-10 w-full font-[Montserrat] rounded-md bg-white shadow-lg">
+                <div className="mt-2 text-c1 font-bold absolute z-10 w-full font-[Montserrat] rounded-md bg-white shadow-lg">
                   <ul
                     className="py-1"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="options-menu"
                   >
-                    <li>
-                      <button
-                        type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
+                   <li
+                        onClick={() => handleSelect2("Credit Card")}
+                        className="cursor-pointer hover:bg-gray-200 px-4 py-2"
+                      >
+                        Credit Card
+                      </li>                  
+                      <li
                         onClick={() => handleSelect2("Cash")}
+                        className="cursor-pointer hover:bg-gray-200 px-4 py-2"
                       >
                         Cash
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
-                        onClick={() => handleSelect2("Card")}
-                      >
-                        Card
-                      </button>
-                    </li>
+                      </li>
                   </ul>
                 </div>
               )}
             </div>
-            <div className="relative w-[500px]">
+            {/* <div className="relative w-[500px]">
               <Typography className="text-c1 mt-10 font-semibold font-[Montserrat]">
                 Discount Type
               </Typography>
               <button
                 type="button"
-                className="mt-2 inline-flex w-full justify-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium font-[Montserrat] text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:ring-offset-2 focus:ring-offset-gray-100"
+                className="mt-2 inline-flex w-full text-c1 font-bold justify-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-[Montserrat] shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:ring-offset-2 focus:ring-offset-gray-100"
                 onClick={() => setIsDropdownOpen3(!isDropdownOpen3)}
               >
                 {selectedOption3 || "Select an option"}
                 <ChevronDownIcon className="-mr-1 h-5 w-5" aria-hidden="true" />
               </button>
               {isDropdownOpen3 && (
-                <div className="mt-2 absolute z-10 w-full font-[Montserrat] rounded-md bg-white shadow-lg">
+                <div className="mt-2 absolute z-10 w-full text-c1 font-bold font-[Montserrat] rounded-md bg-white shadow-lg">
                   <ul
                     className="py-1"
                     role="menu"
@@ -405,7 +511,7 @@ export function Checkout() {
                     <li>
                       <button
                         type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
+                        className="block px-4 py-2 text-sm text-c1 font-bold"
                         onClick={() => handleSelect3("Seasonal")}
                       >
                         Seasonal
@@ -414,7 +520,7 @@ export function Checkout() {
                     <li>
                       <button
                         type="button"
-                        className="block px-4 py-2 text-sm text-gray-700"
+                        className="block px-4 py-2 text-sm text-c1 font-bold"
                         onClick={() => handleSelect3("Coupon")}
                       >
                         Coupon
@@ -423,53 +529,56 @@ export function Checkout() {
                   </ul>
                 </div>
               )}
-            </div>
-            <div className="mt-10 mb-6 flex flex-col gap-y-2 gap-x-6">
-              <Typography className="text-c1 font-semibold font-[Montserrat]">
+            </div> */}
+            {/* <div className="mt-10 mb-6 w-[500px] flex flex-col gap-y-2 gap-x-6">
+              <Typography className="text-c1 w-[500px] font-semibold font-[Montserrat]">
                 Coupon Code
               </Typography>
               <div className="flex w-[350px] items-center gap-3">
                 <Input
                   type="text"
                   id="couponCode"
-                  name="couponCode"
                   value={couponCode}
                   onChange={handleCouponChange}
                   className="w-[100px] px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-deep-orange-800 focus:border-deep-orange-800"
+                  labelProps={{
+                    className: "before:content-none after:content-none",
+                  }}
                 />
                 <Button
                   className="w-[200px] bg-gradient-to-r from-deep-orange-800 to-c3 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-deep-orange-200 dark:focus:ring-deep-orange-500 shadow-lg shadow-deep-orange-500/50 dark:shadow-lg dark:shadow-deep-orange-800 font-[Montserrat] font-extrabold text-sm"
                   type="button"
+                  onClick={() => toast.info("Coupon Applied!")}
                 >
                   Apply
                 </Button>
               </div>
-            </div>
-            <h2 className="text-lg font-bold text-c1 font-[Montserrat] mb-4">
+            </div> */}
+            <h2 className="text-lg mt-10 font-bold w-[500px] text-c1 font-[Montserrat] mb-4">
               Payment Summary
             </h2>
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between w-[500px] mb-2">
               <span>Subtotal</span>
-              <span>Rs. </span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span>Delivery Charges</span>
-              <span>Rs. </span>
-            </div>
-            <div className="flex justify-between mb-2">
+              <span>Rs.{total.toFixed(2)} </span>
+            </div>          
+            {/* <div className="flex justify-between w-[500px] mb-2">
               <span>Discount</span>
-              <span>Rs. </span>
+              <span>Rs. {discount.toFixed(2)}</span>
+            </div> */}
+            <div className="flex justify-between w-[500px] mb-2">
+              <span>Delivery Charges</span>
+              <span>Rs. {deliveryCharge.toFixed(2)}</span>
             </div>
-            <hr className="my-2" />
-            <div className="flex justify-between mb-2">
+            <hr className="my-2 w-[500px]" />
+            <div className="flex justify-between w-[500px] mb-2">
               <span className="font-semibold">Total</span>
-              <span className="font-semibold">Rs. {total.toFixed(2)}</span>
+              <span className="font-semibold">Rs. {calculateTotal().toFixed(2)}</span>
             </div>
             <Button
-              className="mt-4 bg-gradient-to-r from-c1 to-c3 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-deep-orange-200 dark:focus:ring-deep-orange-500 shadow-lg shadow-deep-orange-500/50 dark:shadow-lg dark:shadow-deep-orange-800 font-[Montserrat] font-extrabold text-lg"
+              className="mt-4 w-[500px] bg-gradient-to-r from-c1 to-c3 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-deep-orange-200 dark:focus:ring-deep-orange-500 shadow-lg shadow-deep-orange-500/50 dark:shadow-lg dark:shadow-deep-orange-800 font-[Montserrat] font-extrabold text-lg"
               type="submit"
             >
-              Pay Total
+              Place Order
             </Button>
           </form>
         </Card>
