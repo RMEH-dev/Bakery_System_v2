@@ -289,7 +289,7 @@ export default function TrackOrdersTable() {
   useEffect(() => {
     // Fetch data from the backend when the component mounts
     axiosInstance
-      .get("/userOrders") // Assuming your backend endpoint is /api/stocks
+      .get("/trackOrders") // Assuming your backend endpoint is /api/stocks
       .then((response) => {
         console.log(response.data);
         setRows(response.data); // Update the state with fetched data

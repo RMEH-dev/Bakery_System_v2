@@ -10,15 +10,16 @@ const getOrders= (values, callback) => {
   db.query(sqlOrders, values, callback);
 };
 
-const getOrderDetails = (values, callback) => {
+const getOrderDetails = (orderID, callback) => {
     const sqlGetOrderDetails = `
     SELECT od.orderDetailsID, o.orderID, p.proStockName, od.quantity 
     FROM orderdetails od 
     JOIN orders o ON o.orderID = od.orderID 
     JOIN proStockBatch pb ON pb.proStockBatchID = od.proStockBatchID 
     JOIN proStock p ON p.proStockID = pb.proStockID
+    WHERE o.orderID = ?
     `;
-    db.query(sqlGetOrderDetails, values, callback)
+    db.query(sqlGetOrderDetails, orderID, callback)
 };
 
 const updateOrderStatus = (orderID, orderStatus, callback) => {

@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { Cart } from "./cart";
 import { Typography, Checkbox, Button } from "@material-tailwind/react";
 import { Link } from "react-router-dom";
+import getDecodedToken from "../services/jwtdecoder";
 
 function OrderSuccess() {
+  const decodedToken = getDecodedToken();
   const [isChecked, setIsChecked] = useState(false);
   const handleCheckboxChange = (e) => {
     setIsChecked(e.target.checked);
   };
+
+  const userId = decodedToken?.id;
 
   return (
     <Cart>
@@ -58,7 +62,7 @@ function OrderSuccess() {
             checked={isChecked}
             onChange={handleCheckboxChange}
           />
-          <Link to="/profileUser/MyOrders">
+          <Link to={`/profileUser/MyOrders/${userId}`}>
             <Button className="mt-6 ml-5 w-[450px] justify-items-center hover:bg-deep-orange-900 bg-c3 rounded-3xl text-white text-xl font-[Montserrat]">
               Complete order
             </Button>
