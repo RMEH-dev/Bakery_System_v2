@@ -31,8 +31,15 @@ import ConfirmationModal from "./primary/confirmationModel";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Dialog } from "@material-tailwind/react";
-import { DialogActions, DialogContent, DialogTitle, MenuItem, Select } from "@mui/material";
-
+import {
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -135,6 +142,13 @@ const headCells = [
     disablePadding: false,
     label: "Delivery City",
   },
+  {
+    id: "customerAlerts",
+    numeric: false,
+    disablePadding: false,
+    label: "Customer Alerts",
+  },
+  { id: "actions", numeric: false, disablePadding: false, label: "Actions" },
 ];
 
 function EnhancedTableHead(props) {
@@ -164,7 +178,6 @@ function EnhancedTableHead(props) {
             }}
           />
         </TableCell>
-
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -203,7 +216,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleDelete, handleEdit } = props;
+  const { numSelected, handleDelete, handleEdit, handleFilterClick } = props;
 
   return (
     <Toolbar
@@ -254,7 +267,7 @@ function EnhancedTableToolbar(props) {
         </div>
       ) : (
         <Tooltip title="Filter list">
-          <IconButton>
+          <IconButton onClick={handleFilterClick}>
             <FilterListIcon />
           </IconButton>
         </Tooltip>
@@ -272,19 +285,18 @@ EnhancedTableToolbar.propTypes = {
 export default function TrackOrdersTable() {
   const [rows, setRows] = useState([]); // State to hold fetched data
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("calories");
+  const [orderBy, setOrderBy] = useState("orderID");
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-  const [selectedOrderDetails, setSelectedOrderDetails] = useState([]);
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState({});
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false); // State to manage update dialog visibility
   const [selectedOrder, setSelectedOrder] = useState(null); // State to hold the selected order for updating
   const [orderStatus, setOrderStatus] = useState(""); // State to manage order status
   const [paymentStatus, setPaymentStatus] = useState(""); // State to manage payment status
   const navigate = useNavigate(); // Initialize useNavigate
-
 
   useEffect(() => {
     // Fetch data from the backend when the component mounts
@@ -312,7 +324,7 @@ export default function TrackOrdersTable() {
       setSelectedOrderDetails(rows);
       return;
     }
-    setSelected([]);;
+    setSelected([]);
   };
 
   const handleClick = (event, id) => {
@@ -320,16 +332,19 @@ export default function TrackOrdersTable() {
     let newSelected = [];
 
     if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-      } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-      }
-      setSelected(newSelected);
-    };
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+    setSelected(newSelected);
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -345,7 +360,6 @@ export default function TrackOrdersTable() {
       setIsModalOpen(true);
     }
   };
-
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked);
@@ -381,11 +395,22 @@ export default function TrackOrdersTable() {
   };
 
   const handleUpdateOrder = () => {
-    const updatedOrder = { ...selectedOrderDetails, orderStatus, paymentStatus };
+    const updatedOrder = {
+      ...selectedOrderDetails,
+      orderStatus,
+      paymentStatus,
+    };
     axiosInstance
-      .put(`/updateOrder&PaymentStatus/${selectedOrderDetails.orderID}`, updatedOrder)
+      .put(
+        `/updateOrder&PaymentStatus/${selectedOrderDetails.orderID}`,
+        updatedOrder
+      )
       .then((response) => {
-        setRows((prevRows) => prevRows.map((row) => (row.orderID === selectedOrderDetails.orderID ? updatedOrder : row)));
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            row.orderID === selectedOrderDetails.orderID ? updatedOrder : row
+          )
+        );
         setIsUpdateDialogOpen(false);
         toast.success("Order updated successfully.");
       })
@@ -401,6 +426,7 @@ export default function TrackOrdersTable() {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+    setSelectedOrderDetails({});
   };
 
   const isSelected = (orderID) => selected.indexOf(orderID) !== -1;
@@ -434,6 +460,105 @@ export default function TrackOrdersTable() {
     setIsPopupOpen(false);
   };
 
+  const handleExportPdf = () => {
+    const doc = new jsPDF();
+
+    doc.autoTable({
+      head: [headCells.map((cell) => cell.label)],
+      body: rows.map((row) =>
+        headCells.map((cell) => {
+          if (cell.id === "actions") {
+            return "";
+          }
+          return row[cell.id] || "";
+        })
+      ),
+    });
+
+    doc.save("table_data.pdf");
+  };
+
+  const handleReceiptDownload = (orderID) => {
+    // Fetch the order details from the backend
+    axiosInstance
+      .get(`/order/getOrderDetails/${orderID}`)
+      .then((response) => {
+        const orderDetails = response.data;
+
+        // Find the order from the local state
+        const order = rows.find((row) => row.orderID === orderID);
+
+        // Merge local order details with fetched order details
+        const fullOrderDetails = { ...order, orderItems: orderDetails };
+
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text("Receipt", 10, 10);
+
+        doc.setFontSize(12);
+        doc.text(`Order ID: ${fullOrderDetails.orderID}`, 10, 20);
+        doc.text(`Customer Name: ${fullOrderDetails.firstName}`, 10, 30);
+        doc.text(`Order Date: ${fullOrderDetails.orderDate}`, 10, 40);
+        doc.text(`Order Type: ${fullOrderDetails.orderType}`, 10, 50);
+        doc.text(`Payment Value: ${fullOrderDetails.totalAmount}`, 10, 60);
+        doc.text(`Payment Type: ${fullOrderDetails.paymentType}`, 10, 70);
+        doc.text(`Payment Status: ${fullOrderDetails.paymentStatus}`, 10, 80);
+        doc.text(`Delivery Type: ${fullOrderDetails.deliveryType}`, 10, 90);
+        doc.text(`Customer Contact No: ${fullOrderDetails.contact}`, 10, 100);
+        doc.text(`Street Address: ${fullOrderDetails.street}`, 10, 110);
+        doc.text(`Delivery City: ${fullOrderDetails.city}`, 10, 120);
+
+        // Add a section for order items
+        let yPosition = 130;
+        doc.setFontSize(14);
+        doc.text("Order Items:", 10, yPosition);
+
+        yPosition += 10;
+        doc.setFontSize(12);
+        fullOrderDetails.orderItems.forEach((item, index) => {
+          doc.text(
+            `${index + 1}. Product: ${item.proStockName}, Quantity: ${
+              item.quantity
+            }`,
+            10,
+            yPosition
+          );
+          yPosition += 10;
+        });
+
+        doc.save(`receipt_${orderID}.pdf`);
+      })
+      .catch((error) => {
+        console.error("Error fetching order details:", error);
+      });
+  };
+
+  const handleSendEmail = (orderID) => {
+    axiosInstance
+      .post(`/order/sendReceipt/${orderID}`)
+      .then((response) => {
+        toast.success("Receipt emailed successfully.");
+      })
+      .catch((error) => {
+        console.error("Error sending receipt email:", error);
+        toast.error("Failed to send receipt email. Please try again.");
+      });
+  };
+
+  const handleCustomerAlertsChange = (event, orderID) => {
+    const customerAlerts = event.target.value;
+  
+    axiosInstance.put(`/orders/${orderID}/customerAlerts`, { customerAlerts })
+      .then((response) => {
+        console.log('Customer alerts updated successfully:', response.data);
+        // Optionally, you can perform any additional actions upon successful update
+      })
+      .catch((error) => {
+        console.error('Error updating customer alerts:', error);
+        // Optionally, you can handle errors or show notifications to the user
+      });
+  };
 
   return (
     <Box
@@ -563,6 +688,40 @@ export default function TrackOrdersTable() {
                           {row.city}
                         </Typography>
                       </TableCell>
+                      <TableCell align="right">
+                        <Select
+                          value={row.customerAlert}
+                          onChange={(e) =>
+                            handleCustomerAlertsChange(e, row.orderID)
+                          }
+                        >
+                          <MenuItem value="Order Ready">Order Ready</MenuItem>
+                          <MenuItem value="Order Packing">
+                            Order Packing
+                          </MenuItem>
+                        </Select>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleEmailReceipt(row.orderID);
+                          }}
+                        >
+                          Email Receipt
+                        </Button>
+                        <Button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleReceiptDownload(row.orderID);
+                            // handleExportPdf(row.orderID);
+                          }}
+                        >
+                          Download
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -589,10 +748,58 @@ export default function TrackOrdersTable() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </div>
+      <FormControlLabel
+        control={<Switch checked={dense} onChange={handleChangeDense} />}
+        label="Dense padding"
+      />
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <DialogTitle>Receipt</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            <strong>Order ID:</strong> {selectedOrderDetails.orderID}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Customer Name:</strong> {selectedOrderDetails.firstName}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Order Date:</strong> {selectedOrderDetails.orderDate}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Order Type:</strong> {selectedOrderDetails.orderType}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Payment Value:</strong> {selectedOrderDetails.totalAmount}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Payment Type:</strong> {selectedOrderDetails.paymentType}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Payment Status:</strong>{" "}
+            {selectedOrderDetails.paymentStatus}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Delivery Type:</strong> {selectedOrderDetails.deliveryType}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Customer Contact No:</strong> {selectedOrderDetails.contact}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Street Address:</strong> {selectedOrderDetails.street}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Delivery City:</strong> {selectedOrderDetails.city}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsModalOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
       <Dialog open={isModalOpen} onClose={handleModalClose}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete the selected order(s)?</Typography>
+          <Typography>
+            Are you sure you want to delete the selected order(s)?
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose} color="primary">
@@ -616,8 +823,8 @@ export default function TrackOrdersTable() {
             margin="dense"
             className="z-10"
             MenuProps={{
-                disablePortal: true,
-              }}
+              disablePortal: true,
+            }}
           >
             <MenuItem value="Not Complete">Not Complete</MenuItem>
             <MenuItem value="Completed">Completed</MenuItem>
@@ -629,8 +836,8 @@ export default function TrackOrdersTable() {
             variant="outlined"
             margin="dense"
             MenuProps={{
-                disablePortal: true,
-              }}
+              disablePortal: true,
+            }}
           >
             <MenuItem value="Pending">Pending</MenuItem>
             <MenuItem value="Paid">Paid</MenuItem>
@@ -670,23 +877,24 @@ export default function TrackOrdersTable() {
                 </TableRow>
               </TableHead>
               <TableBody className="font-bold text-c1 font-[Montserrat]">
-              {Array.isArray(selectedOrderDetails) && selectedOrderDetails.map((item, index) => (
-                  <TableRow
-                    className="font-bold text-c1 font-[Montserrat]"
-                    key={index}
-                  >
-                    <TableCell className="font-bold text-c1 font-[Montserrat]">
-                      {" "}
-                      {item.orderDetailsID}
-                    </TableCell>
-                    <TableCell className="font-bold text-c1 font-[Montserrat]">
-                      {item.proStockName}
-                    </TableCell>
-                    <TableCell className="font-bold text-c1 font-[Montserrat]">
-                      {item.quantity}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {Array.isArray(selectedOrderDetails) &&
+                  selectedOrderDetails.map((item, index) => (
+                    <TableRow
+                      className="font-bold text-c1 font-[Montserrat]"
+                      key={index}
+                    >
+                      <TableCell className="font-bold text-c1 font-[Montserrat]">
+                        {" "}
+                        {item.orderDetailsID}
+                      </TableCell>
+                      <TableCell className="font-bold text-c1 font-[Montserrat]">
+                        {item.proStockName}
+                      </TableCell>
+                      <TableCell className="font-bold text-c1 font-[Montserrat]">
+                        {item.quantity}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -701,6 +909,5 @@ export default function TrackOrdersTable() {
         </DialogActions>
       </Dialog>
     </Box>
-    
   );
 }

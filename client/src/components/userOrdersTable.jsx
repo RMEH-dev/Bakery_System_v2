@@ -106,6 +106,12 @@ const headCells = [
     disablePadding: false,
     label: "Delivery Type",
   },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Status",
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -331,6 +337,11 @@ export default function UserOrdersTable() {
                       <TableCell align="right">
                         <Typography variant="body2" fontWeight="medium">
                           {row.deliveryType}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body2" fontWeight="medium">
+                          {row.customerAlert}
                         </Typography>
                       </TableCell>
                     </TableRow>

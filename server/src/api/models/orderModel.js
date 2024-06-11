@@ -1,7 +1,7 @@
 const db = require("../../config/databaseConnection");
 
 const getOrders= (values, callback) => {
-  const sqlOrders = `SELECT u.firstName, o.orderID, o.orderType, DATE_FORMAT(o.orderDate, '%Y-%m-%d') AS orderDate, o.orderStatus, o.totalAmount, p.paymentType, p.paymentStatus, d.deliveryType, u.contact, a.street, a.city
+  const sqlOrders = `SELECT u.firstName, o.orderID, o.orderType, DATE_FORMAT(o.orderDate, '%Y-%m-%d') AS orderDate, o.orderStatus, o.totalAmount, p.paymentType, p.paymentStatus, d.deliveryType, u.contact, a.street, a.city, o.customerAlert
   FROM user u
   JOIN orders o ON u.userID = o.userID
   JOIN payment p ON p.paymentID = o.paymentID
