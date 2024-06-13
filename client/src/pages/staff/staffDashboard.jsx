@@ -74,7 +74,7 @@ function StaffDashboard({ children }) {
       <div className="flex justify-between items-center w-[1540px] bg-gradient-to-t from-c2 to-white text-black h-[100px]">
         <Link to="/staffDashboard/:id">
           <h1 className="ml-10 pt-5 pb-5 text-3xl font-bold font-[Montserrat]">
-            {`Welcome Mr. ${name}`}
+            {`Welcome ${name} !`}
           </h1>
         </Link>
         <Link to="/staffDashboard/:id">

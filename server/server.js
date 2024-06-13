@@ -13,6 +13,10 @@ const cartRoutes = require('./src/api/routes/cartRoutes');
 const orderRoutes = require('./src/api/routes/orderRoutes');
 const checkoutRoutes = require('./src/api/routes/checkoutRoutes');
 const profileRoutes = require('./src/api/routes/profileRoutes');
+const adminAnalyticsRoutes = require('./src/api/routes/adminAnalyticsRoutes');
+
+
+
 require('dotenv').config();
 
 const app = express();
@@ -38,6 +42,7 @@ app.use("/api/routes", cartRoutes);
 app.use("/api/routes", orderRoutes);
 app.use("/api/routes", checkoutRoutes);
 app.use("/api/routes", profileRoutes);
+app.use("/api/routes", adminAnalyticsRoutes);
 
 cronJobs.start();
 

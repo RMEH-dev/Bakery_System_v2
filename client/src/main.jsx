@@ -66,7 +66,7 @@ const router = createBrowserRouter([
   { path: "/addProInventoryStaff", element: <ProtectedRoute component={AddProInventoryStaff} allowedRoles={['Staff', 'Admin']} />},
   { path: "/editProInventoryStaff/:id", element: <ProtectedRoute component={AddProInventoryStaff} allowedRoles={['Staff', 'Admin']} />},
   { path: "/trackOrdersAdmin", element: <ProtectedRoute component={TrackOrders} allowedRoles={['Admin']} />},
-  { path: "/trackOrdersStaff", element: <ProtectedRoute component={TrackOrdersStaff} allowedRoles={['Admin']} />},
+  { path: "/trackOrdersStaff", element: <ProtectedRoute component={TrackOrdersStaff} allowedRoles={['Staff']} />},
   { path: "/users", element: <ProtectedRoute component={UsersSystem} allowedRoles={['Admin']}/>},
   { path: "/addUsers", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},
   { path: "/editUsers/:id", element: <ProtectedRoute component={AddNewUser} allowedRoles={['Admin']}/>},

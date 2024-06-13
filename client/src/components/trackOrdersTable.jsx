@@ -40,6 +40,7 @@ import {
 } from "@mui/material";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+// import logo from '../../src/assets/logos/logo.png';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -484,49 +485,55 @@ export default function TrackOrdersTable() {
       .get(`/order/getOrderDetails/${orderID}`)
       .then((response) => {
         const orderDetails = response.data;
-
+  
         // Find the order from the local state
         const order = rows.find((row) => row.orderID === orderID);
-
+  
         // Merge local order details with fetched order details
         const fullOrderDetails = { ...order, orderItems: orderDetails };
-
+  
         const doc = new jsPDF();
-
+  
+        // Add title
         doc.setFontSize(18);
-        doc.text("Receipt", 10, 10);
-
+        doc.text("Perera Bakers", 40, 20);
+  
+        // Add title
+        doc.setFontSize(18);
+        doc.text("Receipt", 60, 30, { align: 'center' });
+  
+        // Add order details
         doc.setFontSize(12);
-        doc.text(`Order ID: ${fullOrderDetails.orderID}`, 10, 20);
-        doc.text(`Customer Name: ${fullOrderDetails.firstName}`, 10, 30);
-        doc.text(`Order Date: ${fullOrderDetails.orderDate}`, 10, 40);
-        doc.text(`Order Type: ${fullOrderDetails.orderType}`, 10, 50);
-        doc.text(`Payment Value: ${fullOrderDetails.totalAmount}`, 10, 60);
-        doc.text(`Payment Type: ${fullOrderDetails.paymentType}`, 10, 70);
-        doc.text(`Payment Status: ${fullOrderDetails.paymentStatus}`, 10, 80);
-        doc.text(`Delivery Type: ${fullOrderDetails.deliveryType}`, 10, 90);
-        doc.text(`Customer Contact No: ${fullOrderDetails.contact}`, 10, 100);
-        doc.text(`Street Address: ${fullOrderDetails.street}`, 10, 110);
-        doc.text(`Delivery City: ${fullOrderDetails.city}`, 10, 120);
-
-        // Add a section for order items
-        let yPosition = 130;
+        doc.text(`Order ID: ${fullOrderDetails.orderID}`, 10, 50);
+        doc.text(`Customer Name: ${fullOrderDetails.firstName}`, 10, 60);
+        doc.text(`Order Date: ${fullOrderDetails.orderDate}`, 10, 70);
+        doc.text(`Order Type: ${fullOrderDetails.orderType}`, 10, 80);
+        doc.text(`Payment Value LKR: ${fullOrderDetails.totalAmount}`, 10, 90);
+        doc.text(`Payment Type: ${fullOrderDetails.paymentType}`, 10, 100);
+        doc.text(`Payment Status: ${fullOrderDetails.paymentStatus}`, 10, 110);
+        doc.text(`Delivery Type: ${fullOrderDetails.deliveryType}`, 10, 120);
+        doc.text(`Customer Contact No: ${fullOrderDetails.contact}`, 10, 130);
+        doc.text(`Street Address: ${fullOrderDetails.street}`, 10, 140);
+        doc.text(`Delivery City: ${fullOrderDetails.city}`, 10, 150);
+  
+        // Add order items section
         doc.setFontSize(14);
-        doc.text("Order Items:", 10, yPosition);
-
-        yPosition += 10;
-        doc.setFontSize(12);
-        fullOrderDetails.orderItems.forEach((item, index) => {
-          doc.text(
-            `${index + 1}. Product: ${item.proStockName}, Quantity: ${
-              item.quantity
-            }`,
-            10,
-            yPosition
-          );
-          yPosition += 10;
+        doc.text("Order Items:", 10, 170);
+  
+        // Create order items table
+        const orderItems = fullOrderDetails.orderItems.map((item, index) => [
+          index + 1,
+          item.proStockName,
+          item.quantity,
+        ]);
+  
+        doc.autoTable({
+          startY: 180,
+          head: [['#', 'Product', 'Quantity']],
+          body: orderItems,
+          theme: 'striped',
         });
-
+  
         doc.save(`receipt_${orderID}.pdf`);
       })
       .catch((error) => {

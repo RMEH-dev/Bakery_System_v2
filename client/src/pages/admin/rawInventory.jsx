@@ -31,9 +31,10 @@ function RawInventory() {
                 </Typography>
                 <Link to="/addRawInventory">
                   <div className="flex pr-5 pt-2  justify-end">
-                    <PlusIcon className="text-c4 mr-4 justify-start bg-c2 rounded-2xl font-bold mt-6 absolute w-5 h-5" />
-                    <Button className=" mt-3 w-[280px] hover:bg-deep-orange-900 bg-c1 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
+                   
+                    <Button className=" mt-3 w-[300px] hover:bg-deep-orange-900 bg-c1 rounded-3xl hover:text-c2 text-white text-md font-[Montserrat]">
                       Add Raw Stock
+                      <PlusIcon className="text-c4 mr-4 justify-start flex absolute bg-c2 rounded-2xl font-bold mt-6 w-5 h-5" />
                     </Button>
                   </div>
                 </Link>
